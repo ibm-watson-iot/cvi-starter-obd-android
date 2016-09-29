@@ -4,14 +4,11 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -91,13 +88,14 @@ public class Home extends AppCompatActivity {
                     if (wifiInfo.getSSID().equals("\"IBMVISITOR\"")) {
                         Toast toast = Toast.makeText(getApplicationContext(), wifiInfo.getSSID(), Toast.LENGTH_SHORT);
                         toast.show();
+                    } else {
+                        Toast toast = Toast.makeText(getApplicationContext(), "Please Connect to the \"WiFi_OBDII\" network!", Toast.LENGTH_SHORT);
+                        toast.show();
                     }
                 }
             }
-            Toast toast = Toast.makeText(getApplicationContext(), "Enabled", Toast.LENGTH_SHORT);
-            toast.show();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(), "No WIFI!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getApplicationContext(), "Please Turn on your WIFI!", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
