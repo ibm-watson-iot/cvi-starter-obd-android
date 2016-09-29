@@ -14,6 +14,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
+
 public class Home extends AppCompatActivity {
     final private int WIFI_PERMISSIONS_CODE = 000;
 
