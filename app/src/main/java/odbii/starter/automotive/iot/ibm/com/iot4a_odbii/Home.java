@@ -2,24 +2,34 @@ package odbii.starter.automotive.iot.ibm.com.iot4a_odbii;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class Home extends AppCompatActivity {
     final private int BT_PERMISSIONS_CODE = 000;
 
-    BluetoothAdapter btAdapter = null;
+    BluetoothAdapter bluetoothAdapter = null;
     BluetoothSocket socket;
+
+    Set<BluetoothDevice> pairedDevicesSet;
+    final ArrayList<String> deviceNames = new ArrayList<>();
+    final ArrayList<String> deviceAdresses = new ArrayList<>();
+
+    String userDeviceAddress;
 
     WifiManager wifiManager;
 
@@ -28,9 +38,9 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if (btAdapter == null) {
+        if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
         }
         else {
@@ -69,11 +79,51 @@ public class Home extends AppCompatActivity {
     }
 
     public void permissionsGranted() {
-        if (!btAdapter.isEnabled()) {
+        if (!bluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
         } else {
-            Toast.makeText(getApplicationContext(), btAdapter.getName(), Toast.LENGTH_SHORT).show();
+            pairedDevicesSet = bluetoothAdapter.getBondedDevices();
+
+            if (pairedDevicesSet.size() > 0) {
+                for (BluetoothDevice device : pairedDevicesSet)
+                {
+                    deviceNames.add(device.getName());
+                    deviceAdresses.add(device.getAddress());
+                }
+
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
+
+                int selectedDevice = -1;
+                for (int i = 0; i < deviceNames.size(); i++) {
+                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
+                        selectedDevice = i;
+                    }
+                }
+
+                alertDialog
+                           .setSingleChoiceItems(adapter, selectedDevice, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                        userDeviceAddress = deviceAdresses.get(position);
+                    }
+                })
+                           .setTitle("Please Choose the OBDII Bluetooth Device")
+                           .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                               @Override
+                               public void onClick(DialogInterface dialog, int which)
+                               {
+                                   dialog.dismiss();
+                                   Toast.makeText(getApplicationContext(), userDeviceAddress, Toast.LENGTH_SHORT).show();
+                               }
+                           })
+                           .show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Plase pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
