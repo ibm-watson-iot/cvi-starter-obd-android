@@ -15,8 +15,10 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 public class Home extends AppCompatActivity {
     final private int BT_PERMISSIONS_CODE = 000;
@@ -102,21 +104,28 @@ public class Home extends AppCompatActivity {
                 }
 
                 alertDialog
-                           .setSingleChoiceItems(adapter, selectedDevice, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                        userDeviceAddress = deviceAdresses.get(position);
-                    }
-                })
+                           .setSingleChoiceItems(adapter, selectedDevice, null)
                            .setTitle("Please Choose the OBDII Bluetooth Device")
                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                @Override
                                public void onClick(DialogInterface dialog, int which)
                                {
                                    dialog.dismiss();
+                                   int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                                   userDeviceAddress = deviceAdresses.get(position);
+
                                    Toast.makeText(getApplicationContext(), userDeviceAddress, Toast.LENGTH_SHORT).show();
+
+                                   BluetoothDevice device = bluetoothAdapter.getRemoteDevice(userDeviceAddress);
+
+                                   UUID uuid = UUID.fromString(API.getUUID());
+
+                                   try {
+                                       BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                                       socket.connect();
+                                   } catch (IOException e) {
+                                       e.printStackTrace();
+                                   }
                                }
                            })
                            .show();
