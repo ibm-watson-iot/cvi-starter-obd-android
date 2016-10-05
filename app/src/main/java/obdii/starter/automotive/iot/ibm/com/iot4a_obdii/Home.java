@@ -15,6 +15,13 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
+import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
+import com.github.pires.obd.enums.ObdProtocols;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
@@ -123,14 +130,22 @@ public class Home extends AppCompatActivity {
                                    try {
                                        BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
                                        socket.connect();
+
+                                       new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                                       new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                                       new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
+                                       new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
+                                       new AmbientAirTemperatureCommand().run(socket.getInputStream(), socket.getOutputStream());
                                    } catch (IOException e) {
+                                       e.printStackTrace();
+                                   } catch (InterruptedException e) {
                                        e.printStackTrace();
                                    }
                                }
                            })
                            .show();
             } else {
-                Toast.makeText(getApplicationContext(), "Plase pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
             }
         }
     }
