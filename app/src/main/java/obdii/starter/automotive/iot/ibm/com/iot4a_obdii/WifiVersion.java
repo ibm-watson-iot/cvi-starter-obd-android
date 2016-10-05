@@ -1,15 +1,4 @@
-package odbii.starter.automotive.iot.ibm.com.iot4a_odbii;
-
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 /**
  * Created by iliadm on 2016-09-30.

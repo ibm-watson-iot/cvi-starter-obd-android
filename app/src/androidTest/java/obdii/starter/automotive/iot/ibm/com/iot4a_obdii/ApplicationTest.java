@@ -1,4 +1,4 @@
-package odbii.starter.automotive.iot.ibm.com.iot4a_odbii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

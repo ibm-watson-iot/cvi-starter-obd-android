@@ -1,4 +1,4 @@
-package odbii.starter.automotive.iot.ibm.com.iot4a_odbii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -31,12 +30,12 @@ public class Home extends AppCompatActivity {
 
     String userDeviceAddress;
 
-    WifiManager wifiManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        new API(getApplicationContext());
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
