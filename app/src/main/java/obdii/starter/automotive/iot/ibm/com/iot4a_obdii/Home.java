@@ -3,6 +3,7 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,14 +16,11 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.protocol.EchoOffCommand;
-import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
-import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
-import com.github.pires.obd.commands.protocol.TimeoutCommand;
-import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
-import com.github.pires.obd.enums.ObdProtocols;
+import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
+import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -36,6 +34,8 @@ public class Home extends AppCompatActivity {
     Set<BluetoothDevice> pairedDevicesSet;
     final ArrayList<String> deviceNames = new ArrayList<>();
     final ArrayList<String> deviceAdresses = new ArrayList<>();
+
+    private static final String TAG = BluetoothManager.class.getName();
 
     String userDeviceAddress;
 
@@ -121,26 +121,12 @@ public class Home extends AppCompatActivity {
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
 
-                                   Toast.makeText(getApplicationContext(), userDeviceAddress, Toast.LENGTH_SHORT).show();
+//                                   Toast.makeText(getApplicationContext(), userDeviceAddress, Toast.LENGTH_SHORT).show();
 
-                                   BluetoothDevice device = bluetoothAdapter.getRemoteDevice(userDeviceAddress);
+                                   BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+                                   BluetoothDevice device = btAdapter.getRemoteDevice(deviceAdresses.get(position));
 
                                    UUID uuid = UUID.fromString(API.getUUID());
-
-                                   try {
-                                       BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
-                                       socket.connect();
-
-                                       new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                                       new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                                       new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                                       new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
-                                       new AmbientAirTemperatureCommand().run(socket.getInputStream(), socket.getOutputStream());
-                                   } catch (IOException e) {
-                                       e.printStackTrace();
-                                   } catch (InterruptedException e) {
-                                       e.printStackTrace();
-                                   }
                                }
                            })
                            .show();
