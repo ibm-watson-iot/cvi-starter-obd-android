@@ -156,6 +156,25 @@ public class Home extends AppCompatActivity {
                                            }
                                        }
                                    }
+
+                                   AirFuelRatioCommand airFuelRatioCommand = new AirFuelRatioCommand();
+                                   FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+
+                                   while (!Thread.currentThread().isInterrupted())
+                                   {
+                                       try {
+
+                                           fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                           Log.d(TAG, "Fuel Level: " + fuelLevelCommand.getFormattedResult());
+
+                                           airFuelRatioCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                           Log.d(TAG, "Air Fuel Ratio: " + airFuelRatioCommand.getFormattedResult());
+                                       } catch (IOException e) {
+                                           e.printStackTrace();
+                                       } catch (InterruptedException e) {
+                                           e.printStackTrace();
+                                       }
+                                   }
                                }
                            })
                            .show();
