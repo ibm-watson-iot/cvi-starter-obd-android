@@ -127,6 +127,35 @@ public class Home extends AppCompatActivity {
                                    BluetoothDevice device = btAdapter.getRemoteDevice(deviceAdresses.get(position));
 
                                    UUID uuid = UUID.fromString(API.getUUID());
+
+                                   // https://github.com/pires/android-obd-reader/blob/master/src/main/java/com/github/pires/obd/reader/io/BluetoothManager.java
+                                   BluetoothSocket socket = null;
+                                   BluetoothSocket sockFallback = null;
+
+                                   Log.d(TAG, "Starting Bluetooth connection..");
+                                   try {
+                                       socket = device.createRfcommSocketToServiceRecord(uuid);
+                                       socket.connect();
+                                   } catch (Exception e1) {
+                                       Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
+                                       Class<?> clazz = socket.getRemoteDevice().getClass();
+                                       Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
+                                       try {
+                                           Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                                           Object[] params = new Object[]{Integer.valueOf(1)};
+                                           sockFallback = (BluetoothSocket) m.invoke(socket.getRemoteDevice(), params);
+                                           sockFallback.connect();
+                                           socket = sockFallback;
+                                       } catch (Exception e2) {
+                                           Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
+
+                                           try {
+                                               throw new IOException(e2.getMessage());
+                                           } catch (IOException e) {
+                                               e.printStackTrace();
+                                           }
+                                       }
+                                   }
                                }
                            })
                            .show();
