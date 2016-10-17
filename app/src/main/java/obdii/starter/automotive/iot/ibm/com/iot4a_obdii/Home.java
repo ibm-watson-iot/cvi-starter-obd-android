@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
+import com.github.pires.obd.commands.temperature.TemperatureCommand;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -50,8 +51,7 @@ public class Home extends AppCompatActivity {
 
         if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             int permissionGiven = 0;
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
