@@ -14,11 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.TemperatureCommand;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -128,32 +131,33 @@ public class Home extends AppCompatActivity {
 
                                    UUID uuid = UUID.fromString(API.getUUID());
 
-                                   // https://github.com/pires/android-obd-reader/blob/master/src/main/java/com/github/pires/obd/reader/io/BluetoothManager.java
                                    BluetoothSocket socket = null;
-                                   BluetoothSocket sockFallback = null;
 
                                    Log.d(TAG, "Starting Bluetooth connection..");
+
                                    try {
                                        socket = device.createRfcommSocketToServiceRecord(uuid);
-                                       socket.connect();
-                                   } catch (Exception e1) {
-                                       Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
-                                       Class<?> clazz = socket.getRemoteDevice().getClass();
-                                       Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
-                                       try {
-                                           Method m = clazz.getMethod("createRfcommSocket", paramTypes);
-                                           Object[] params = new Object[]{Integer.valueOf(1)};
-                                           sockFallback = (BluetoothSocket) m.invoke(socket.getRemoteDevice(), params);
-                                           sockFallback.connect();
-                                           socket = sockFallback;
-                                       } catch (Exception e2) {
-                                           Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
+                                   } catch (Exception e) {
+                                       Log.e("Bluetooth Connection", "Socket couldn't be created");
+                                       e.printStackTrace();
+                                   }
 
-                                           try {
-                                               throw new IOException(e2.getMessage());
-                                           } catch (IOException e) {
-                                               e.printStackTrace();
-                                           }
+                                   try {
+                                       socket.connect();
+                                       Log.i("Bluetooth Connection", "CONNECTED");
+                                   } catch (IOException e) {
+                                       Log.e("Bluetooth Connection", e.getMessage());
+
+                                       try {
+                                           Log.i("Bluetooth Connection", "Using fallback method");
+
+                                           socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
+                                           socket.connect();
+
+                                           Log.i("Bluetooth Connection", "CONNECTED");
+                                       }
+                                       catch (Exception e2) {
+                                           Log.e("Bluetooth Connection", "Couldn't establish connection");
                                        }
                                    }
 
@@ -163,9 +167,8 @@ public class Home extends AppCompatActivity {
                                    while (!Thread.currentThread().isInterrupted())
                                    {
                                        try {
-
                                            fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                           Log.d(TAG, "Fuel Level: " + fuelLevelCommand.getFormattedResult());
+                                           Log.d(TAG, "Fuel Level: " + (100 - fuelLevelCommand.getFuelLevel()) + "%");
 
                                            airFuelRatioCommand.run(socket.getInputStream(), socket.getOutputStream());
                                            Log.d(TAG, "Air Fuel Ratio: " + airFuelRatioCommand.getFormattedResult());
