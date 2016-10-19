@@ -15,7 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +66,15 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        ProgressBar progressBar = new ProgressBar(this);
+        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setIndeterminate(true);
+        progressBar.setScaleX(0.5f);
+        progressBar.setScaleY(0.5f);
+
+        getSupportActionBar().setDisplayShowCustomEnabled(false);
+        getSupportActionBar().setCustomView(progressBar);
 
         fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
 
@@ -225,6 +236,7 @@ public class Home extends AppCompatActivity {
         String url = API.addDevices;
 
         getSupportActionBar().setTitle("Registering Your Device...");
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
 
         try {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
@@ -233,6 +245,8 @@ public class Home extends AppCompatActivity {
                     result.remove(result.length() - 1);
 
                     Log.d("Register Device", result.toString());
+
+                    getSupportActionBar().setDisplayShowCustomEnabled(false);
                 }
             });
 
