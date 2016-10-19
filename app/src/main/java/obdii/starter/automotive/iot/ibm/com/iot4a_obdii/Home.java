@@ -48,7 +48,6 @@ public class Home extends AppCompatActivity {
     final private int BT_PERMISSIONS_CODE = 000;
 
     BluetoothAdapter bluetoothAdapter = null;
-    BluetoothSocket socket = null;
     BluetoothDevice userDevice;
 
     Set<BluetoothDevice> pairedDevicesSet;
@@ -110,6 +109,10 @@ public class Home extends AppCompatActivity {
     }
 
     public void permissionsGranted() {
+        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
+        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
+        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
+
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
@@ -150,6 +153,8 @@ public class Home extends AppCompatActivity {
 
                                    UUID uuid = UUID.fromString(API.getUUID());
 
+                                   BluetoothSocket socket = null;
+
                                    Log.d(TAG, "Starting Bluetooth connection..");
 
                                    try {
@@ -181,6 +186,32 @@ public class Home extends AppCompatActivity {
                                            Log.e("Bluetooth Connection", "Couldn't establish connection");
                                        }
                                    }
+
+                                   while (!Thread.currentThread().isInterrupted()) {
+                                       try {
+                                           SpeedCommand speedCommand = new SpeedCommand();
+                                           speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                                           Log.d("Speed", speedCommand.getFormattedResult());
+                                           speedValue.setText(speedCommand.getFormattedResult());
+
+                                           FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                           fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                                           Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                           fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
+
+                                           EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                                           engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                                           Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                           engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                       } catch (IOException e) {
+                                           e.printStackTrace();
+                                       } catch (InterruptedException e) {
+                                           e.printStackTrace();
+                                       }
+                                   }
                                }
                            })
                            .show();
@@ -193,6 +224,8 @@ public class Home extends AppCompatActivity {
     public void registerDevice() {
         String url = API.addDevices;
 
+        getSupportActionBar().setTitle("Registering Your Device...");
+
         try {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
@@ -200,8 +233,6 @@ public class Home extends AppCompatActivity {
                     result.remove(result.length() - 1);
 
                     Log.d("Register Device", result.toString());
-
-                    getVehicleData();
                 }
             });
 
@@ -218,38 +249,6 @@ public class Home extends AppCompatActivity {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void getVehicleData() {
-        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
-        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
-        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
-
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                SpeedCommand speedCommand = new SpeedCommand();
-                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Speed", speedCommand.getFormattedResult());
-                speedValue.setText(speedCommand.getFormattedResult());
-
-                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
-
-                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
