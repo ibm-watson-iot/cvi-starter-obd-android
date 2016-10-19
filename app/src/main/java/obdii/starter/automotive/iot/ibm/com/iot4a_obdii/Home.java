@@ -14,12 +14,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
+import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
+import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
+import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.commands.temperature.TemperatureCommand;
+import com.github.pires.obd.enums.ObdProtocols;
 
 import org.w3c.dom.Text;
 
@@ -41,12 +50,16 @@ public class Home extends AppCompatActivity {
 
     private static final String TAG = BluetoothManager.class.getName();
 
+    TextView fuelLevelValue;
+
     String userDeviceAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
 
         new API(getApplicationContext());
 
@@ -120,6 +133,7 @@ public class Home extends AppCompatActivity {
                                @Override
                                public void onClick(DialogInterface dialog, int which)
                                {
+
                                    dialog.dismiss();
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
@@ -161,17 +175,21 @@ public class Home extends AppCompatActivity {
                                        }
                                    }
 
-                                   AirFuelRatioCommand airFuelRatioCommand = new AirFuelRatioCommand();
-                                   FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-
                                    while (!Thread.currentThread().isInterrupted())
                                    {
                                        try {
-                                           fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                           Log.d(TAG, "Fuel Level: " + (100 - fuelLevelCommand.getFuelLevel()) + "%");
+                                           SpeedCommand speedCommand = new SpeedCommand();
+                                           speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                           Log.d("Speed", speedCommand.getFormattedResult());
 
-                                           airFuelRatioCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                           Log.d(TAG, "Air Fuel Ratio: " + airFuelRatioCommand.getFormattedResult());
+                                           FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                           fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                           Log.d("Fuel", fuelLevelCommand.getFormattedResult());
+
+                                           EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                                           engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                                           Log.d("Coolant", engineCoolantTemperatureCommand.getFormattedResult());
                                        } catch (IOException e) {
                                            e.printStackTrace();
                                        } catch (InterruptedException e) {
