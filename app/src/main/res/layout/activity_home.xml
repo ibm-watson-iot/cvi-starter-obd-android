@@ -12,6 +12,22 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="Fuel Level"
         android:id="@+id/fuelLevelValue" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speed"
+        android:id="@+id/speedValue"
+        android:layout_below="@+id/fuelLevelValue"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Engine Coolant"
+        android:id="@+id/engineCoolantValue"
+        android:layout_below="@+id/speedValue"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

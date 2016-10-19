@@ -103,6 +103,10 @@ public class Home extends AppCompatActivity {
     }
 
     public void permissionsGranted() {
+        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
+        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
+        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
+
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
@@ -133,12 +137,9 @@ public class Home extends AppCompatActivity {
                                @Override
                                public void onClick(DialogInterface dialog, int which)
                                {
-
                                    dialog.dismiss();
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
-
-//                                   Toast.makeText(getApplicationContext(), userDeviceAddress, Toast.LENGTH_SHORT).show();
 
                                    BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
                                    BluetoothDevice device = btAdapter.getRemoteDevice(deviceAdresses.get(position));
@@ -175,21 +176,25 @@ public class Home extends AppCompatActivity {
                                        }
                                    }
 
-                                   while (!Thread.currentThread().isInterrupted())
-                                   {
+                                   while (!Thread.currentThread().isInterrupted()) {
                                        try {
                                            SpeedCommand speedCommand = new SpeedCommand();
                                            speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+
                                            Log.d("Speed", speedCommand.getFormattedResult());
+                                           speedValue.setText(speedCommand.getFormattedResult());
 
                                            FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
                                            fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                           Log.d("Fuel", fuelLevelCommand.getFormattedResult());
+
+                                           Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                           fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
 
                                            EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
                                            engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
 
-                                           Log.d("Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                           Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                           engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
                                        } catch (IOException e) {
                                            e.printStackTrace();
                                        } catch (InterruptedException e) {
