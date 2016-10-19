@@ -8,11 +8,13 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,6 +32,9 @@ import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand
 import com.github.pires.obd.commands.temperature.TemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -37,12 +42,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity {
     final private int BT_PERMISSIONS_CODE = 000;
 
     BluetoothAdapter bluetoothAdapter = null;
-    BluetoothSocket socket;
+    BluetoothDevice userDevice;
 
     Set<BluetoothDevice> pairedDevicesSet;
     final ArrayList<String> deviceNames = new ArrayList<>();
@@ -143,6 +149,7 @@ public class Home extends AppCompatActivity {
 
                                    BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
                                    BluetoothDevice device = btAdapter.getRemoteDevice(deviceAdresses.get(position));
+                                   userDevice = device;
 
                                    UUID uuid = UUID.fromString(API.getUUID());
 
@@ -160,6 +167,8 @@ public class Home extends AppCompatActivity {
                                    try {
                                        socket.connect();
                                        Log.i("Bluetooth Connection", "CONNECTED");
+
+                                       registerDevice();
                                    } catch (IOException e) {
                                        Log.e("Bluetooth Connection", e.getMessage());
 
@@ -207,6 +216,35 @@ public class Home extends AppCompatActivity {
             } else {
                 Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    public void registerDevice() {
+        String url = API.addDevices;
+
+        try {
+            API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
+                @Override
+                public void postExecute(JSONArray result) {
+                    result.remove(result.length() - 1);
+
+                    Log.d("Register Device", result.toString());
+                }
+            });
+
+            JSONObject bodyObject = new JSONObject();
+            bodyObject
+                    .put("deviceId", userDeviceAddress)
+                    .put("typeId", "OBDII")
+                    .put("authToken", "QjbUcS?H&!p3lO_Ywx");
+
+            task.execute(url, "POST", null, bodyObject.toString()).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 }
