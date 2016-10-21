@@ -55,25 +55,25 @@ public class Home extends AppCompatActivity {
     Set<BluetoothDevice> pairedDevicesSet;
     final ArrayList<String> deviceNames = new ArrayList<>();
     final ArrayList<String> deviceAdresses = new ArrayList<>();
+    String userDeviceAddress;
 
     private static final String TAG = BluetoothManager.class.getName();
 
     TextView fuelLevelValue;
-
-    String userDeviceAddress;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setVisibility(View.VISIBLE);
+        progressBar = new ProgressBar(this);
+        progressBar.setVisibility(View.GONE);
         progressBar.setIndeterminate(true);
         progressBar.setScaleX(0.5f);
         progressBar.setScaleY(0.5f);
 
-        getSupportActionBar().setDisplayShowCustomEnabled(false);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(progressBar);
 
         fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
@@ -154,7 +154,8 @@ public class Home extends AppCompatActivity {
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
 
-                                   connectSocket(userDeviceAddress);
+//                                   connectSocket(userDeviceAddress);
+                                   registerDevice();
                                }
                            })
                            .show();
@@ -168,7 +169,7 @@ public class Home extends AppCompatActivity {
         String url = API.addDevices;
 
         getSupportActionBar().setTitle("Registering Your Device...");
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        progressBar.setVisibility(View.VISIBLE);
 
         try {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
@@ -178,7 +179,7 @@ public class Home extends AppCompatActivity {
 
                     Log.d("Register Device", result.toString());
 
-                    getSupportActionBar().setDisplayShowCustomEnabled(false);
+                    progressBar.setVisibility(View.VISIBLE);
                 }
             });
 
