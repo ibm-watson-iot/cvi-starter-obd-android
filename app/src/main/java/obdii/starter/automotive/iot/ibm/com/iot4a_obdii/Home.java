@@ -120,10 +120,6 @@ public class Home extends AppCompatActivity {
     }
 
     public void permissionsGranted() {
-        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
-        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
-        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
-
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
@@ -158,71 +154,7 @@ public class Home extends AppCompatActivity {
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
 
-                                   BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-                                   BluetoothDevice device = btAdapter.getRemoteDevice(deviceAdresses.get(position));
-                                   userDevice = device;
-
-                                   UUID uuid = UUID.fromString(API.getUUID());
-
-                                   BluetoothSocket socket = null;
-
-                                   Log.d(TAG, "Starting Bluetooth connection..");
-
-                                   try {
-                                       socket = device.createRfcommSocketToServiceRecord(uuid);
-                                   } catch (Exception e) {
-                                       Log.e("Bluetooth Connection", "Socket couldn't be created");
-                                       e.printStackTrace();
-                                   }
-
-                                   try {
-                                       socket.connect();
-                                       Log.i("Bluetooth Connection", "CONNECTED");
-
-                                       registerDevice();
-                                   } catch (IOException e) {
-                                       Log.e("Bluetooth Connection", e.getMessage());
-
-                                       try {
-                                           Log.i("Bluetooth Connection", "Using fallback method");
-
-                                           socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
-                                           socket.connect();
-
-                                           Log.i("Bluetooth Connection", "CONNECTED");
-
-                                           registerDevice();
-                                       }
-                                       catch (Exception e2) {
-                                           Log.e("Bluetooth Connection", "Couldn't establish connection");
-                                       }
-                                   }
-
-                                   while (!Thread.currentThread().isInterrupted()) {
-                                       try {
-                                           SpeedCommand speedCommand = new SpeedCommand();
-                                           speedCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                                           Log.d("Speed", speedCommand.getFormattedResult());
-                                           speedValue.setText(speedCommand.getFormattedResult());
-
-                                           FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                           fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                                           Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                           fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
-
-                                           EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-                                           engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                                           Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                           engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-                                       } catch (IOException e) {
-                                           e.printStackTrace();
-                                       } catch (InterruptedException e) {
-                                           e.printStackTrace();
-                                       }
-                                   }
+                                   connectSocket(userDeviceAddress);
                                }
                            })
                            .show();
@@ -263,6 +195,78 @@ public class Home extends AppCompatActivity {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void connectSocket(String userDeviceAddress) {
+        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
+        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
+        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
+
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
+        userDevice = device;
+
+        UUID uuid = UUID.fromString(API.getUUID());
+
+        BluetoothSocket socket = null;
+
+        Log.d(TAG, "Starting Bluetooth connection..");
+
+        try {
+            socket = device.createRfcommSocketToServiceRecord(uuid);
+        } catch (Exception e) {
+            Log.e("Bluetooth Connection", "Socket couldn't be created");
+            e.printStackTrace();
+        }
+
+        try {
+            socket.connect();
+            Log.i("Bluetooth Connection", "CONNECTED");
+
+            registerDevice();
+        } catch (IOException e) {
+            Log.e("Bluetooth Connection", e.getMessage());
+
+            try {
+                Log.i("Bluetooth Connection", "Using fallback method");
+
+                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
+                socket.connect();
+
+                Log.i("Bluetooth Connection", "CONNECTED");
+
+                registerDevice();
+            }
+            catch (Exception e2) {
+                Log.e("Bluetooth Connection", "Couldn't establish connection");
+            }
+        }
+
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                SpeedCommand speedCommand = new SpeedCommand();
+                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                Log.d("Speed", speedCommand.getFormattedResult());
+                speedValue.setText(speedCommand.getFormattedResult());
+
+                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
+
+                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
