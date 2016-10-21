@@ -156,7 +156,7 @@ public class Home extends AppCompatActivity {
     public void checkDeviceRegistry() {
         String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
 
-        getSupportActionBar().setTitle("Checking if Device is Registered");
+        getSupportActionBar().setTitle("Checking Device Registeration");
         progressBar.setVisibility(View.VISIBLE);
 
         try {
@@ -173,8 +173,12 @@ public class Home extends AppCompatActivity {
                             Log.d("Register Device", result.toString());
                             Log.d("Register Device", "Already Registered");
 
+                            getSupportActionBar().setTitle("Device Already Registered");
+                            progressBar.setVisibility(View.GONE);
+
                             break;
                         case 404:
+                        case 405:
                             Log.d("Register Device", "Not Registered");
                             progressBar.setVisibility(View.GONE);
 
@@ -201,9 +205,6 @@ public class Home extends AppCompatActivity {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
-                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
-                    int statusCode = serverResponse.getInt("statusCode");
-
                     result.remove(result.length() - 1);
 
                     Log.d("Register Device", result.toString());
@@ -212,12 +213,17 @@ public class Home extends AppCompatActivity {
                 }
             });
 
+            JSONArray bodyArray = new JSONArray();
             JSONObject bodyObject = new JSONObject();
+
             bodyObject
                     .put("typeId", API.typeId)
-                    .put("deviceId", userDeviceAddress);
+                    .put("deviceId", userDeviceAddress.replaceAll(":", "-"));
 
-            task.execute(url, "POST", null, null, API.credentialsBase64).get();
+            bodyArray
+                    .put(bodyObject);
+
+            task.execute(url, "POST", null, bodyArray.toString(), API.credentialsBase64).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

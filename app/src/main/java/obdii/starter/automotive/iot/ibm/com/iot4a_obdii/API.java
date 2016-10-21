@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -108,7 +109,7 @@ public class API {
 
                 urlConnection.setRequestMethod(requestType);
 
-                if (requestType == "POST" || requestType == "PUT") {
+                if (requestType == "POST" || requestType == "PUT" || requestType == "GET") {
                     urlConnection.setDoInput(true);
                     urlConnection.setDoOutput(true);
 
@@ -123,8 +124,13 @@ public class API {
                         writer.close();
                         os.close();
 
-                        urlConnection.connect();
                         Log.i("Using Parameters:", params[2]);
+                    }
+
+                    if (params.length > 4) {
+                        urlConnection.setRequestProperty("Authorization", "Basic " + params[4]);
+
+                        Log.i("Using Basic Auth", "");
                     }
 
                     if (params.length > 3 && params[3] != null) { // params[3] == HTTP Body - String
@@ -140,12 +146,8 @@ public class API {
 
                         Log.i("Using Body:", httpBody);
                     }
-                }
 
-                if (params.length > 4) {
-                    urlConnection.addRequestProperty("Authorization", "Basic " + params[4]);
-
-                    Log.i("Using Basic Auth", "");
+                    urlConnection.connect();
                 }
 
                 try {
