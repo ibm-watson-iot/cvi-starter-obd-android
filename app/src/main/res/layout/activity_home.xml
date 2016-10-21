@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Engine Coolant Temperature ●"
+            android:text="Engine Coolant Temperature"
             android:id="@+id/engineCoolantLabel"
             android:layout_gravity="center_horizontal"
             android:textStyle="bold" />
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Fuel Level ●"
+                android:text="Fuel Level"
                 android:id="@+id/fuelLevelLabel"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal" />

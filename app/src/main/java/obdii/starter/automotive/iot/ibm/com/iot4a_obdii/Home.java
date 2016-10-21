@@ -253,7 +253,7 @@ public class Home extends AppCompatActivity {
 
     public void connectSocket(String userDeviceAddress) {
         final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
-        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
+//        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
         final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
 
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -294,11 +294,11 @@ public class Home extends AppCompatActivity {
 
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                SpeedCommand speedCommand = new SpeedCommand();
-                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Speed", speedCommand.getFormattedResult());
-                speedValue.setText(speedCommand.getFormattedResult());
+//                SpeedCommand speedCommand = new SpeedCommand();
+//                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+//
+//                Log.d("Speed", speedCommand.getFormattedResult());
+//                speedValue.setText(speedCommand.getFormattedResult());
 
                 FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
                 fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
