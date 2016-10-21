@@ -156,7 +156,7 @@ public class Home extends AppCompatActivity {
                                    userDeviceAddress = deviceAdresses.get(position);
 
 //                                   connectSocket(userDeviceAddress);
-                                   registerDevice();
+                                   checkDeviceRegistry();
                                }
                            })
                            .show();
@@ -166,8 +166,8 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    public void registerDevice() {
-        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/";
+    public void checkDeviceRegistry() {
+        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "+");
 
         getSupportActionBar().setTitle("Registering Your Device...");
         progressBar.setVisibility(View.VISIBLE);
@@ -175,10 +175,22 @@ public class Home extends AppCompatActivity {
         try {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
-                public void postExecute(JSONArray result) {
+                public void postExecute(JSONArray result) throws JSONException {
+                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
+                    int statusCode = serverResponse.getInt("statusCode");
+
                     result.remove(result.length() - 1);
 
-                    Log.d("Register Device", result.toString());
+                    switch (statusCode) {
+                        case 200:
+                            Log.d("Register Device", result.toString());
+                            Log.d("Register Device", "Already Registered");
+
+                            break;
+                        case 404:
+                            Log.d("Register Device", "Not Registered");
+                    }
+
 
                     progressBar.setVisibility(View.VISIBLE);
                 }
