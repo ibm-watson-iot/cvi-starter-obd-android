@@ -1,2 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
+
+    <item
+        jar="/Users/iliadm/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/23.4.0/support-annotations-23.4.0.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="ffbe55fdb2bb456b1485831706a9eac3300bb6b8">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/support-annotations-23.4.0_f72789ce36e57c19f65f785a3ad5766bc3fedaa1.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="67bd36ee9340ec7c254108936ad16b24bed160cc">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-23.4.0_d5d6063a4d6eb715fc9d860e701fe4ac7d827e6d.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-23.4.0_6aaa98bfa986833be07baab3178f85f33579dece.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-23.4.0_8dcf2f4d096542264818a7f1a2abdd7334438b57.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="e9829d4fea1775f688b2f1abf5bf5132202934ee">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/instant-run_d18f9771f5b13c2ef73142e8c6ca00f14875b1b7.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="de4db3785756bfb0915a9f59a9b3f2fea7407be4">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-23.4.0_7a337c45eb9cf545e0597bcfb73e9bc59c4b03aa.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="5f3513269147b92917b34a73ec638ed4a13198fe">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_189ab6deef697ecd048fcfa2ee1713df20bbe598.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/.gradle/caches/modules-2/files-2.1/com.github.pires/obd-java-api/1.0-RC16/143a49a7635f3437067384ad9fb433cc292ee81/obd-java-api-1.0-RC16.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="0143a49a7635f3437067384ad9fb433cc292ee81">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/obd-java-api-1.0-RC16_8ddb6d573bd4a7846c6c8f8f6e58fbf0fbf74e68.jar" />
+    </item>
+    <item
+        jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.4.0/jars/libs/internal_impl-23.4.0.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="ea3c07504d2c8f4b13aa17c45c1b68ed9c1c3674">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/pre-dexed/debug/internal_impl-23.4.0_29cfd786aa90e94a10475b4b6f44030ef0a0eb4c.jar" />
+    </item>
+
+</items>
