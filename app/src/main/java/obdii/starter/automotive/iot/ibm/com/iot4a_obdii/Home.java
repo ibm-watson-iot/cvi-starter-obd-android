@@ -167,7 +167,7 @@ public class Home extends AppCompatActivity {
     }
 
     public void checkDeviceRegistry() {
-        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "+");
+        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
 
         getSupportActionBar().setTitle("Registering Your Device...");
         progressBar.setVisibility(View.VISIBLE);
