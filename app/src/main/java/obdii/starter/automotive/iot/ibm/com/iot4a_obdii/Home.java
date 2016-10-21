@@ -205,7 +205,25 @@ public class Home extends AppCompatActivity {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
+                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
+                    int statusCode = serverResponse.getInt("statusCode");
+
                     result.remove(result.length() - 1);
+
+                    switch (statusCode) {
+                        case 201:
+                        case 202:
+                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                            alertDialog
+                                    .setCancelable(false)
+                                    .setTitle("Your Device is Now Registered!")
+                                    .setMessage("Please take note of this Autentication Token as you will need it in the future\n\n" + result.getJSONObject(0).getString("authToken"))
+                                    .setPositiveButton("Ok", null)
+                                    .show();
+                            break;
+                        default:
+                            break;
+                    }
 
                     Log.d("Register Device", result.toString());
 

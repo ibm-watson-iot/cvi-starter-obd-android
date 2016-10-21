@@ -169,6 +169,8 @@ public class API {
                         JSONObject statusCode = new JSONObject();
                         statusCode.put("statusCode", code + "");
 
+                        Log.d("Responded With", code + "");
+
                         result.put(statusCode);
 
                         return result;
