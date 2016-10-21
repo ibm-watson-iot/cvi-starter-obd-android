@@ -19,6 +19,7 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -41,8 +42,8 @@ public class API {
 
     protected static final String apiKey = "a-p375s9-l4xsff5ftf";
     protected static final String apiToken = "pPKd5PLU0g-Zg1hJvt";
-
-    protected static final String authedPlatformAPI = "https://" + apiKey + ":" + apiToken + "@" + orgId + ".internetofthings.ibmcloud.com/api/v0002";
+    protected static final String credentials = API.apiKey + ":" + API.apiToken;
+    protected static final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
 
     protected static final String typeId = "OBDII";
 

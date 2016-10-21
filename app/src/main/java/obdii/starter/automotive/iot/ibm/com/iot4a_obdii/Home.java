@@ -8,40 +8,26 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.pires.obd.commands.SpeedCommand;
-import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
-import com.github.pires.obd.commands.protocol.EchoOffCommand;
-import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
-import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
-import com.github.pires.obd.commands.protocol.TimeoutCommand;
-import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
-import com.github.pires.obd.commands.temperature.TemperatureCommand;
-import com.github.pires.obd.enums.ObdProtocols;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -145,6 +131,7 @@ public class Home extends AppCompatActivity {
                 }
 
                 alertDialog
+                           .setCancelable(false)
                            .setSingleChoiceItems(adapter, selectedDevice, null)
                            .setTitle("Please Choose the OBDII Bluetooth Device")
                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -169,7 +156,7 @@ public class Home extends AppCompatActivity {
     public void checkDeviceRegistry() {
         String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
 
-        getSupportActionBar().setTitle("Registering Your Device...");
+        getSupportActionBar().setTitle("Checking if Device is Registered");
         progressBar.setVisibility(View.VISIBLE);
 
         try {
@@ -189,25 +176,53 @@ public class Home extends AppCompatActivity {
                             break;
                         case 404:
                             Log.d("Register Device", "Not Registered");
+                            progressBar.setVisibility(View.GONE);
+
+                            registerDevice();
                     }
-
-
-                    progressBar.setVisibility(View.VISIBLE);
                 }
             });
 
-//            JSONObject bodyObject = new JSONObject();
-//            bodyObject
-//                    .put("username", API.apiKey)
-//                    .put("password", API.apiToken);
-
-            String credentials = API.apiKey + ":" + API.apiToken;
-            String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
-
-            task.execute(url, "GET", null, null, credentialsBase64).get();
+            task.execute(url, "GET", null, null, API.credentialsBase64).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void registerDevice() {
+        String url = API.addDevices;
+
+        getSupportActionBar().setTitle("Registering Your Device");
+        progressBar.setVisibility(View.VISIBLE);
+
+        try {
+            API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
+                @Override
+                public void postExecute(JSONArray result) throws JSONException {
+                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
+                    int statusCode = serverResponse.getInt("statusCode");
+
+                    result.remove(result.length() - 1);
+
+                    Log.d("Register Device", result.toString());
+
+                    progressBar.setVisibility(View.GONE);
+                }
+            });
+
+            JSONObject bodyObject = new JSONObject();
+            bodyObject
+                    .put("typeId", API.typeId)
+                    .put("deviceId", userDeviceAddress);
+
+            task.execute(url, "POST", null, null, API.credentialsBase64).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -237,8 +252,6 @@ public class Home extends AppCompatActivity {
         try {
             socket.connect();
             Log.i("Bluetooth Connection", "CONNECTED");
-
-            registerDevice();
         } catch (IOException e) {
             Log.e("Bluetooth Connection", e.getMessage());
 
@@ -249,8 +262,6 @@ public class Home extends AppCompatActivity {
                 socket.connect();
 
                 Log.i("Bluetooth Connection", "CONNECTED");
-
-                registerDevice();
             }
             catch (Exception e2) {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");
