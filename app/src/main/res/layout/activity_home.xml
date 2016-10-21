@@ -51,33 +51,7 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="5">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Speed"
-                android:id="@+id/speedLabel"
-                android:layout_gravity="center_horizontal"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="65 KM/hr"
-                android:id="@+id/speedValue"
-                android:layout_gravity="center_horizontal"
-                android:textSize="17dp"
-                android:layout_marginTop="10dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="5" >
+            android:layout_weight="10" >
 
             <TextView
                 android:layout_width="wrap_content"
