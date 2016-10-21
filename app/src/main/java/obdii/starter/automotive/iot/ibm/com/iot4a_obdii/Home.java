@@ -13,6 +13,7 @@ import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -166,7 +167,7 @@ public class Home extends AppCompatActivity {
     }
 
     public void registerDevice() {
-        String url = API.addDevices;
+        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/";
 
         getSupportActionBar().setTitle("Registering Your Device...");
         progressBar.setVisibility(View.VISIBLE);
@@ -183,18 +184,18 @@ public class Home extends AppCompatActivity {
                 }
             });
 
-            JSONObject bodyObject = new JSONObject();
-            bodyObject
-                    .put("deviceId", userDeviceAddress)
-                    .put("typeId", "OBDII")
-                    .put("authToken", "QjbUcS?H&!p3lO_Ywx");
+//            JSONObject bodyObject = new JSONObject();
+//            bodyObject
+//                    .put("username", API.apiKey)
+//                    .put("password", API.apiToken);
 
-            task.execute(url, "POST", null, bodyObject.toString()).get();
+            String credentials = API.apiKey + ":" + API.apiToken;
+            String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
+
+            task.execute(url, "GET", null, null, credentialsBase64).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
     }

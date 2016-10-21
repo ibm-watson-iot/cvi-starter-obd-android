@@ -39,6 +39,13 @@ public class API {
     protected static final String orgId = "p375s9";
     protected static final String platformAPI = "https://" + orgId + ".internetofthings.ibmcloud.com/api/v0002";
 
+    protected static final String apiKey = "a-p375s9-l4xsff5ftf";
+    protected static final String apiToken = "pPKd5PLU0g-Zg1hJvt";
+
+    protected static final String authedPlatformAPI = "https://" + apiKey + ":" + apiToken + "@" + orgId + ".internetofthings.ibmcloud.com/api/v0002";
+
+    protected static final String typeId = "OBDII";
+
     // Endpoints
     protected static final String addDevices = platformAPI + "/bulk/devices/add";
 
@@ -83,6 +90,7 @@ public class API {
                     params[1] == request type (String e.g. "GET")
                     params[2] == parameters query (Uri converted to String)
                     params[3] == body (JSONObject converted to String)
+                    params[4] == Basic Auth
             */
 
             int code = 0;
@@ -118,7 +126,7 @@ public class API {
                         Log.i("Using Parameters:", params[2]);
                     }
 
-                    if (params.length > 3) { // params[3] == HTTP Body - String
+                    if (params.length > 3 && params[3] != null) { // params[3] == HTTP Body - String
                         String httpBody = params[3];
 
                         urlConnection.setRequestProperty("Content-Type", "application/json");
@@ -131,6 +139,12 @@ public class API {
 
                         Log.i("Using Body:", httpBody);
                     }
+                }
+
+                if (params.length > 4) {
+                    urlConnection.addRequestProperty("Authorization", "Basic " + params[4]);
+
+                    Log.i("Using Basic Auth", "");
                 }
 
                 try {

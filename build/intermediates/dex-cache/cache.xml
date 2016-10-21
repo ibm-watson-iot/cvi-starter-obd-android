@@ -19,7 +19,7 @@
         jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="23.0.3"
-        sha1="cecaa7319b6f88896e44ccb605ad56b7a103118c">
+        sha1="fbc89640f99c33540d4ccc6866695d49c0e0ec09">
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_d18f9771f5b13c2ef73142e8c6ca00f14875b1b7/classes.dex" />
     </item>
     <item
@@ -47,7 +47,7 @@
         jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.3"
-        sha1="e682e14c39e8da2e57b11fb8dd5b4b569da32e43">
+        sha1="cf51ef79bc492424a7f368698c4153301495e53e">
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_189ab6deef697ecd048fcfa2ee1713df20bbe598/classes.dex" />
     </item>
     <item
