@@ -22,6 +22,10 @@ import android.widget.Toast;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,13 +52,17 @@ public class Home extends AppCompatActivity {
     TextView fuelLevelValue;
     ProgressBar progressBar;
 
+    protected static MqttAsyncClient mqtt;
+    private static MqttConnectOptions options = new MqttConnectOptions();
+    private static MemoryPersistence persistence = new MemoryPersistence();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
         progressBar = new ProgressBar(this);
-        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
         progressBar.setIndeterminate(true);
         progressBar.setScaleX(0.5f);
         progressBar.setScaleY(0.5f);
@@ -217,7 +225,12 @@ public class Home extends AppCompatActivity {
                                     .setCancelable(false)
                                     .setTitle("Your Device is Now Registered!")
                                     .setMessage("Please take note of this Autentication Token as you will need it in the future\n\n" + result.getJSONObject(0).getString("authToken"))
-                                    .setPositiveButton("Ok", null)
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            deviceRegistered();
+                                        }
+                                    })
                                     .show();
                             break;
                         default:
@@ -315,6 +328,34 @@ public class Home extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void deviceRegistered() {
+        final String clientIdPid = "d:" + API.orgId + ":OBDII:00-1D-A5-00-05-8C";
+        final String broker      = "ssl://" + API.orgId + "messaging.internetofthings.ibmcloud.com:8883";
+        MemoryPersistence persistence = new MemoryPersistence();
+
+        try {
+            mqtt = new MqttAsyncClient(broker, clientIdPid, persistence);
+
+            options.setCleanSession(true);
+            options.setUserName("use-token-auth");
+            options.setPassword("2@8rQA@OYFr6zmYqF3".toCharArray());
+            options.setKeepAliveInterval(90);
+
+            Log.i("MQTT", "Connecting to broker: " + broker);
+            mqtt.connect(options);
+
+            Log.i("MQTT", "Connected");
+        } catch(MqttException me) {
+            Log.e("Reason", me.getReasonCode() + "");
+            Log.e("Message", me.getMessage());
+            Log.e("Localized Message", me.getLocalizedMessage());
+            Log.e("Cause", me.getCause() + "");
+            Log.e("Exception", me + "");
+
+            me.printStackTrace();
         }
     }
 }
