@@ -110,9 +110,11 @@ public class API {
 
                 urlConnection.setRequestMethod(requestType);
 
-                if (requestType == "POST" || requestType == "PUT" || requestType == "GET") {
-                    urlConnection.setDoInput(true);
-                    urlConnection.setDoOutput(true);
+                if (requestType.equals("POST") || requestType.equals("PUT") || requestType.equals("GET")) {
+                    if (!requestType.equals("GET")) {
+                        urlConnection.setDoInput(true);
+                        urlConnection.setDoOutput(true);
+                    }
 
                     if (params.length > 2 && params[2] != null) { // params[2] == HTTP Parameters Query - String
                         String query = params[2];
