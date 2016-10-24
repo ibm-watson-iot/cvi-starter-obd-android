@@ -56,6 +56,8 @@ public class Home extends AppCompatActivity {
     private static MqttConnectOptions options = new MqttConnectOptions();
     private static MemoryPersistence persistence = new MemoryPersistence();
 
+    private JSONObject currentDevice;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,12 +180,13 @@ public class Home extends AppCompatActivity {
 
                     switch (statusCode) {
                         case 200:
-                            Log.d("Check Device Registry", result.toString());
+                            Log.d("Check Device Registry", result.toString(4));
                             Log.d("Check Device Registry", "***Already Registered***");
 
                             getSupportActionBar().setTitle("Device Already Registered");
                             progressBar.setVisibility(View.GONE);
 
+                            currentDevice = result.getJSONObject(0);
                             deviceRegistered();
 
                             break;
@@ -233,7 +236,7 @@ public class Home extends AppCompatActivity {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
-                    Log.d("Register Device", result.toString());
+                    Log.d("Register Device", result.toString(4));
 
                     JSONObject serverResponse = result.getJSONObject(result.length() - 1);
                     int statusCode = serverResponse.getInt("statusCode");
@@ -251,7 +254,11 @@ public class Home extends AppCompatActivity {
                                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
-                                            deviceRegistered();
+                                            try {
+                                                deviceRegistered();
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     })
                                     .show();
@@ -352,8 +359,8 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    public void deviceRegistered() {
-        final String clientIdPid = "d:" + API.orgId + ":OBDII:00-1D-A5-00-05-8C";
+    public void deviceRegistered() throws JSONException {
+        final String clientIdPid = currentDevice.getString("clientId");
         final String broker      = "ssl://" + API.orgId + "messaging.internetofthings.ibmcloud.com:8883";
         MemoryPersistence persistence = new MemoryPersistence();
 
