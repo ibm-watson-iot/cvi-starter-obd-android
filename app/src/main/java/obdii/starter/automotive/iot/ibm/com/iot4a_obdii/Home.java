@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
@@ -247,11 +248,16 @@ public class Home extends AppCompatActivity {
                         case 201:
                         case 202:
                             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+
+//                            LayoutInflater inflater
+//                            View authTokenAlert = inflater.inflate(R.layout.activity_analyze_my_driving, container, false);
+//                            authTokenAlert.setContent
+                            alertDialog.setView(R.layout.activity_home_authtokenalert);
                             alertDialog
                                     .setCancelable(false)
                                     .setTitle("Your Device is Now Registered!")
                                     .setMessage("Please take note of this Autentication Token as you will need it in the future\n\n" + result.getJSONObject(0).getString("authToken"))
-                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
                                             try {
