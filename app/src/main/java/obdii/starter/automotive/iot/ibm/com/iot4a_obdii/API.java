@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -124,7 +125,7 @@ public class API {
                         writer.close();
                         os.close();
 
-                        Log.i("Using Parameters:", params[2]);
+                        Log.i("Using Parameters", params[2]);
                     }
 
                     if (params.length > 4) {
@@ -144,7 +145,7 @@ public class API {
                         wr.flush();
                         wr.close();
 
-                        Log.i("Using Body:", httpBody);
+                        Log.i("Using Body", httpBody);
                     }
 
                     urlConnection.connect();
@@ -153,7 +154,17 @@ public class API {
                 try {
                     code = urlConnection.getResponseCode();
 
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    BufferedReader bufferedReader = null;
+                    InputStream inputStream = null;
+
+                    try {
+                        inputStream = urlConnection.getInputStream();
+                    } catch(IOException exception) {
+                        inputStream = urlConnection.getErrorStream();
+                    }
+
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
                     StringBuilder stringBuilder = new StringBuilder();
 
                     String line;
@@ -195,6 +206,12 @@ public class API {
                             object.put("result", stringBuilder.toString());
 
                             result.put(object);
+
+                            JSONObject statusCode = new JSONObject();
+                            statusCode.put("statusCode", code);
+                            Log.d("Responded With", code + "");
+
+                            result.put(statusCode);
 
                             return result;
                         }

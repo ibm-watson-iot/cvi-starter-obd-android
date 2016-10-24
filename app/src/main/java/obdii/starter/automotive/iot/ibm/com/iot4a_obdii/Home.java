@@ -170,6 +170,8 @@ public class Home extends AppCompatActivity {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
+                    Log.d("Register Device", result.toString());
+
                     JSONObject serverResponse = result.getJSONObject(result.length() - 1);
                     int statusCode = serverResponse.getInt("statusCode");
 
@@ -212,6 +214,8 @@ public class Home extends AppCompatActivity {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
+                    Log.d("Register Device", result.toString());
+
                     JSONObject serverResponse = result.getJSONObject(result.length() - 1);
                     int statusCode = serverResponse.getInt("statusCode");
 
@@ -236,8 +240,6 @@ public class Home extends AppCompatActivity {
                         default:
                             break;
                     }
-
-                    Log.d("Register Device", result.toString());
 
                     progressBar.setVisibility(View.GONE);
                 }
