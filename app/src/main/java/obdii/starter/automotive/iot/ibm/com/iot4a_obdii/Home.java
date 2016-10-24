@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -250,12 +253,25 @@ public class Home extends AppCompatActivity {
                     switch (statusCode) {
                         case 201:
                         case 202:
-                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                            final String authToken = result.getJSONObject(0).getString("authToken");
 
+                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                             View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
+
                             EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
-                            authTokenField.edit
-                            authTokenField.setText(result.getJSONObject(0).getString("authToken"));
+                            authTokenField.setText(authToken);
+
+                            Button copyToClipboard = (Button) authTokenAlert.findViewById(R.id.copyToClipboard);
+                            copyToClipboard.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                                    ClipData clipData = ClipData.newPlainText("authToken", authToken);
+                                    clipboard.setPrimaryClip(clipData);
+
+                                    Toast.makeText(Home.this, "Successfully copied to your Clipboard!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
 
                             alertDialog.setView(authTokenAlert);
                             alertDialog
@@ -371,10 +387,10 @@ public class Home extends AppCompatActivity {
     }
 
     public void deviceRegistered() throws JSONException {
-        final String clientIdPid = currentDevice.getString("clientId");
-        final String broker      = "ssl://" + API.orgId + "messaging.internetofthings.ibmcloud.com:8883";
-        MemoryPersistence persistence = new MemoryPersistence();
+        final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
+        final String broker      = "ssl://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:8883";
 
+        MemoryPersistence persistence = new MemoryPersistence();
         try {
             mqtt = new MqttAsyncClient(broker, clientIdPid, persistence);
 
