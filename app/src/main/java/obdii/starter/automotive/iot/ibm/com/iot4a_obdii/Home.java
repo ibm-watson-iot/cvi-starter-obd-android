@@ -178,8 +178,8 @@ public class Home extends AppCompatActivity {
 
                     switch (statusCode) {
                         case 200:
-                            Log.d("Register Device", result.toString());
-                            Log.d("Register Device", "Already Registered");
+                            Log.d("Check Device Registry", result.toString());
+                            Log.d("Check Device Registry", "***Already Registered***");
 
                             getSupportActionBar().setTitle("Device Already Registered");
                             progressBar.setVisibility(View.GONE);
@@ -189,10 +189,28 @@ public class Home extends AppCompatActivity {
                             break;
                         case 404:
                         case 405:
-                            Log.d("Register Device", "Not Registered");
+                            Log.d("Check Device Registry", "***Not Registered***");
                             progressBar.setVisibility(View.GONE);
 
-                            registerDevice();
+                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                            alertDialog
+                                    .setCancelable(false)
+                                    .setTitle("Your Device is NOT Registered!")
+                                    .setMessage("In order to use this application, we need to register your device to the IBM IoT Platform")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            registerDevice();
+                                        }
+                                    })
+                                    .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            Toast.makeText(Home.this, "Cannot continue without registering your device!", Toast.LENGTH_LONG).show();
+                                            Home.this.finishAffinity();
+                                        }
+                                    })
+                                    .show();
                     }
                 }
             });
