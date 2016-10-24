@@ -242,7 +242,7 @@ public class Home extends AppCompatActivity {
         try {
             API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
-                public void postExecute(JSONArray result) throws JSONException {
+                public void postExecute(final JSONArray result) throws JSONException {
                     Log.d("Register Device", result.toString(4));
 
                     JSONObject serverResponse = result.getJSONObject(result.length() - 1);
@@ -282,6 +282,7 @@ public class Home extends AppCompatActivity {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
                                             try {
+                                                currentDevice = result.getJSONObject(0);
                                                 deviceRegistered();
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
