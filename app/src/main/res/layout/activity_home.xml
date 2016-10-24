@@ -82,19 +82,23 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp">
 
-        <Button
+        <Button style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Change Network"
             android:id="@+id/changeNetworkButton"
-            android:layout_weight="5" />
+            android:layout_weight="5"
+            android:drawableLeft="@drawable/bluetooth"
+            android:layout_marginRight="2.5dp" />
 
-        <Button
+        <Button style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connect"
             android:id="@+id/connectButton"
-            android:layout_weight="5" />
+            android:layout_weight="5"
+            android:drawableLeft="@drawable/connect"
+            android:layout_marginLeft="2.5dp" />
     </LinearLayout>
 
 </RelativeLayout>
