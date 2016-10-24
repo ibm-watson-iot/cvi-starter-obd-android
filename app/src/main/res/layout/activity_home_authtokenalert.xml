@@ -6,10 +6,10 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/authTokenField"
         android:layout_gravity="center_horizontal"
         android:text="2@8rQA@OYFr6zmYqF3"
-        android:editable="false"
+        android:inputType="none"
         android:layout_margin="15dp" />
 
     <Button
