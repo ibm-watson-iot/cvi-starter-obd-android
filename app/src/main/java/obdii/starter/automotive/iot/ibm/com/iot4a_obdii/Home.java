@@ -256,6 +256,12 @@ public class Home extends AppCompatActivity {
                         case 201:
                         case 202:
                             final String authToken = result.getJSONObject(0).getString("authToken");
+                            final String deviceId = result.getJSONObject(0).getString("deviceId");
+                            final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
+
+                            if (!API.getStoredData(sharedPrefsKey).equals(authToken)) {
+                                API.storeData(sharedPrefsKey, authToken);
+                            }
 
                             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                             View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
@@ -391,7 +397,7 @@ public class Home extends AppCompatActivity {
 
     public void deviceRegistered() throws JSONException {
         final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
-        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:8883/mqtt";
+        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:443";
 
         MemoryPersistence persistence = new MemoryPersistence();
         try {
@@ -399,7 +405,7 @@ public class Home extends AppCompatActivity {
 
             options.setCleanSession(true);
             options.setUserName("use-token-auth");
-            options.setPassword("2@8rQA@OYFr6zmYqF3".toCharArray());
+            options.setPassword(API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")).toCharArray());
             options.setKeepAliveInterval(90);
 
             Log.i("MQTT", "Connecting to broker: " + broker);

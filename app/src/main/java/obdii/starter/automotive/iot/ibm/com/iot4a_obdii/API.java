@@ -49,6 +49,8 @@ public class API {
 
     protected static final String typeId = "OBDII";
 
+    protected static final String DOESNOTEXIST = "doesNotExist";
+
     // Endpoints
     protected static final String addDevices = platformAPI + "/bulk/devices/add";
 
@@ -62,9 +64,9 @@ public class API {
     public static String getUUID() {
         sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
 
-        String uuidString = sharedpreferences.getString("iota-starter-obdii-uuid", "no-iota-starter-obdii-uuid");
+        String uuidString = sharedpreferences.getString("iota-starter-obdii-uuid", DOESNOTEXIST);
 
-        if (uuidString != "no-iota-starter-obdii-uuid") {
+        if (uuidString != DOESNOTEXIST) {
             return uuidString;
         } else {
             uuidString = UUID.randomUUID().toString();
@@ -73,6 +75,16 @@ public class API {
 
             return uuidString;
         }
+    }
+
+    public static void storeData(String key, String value) {
+        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
+        sharedpreferences.edit().putString(key, value).apply();
+    }
+
+    public static String getStoredData(String key) {
+        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
+        return sharedpreferences.getString(key, DOESNOTEXIST);
     }
 
     public static class doRequest extends AsyncTask<String, Void, JSONArray> {
