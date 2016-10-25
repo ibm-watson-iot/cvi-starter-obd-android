@@ -510,9 +510,6 @@ public class Home extends AppCompatActivity {
         numberPicker.setMinValue(1);
         numberPicker.setMaxValue(60);
 
-//        EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
-//        authTokenField.setText(authToken);
-
         alertDialog.setView(changeFrequencyAlert);
         alertDialog
                 .setCancelable(false)
@@ -520,15 +517,10 @@ public class Home extends AppCompatActivity {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-
+                        
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which) {
-
-                    }
-                })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 }
