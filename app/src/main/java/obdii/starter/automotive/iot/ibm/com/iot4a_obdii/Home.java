@@ -29,7 +29,9 @@ import android.widget.Toast;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -409,13 +411,38 @@ public class Home extends AppCompatActivity {
             options.setKeepAliveInterval(90);
             options.setAutomaticReconnect(true);
 
+            mqtt.setCallback(new MqttCallbackExtended() {
+
+                @Override
+                public void connectComplete(boolean reconnect, String serverURI) {
+                    // Subscriptions
+                    if (reconnect){
+                        Log.d("MQTT", "Automatically Reconnected " + serverURI);
+                    } else {
+                        Log.d("MQTT", "Connected for the first time! " + serverURI);
+                    }
+                }
+
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    // Not used
+                }
+
+                public void deliveryComplete(IMqttDeliveryToken token) {
+                    // Not used
+                }
+
+                public void connectionLost(Throwable cause) {
+                    Log.e("MQTT", "Connection Lost - " + cause.getMessage());
+                }
+            });
+
             Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
             mqtt.connect(options);
+//
+//            if (mqtt.isConnected())
+//            Log.i("MQTT", "Connected");
 
-            if (mqtt.isConnected())
-            Log.i("MQTT", "Connected");
-
-            mqttPublish();
+//            mqttPublish();
         } catch(MqttException me) {
             Log.e("Reason", me.getReasonCode() + "");
             Log.e("Message", me.getMessage());
