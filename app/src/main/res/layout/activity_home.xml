@@ -118,7 +118,8 @@
             android:id="@+id/button2"
             android:layout_weight="5"
             android:drawableLeft="@drawable/timer"
-            android:layout_marginLeft="2.5dp" />
+            android:layout_marginLeft="2.5dp"
+            android:onClick="changeFrequency" />
     </LinearLayout>
 
 </RelativeLayout>

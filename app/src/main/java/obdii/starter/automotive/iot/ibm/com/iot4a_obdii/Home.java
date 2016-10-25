@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -499,5 +500,35 @@ public class Home extends AppCompatActivity {
         }
 
         return temp;
+    }
+
+    public void changeFrequency(View view) {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+        View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
+
+        NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(60);
+
+//        EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
+//        authTokenField.setText(authToken);
+
+        alertDialog.setView(changeFrequencyAlert);
+        alertDialog
+                .setCancelable(false)
+                .setTitle("Change the Frequency of Data Being Sent")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+
+                    }
+                })
+                .show();
     }
 }
