@@ -407,8 +407,9 @@ public class Home extends AppCompatActivity {
             options.setUserName("use-token-auth");
             options.setPassword(API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")).toCharArray());
             options.setKeepAliveInterval(90);
+            options.setAutomaticReconnect(true);
 
-            Log.i("MQTT", "Connecting to broker: " + broker);
+            Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
             mqtt.connect(options);
 
             if (mqtt.isConnected())
@@ -436,11 +437,13 @@ public class Home extends AppCompatActivity {
         String stringData = jsonToString(data);
         MqttMessage message = new MqttMessage(stringData.getBytes());
 
-        try {
-            mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
-        } catch(MqttException me) {
-            Log.e("MQTT", "Publishing Failed");
-            me.printStackTrace();
+        if (!mqtt.isConnected()) {
+            try {
+                mqtt.connect(options);
+                mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
         }
     }
 
