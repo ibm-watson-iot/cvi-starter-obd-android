@@ -32,6 +32,7 @@ import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +40,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -389,7 +391,7 @@ public class Home extends AppCompatActivity {
 
     public void deviceRegistered() throws JSONException {
         final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
-        final String broker      = "ssl://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:8883";
+        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:8883/mqtt";
 
         MemoryPersistence persistence = new MemoryPersistence();
         try {
@@ -403,7 +405,10 @@ public class Home extends AppCompatActivity {
             Log.i("MQTT", "Connecting to broker: " + broker);
             mqtt.connect(options);
 
+            if (mqtt.isConnected())
             Log.i("MQTT", "Connected");
+
+            mqttPublish();
         } catch(MqttException me) {
             Log.e("Reason", me.getReasonCode() + "");
             Log.e("Message", me.getMessage());
@@ -413,5 +418,40 @@ public class Home extends AppCompatActivity {
 
             me.printStackTrace();
         }
+    }
+
+    public void mqttPublish() throws MqttException {
+        Log.e("MQTT", "Publishing NOW");
+
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        data.add(new ArrayList<String>(Arrays.asList("fuelLevel", 30 + "")));
+        data.add(new ArrayList<String>(Arrays.asList("engineCoolant", 92 + "")));
+
+        String stringData = jsonToString(data);
+        MqttMessage message = new MqttMessage(stringData.getBytes());
+
+        try {
+            mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
+        } catch(MqttException me) {
+            Log.e("MQTT", "Publishing Failed");
+            me.printStackTrace();
+        }
+    }
+
+    public String jsonToString(ArrayList<ArrayList<String>> data) {
+        String temp = "{\"d\":{";
+        int accum = 0;
+
+        for (int i=0; i < data.size(); i++) {
+            if (accum == (data.size() - 1)) {
+                temp += "\"" + data.get(i).get(0) + "\": \"" + data.get(i).get(1) + "\"}}";
+            } else {
+                temp += "\"" + data.get(i).get(0) + "\": \"" + data.get(i).get(1) + "\", ";
+            }
+
+            accum += 1;
+        }
+
+        return temp;
     }
 }

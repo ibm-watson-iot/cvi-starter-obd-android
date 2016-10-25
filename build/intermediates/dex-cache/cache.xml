@@ -16,10 +16,17 @@
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-appcompat-v7-23.4.0_8dcf2f4d096542264818a7f1a2abdd7334438b57/classes.dex" />
     </item>
     <item
+        jar="/Users/iliadm/.gradle/caches/modules-2/files-2.1/org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.0.2/11752d3f24d1a9deda4533a7ca18d8496417ceeb/org.eclipse.paho.client.mqttv3-1.0.2.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="11752d3f24d1a9deda4533a7ca18d8496417ceeb">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/org.eclipse.paho.client.mqttv3-1.0.2_35f483d05aa6deb1db0eca8f5b18f1cece28d524/classes.dex" />
+    </item>
+    <item
         jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="23.0.3"
-        sha1="79fc096110f74537cd65d817be35a479fccb0629">
+        sha1="d319a3f73c55631eb95955d9d13816fa5336fc64">
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_d18f9771f5b13c2ef73142e8c6ca00f14875b1b7/classes.dex" />
     </item>
     <item
@@ -44,24 +51,17 @@
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-v4-23.4.0_d5d6063a4d6eb715fc9d860e701fe4ac7d827e6d/classes.dex" />
     </item>
     <item
-        jar="/Users/iliadm/.gradle/caches/modules-2/files-2.1/org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.1.0/89d827ffa47c241f2627421ef1d6c7a8c207a341/org.eclipse.paho.client.mqttv3-1.1.0.jar"
+        jar="/Users/iliadm/.gradle/caches/modules-2/files-2.1/org.eclipse.paho/org.eclipse.paho.android.service/1.0.2/2d956522c556caeb35148445ecd059ebe67331f6/org.eclipse.paho.android.service-1.0.2.jar"
         jumboMode="true"
         revision="23.0.3"
-        sha1="89d827ffa47c241f2627421ef1d6c7a8c207a341">
-        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/org.eclipse.paho.client.mqttv3-1.1.0_ebc8f53a6bf1b70b6aef04d0daa606e4f5484d49/classes.dex" />
-    </item>
-    <item
-        jar="/Users/iliadm/.gradle/caches/modules-2/files-2.1/org.eclipse.paho/org.eclipse.paho.android.service/1.1.0/1945d9504415955d865ac805f60bf85366aeaffb/org.eclipse.paho.android.service-1.1.0.jar"
-        jumboMode="true"
-        revision="23.0.3"
-        sha1="1945d9504415955d865ac805f60bf85366aeaffb">
-        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/org.eclipse.paho.android.service-1.1.0_409eefe0705402f549eb223b62cd16e0a3235110/classes.dex" />
+        sha1="2d956522c556caeb35148445ecd059ebe67331f6">
+        <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/org.eclipse.paho.android.service-1.0.2_e1a9d47835476313bea4966326b57cedb9a48034/classes.dex" />
     </item>
     <item
         jar="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.3"
-        sha1="4b6d6d4895b06e732f089011cabe5749a90af0c8">
+        sha1="3ad48f89223c29ab9ade1347879ba350dcd00977">
         <dex dex="/Users/iliadm/AndroidStudioProjects/IoT-Automotive-OBD2-android/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_189ab6deef697ecd048fcfa2ee1713df20bbe598/classes.dex" />
     </item>
     <item
