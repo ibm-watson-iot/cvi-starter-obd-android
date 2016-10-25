@@ -70,6 +70,10 @@ public class Home extends AppCompatActivity {
     private static MqttConnectOptions options = new MqttConnectOptions();
     private static MemoryPersistence persistence = new MemoryPersistence();
 
+    private int timerDelay = 5000;
+    private int timerPeriod = 15000;
+    private Timer timer;
+
     private JSONObject currentDevice;
 
     @Override
@@ -441,9 +445,8 @@ public class Home extends AppCompatActivity {
             Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
             mqtt.connect(options);
 
-            Timer timer = new Timer();
+            timer = new Timer();
             timer.scheduleAtFixedRate(new TimerTask() {
-
                 @Override
                 public void run() {
                     try {
@@ -457,7 +460,7 @@ public class Home extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-            }, 5000, 15000);
+            }, timerDelay, timerPeriod);
         } catch(MqttException me) {
             Log.e("Reason", me.getReasonCode() + "");
             Log.e("Message", me.getMessage());
@@ -506,8 +509,8 @@ public class Home extends AppCompatActivity {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
         View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
-        NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
-        numberPicker.setMinValue(1);
+        final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(5);
         numberPicker.setMaxValue(60);
 
         alertDialog.setView(changeFrequencyAlert);
@@ -517,7 +520,30 @@ public class Home extends AppCompatActivity {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        
+                        int newFrequency = numberPicker.getValue();
+
+                        if (newFrequency != timerPeriod) {
+                            timerPeriod = newFrequency;
+
+                            timer.cancel();
+
+                            timer = new Timer();
+                            timer.scheduleAtFixedRate(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (mqtt.isConnected()) {
+                                            mqttPublish();
+                                        } else {
+                                            Log.e("MQTT", "No Connection to the Server");
+                                        }
+
+                                    } catch (MqttException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, timerDelay, timerPeriod);
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
