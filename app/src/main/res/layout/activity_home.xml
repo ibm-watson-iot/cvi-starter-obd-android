@@ -80,7 +80,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linearLayout"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="30dp"
+        android:id="@+id/linearLayout3">
 
         <Button style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
@@ -94,10 +95,29 @@
         <Button style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connect"
+            android:text="Send Live Data"
             android:id="@+id/connectButton"
             android:layout_weight="5"
             android:drawableLeft="@drawable/connect"
+            android:layout_marginLeft="2.5dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout4"
+        android:layout_below="@+id/linearLayout3"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Frequency"
+            android:id="@+id/button2"
+            android:layout_weight="5"
+            android:drawableLeft="@drawable/timer"
             android:layout_marginLeft="2.5dp" />
     </LinearLayout>
 

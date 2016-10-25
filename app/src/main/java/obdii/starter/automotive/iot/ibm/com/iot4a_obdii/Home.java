@@ -456,8 +456,7 @@ public class Home extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-            }, 5000, 5000);
-
+            }, 5000, 15000);
         } catch(MqttException me) {
             Log.e("Reason", me.getReasonCode() + "");
             Log.e("Message", me.getMessage());
@@ -471,15 +470,15 @@ public class Home extends AppCompatActivity {
 
     public void mqttPublish() throws MqttException {
         ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        data.add(new ArrayList<String>(Arrays.asList("fuelLevel", 30 + "")));
-        data.add(new ArrayList<String>(Arrays.asList("engineCoolant", 92 + "")));
+        data.add(new ArrayList<String>(Arrays.asList("fuelLevel", (Math.floor(Math.random() * 25) + 30) + "")));
+        data.add(new ArrayList<String>(Arrays.asList("engineCoolant", (Math.floor(Math.random() * 45) + 80) + "")));
 
         String stringData = jsonToString(data);
         MqttMessage message = new MqttMessage(stringData.getBytes());
 
         try {
             mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
-            Log.e("MQTT - Published", data.toString());
+            Log.d("MQTT - Published", data.toString());
         } catch (MqttException e) {
             e.printStackTrace();
         }
