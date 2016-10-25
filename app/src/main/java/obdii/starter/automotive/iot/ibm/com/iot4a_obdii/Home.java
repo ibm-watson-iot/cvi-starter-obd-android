@@ -512,15 +512,16 @@ public class Home extends AppCompatActivity {
         final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
         numberPicker.setMinValue(5);
         numberPicker.setMaxValue(60);
+        numberPicker.setValue(15);
 
         alertDialog.setView(changeFrequencyAlert);
         alertDialog
                 .setCancelable(false)
-                .setTitle("Change the Frequency of Data Being Sent")
+                .setTitle("Change the Frequency of Data Being Sent (in Seconds)")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        int newFrequency = numberPicker.getValue();
+                        int newFrequency = numberPicker.getValue() * 1000;
 
                         if (newFrequency != timerPeriod) {
                             timerPeriod = newFrequency;
