@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -412,7 +414,6 @@ public class Home extends AppCompatActivity {
             options.setAutomaticReconnect(true);
 
             mqtt.setCallback(new MqttCallbackExtended() {
-
                 @Override
                 public void connectComplete(boolean reconnect, String serverURI) {
                     // Subscriptions
@@ -438,11 +439,25 @@ public class Home extends AppCompatActivity {
 
             Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
             mqtt.connect(options);
-//
-//            if (mqtt.isConnected())
-//            Log.i("MQTT", "Connected");
 
-//            mqttPublish();
+            Timer timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+
+                @Override
+                public void run() {
+                    try {
+                        if (mqtt.isConnected()) {
+                            mqttPublish();
+                        } else {
+                            Log.e("MQTT", "No Connection to the Server");
+                        }
+
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 5000, 5000);
+
         } catch(MqttException me) {
             Log.e("Reason", me.getReasonCode() + "");
             Log.e("Message", me.getMessage());
@@ -455,8 +470,6 @@ public class Home extends AppCompatActivity {
     }
 
     public void mqttPublish() throws MqttException {
-        Log.e("MQTT", "Publishing NOW");
-
         ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         data.add(new ArrayList<String>(Arrays.asList("fuelLevel", 30 + "")));
         data.add(new ArrayList<String>(Arrays.asList("engineCoolant", 92 + "")));
@@ -464,13 +477,11 @@ public class Home extends AppCompatActivity {
         String stringData = jsonToString(data);
         MqttMessage message = new MqttMessage(stringData.getBytes());
 
-        if (!mqtt.isConnected()) {
-            try {
-                mqtt.connect(options);
-                mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
+        try {
+            mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
+            Log.e("MQTT - Published", data.toString());
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
     }
 
