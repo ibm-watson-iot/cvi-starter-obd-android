@@ -29,6 +29,8 @@ import android.widget.Toast;
 
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
+import com.google.gson.JsonObject;
+import com.ibm.iotf.client.device.DeviceClient;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -44,6 +46,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -458,6 +461,8 @@ public class Home extends AppCompatActivity {
 
                     } catch (MqttException e) {
                         e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }, timerDelay, timerPeriod);
@@ -472,20 +477,32 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    public void mqttPublish() throws MqttException {
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        data.add(new ArrayList<String>(Arrays.asList("fuelLevel", (Math.floor(Math.random() * 25) + 30) + "")));
-        data.add(new ArrayList<String>(Arrays.asList("engineCoolant", (Math.floor(Math.random() * 45) + 80) + "")));
+    public void mqttPublish() throws MqttException, JSONException {
+        Properties options = new Properties();
+        options.setProperty("org", API.orgId);
+        options.setProperty("type", API.typeId);
+        options.setProperty("id", currentDevice.getString("deviceId"));
+        options.setProperty("auth-method", "token");
+        options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
 
-        String stringData = jsonToString(data);
-        MqttMessage message = new MqttMessage(stringData.getBytes());
-
+        DeviceClient myClient = null;
         try {
-            mqtt.publish("iot-2/evt/fuelAndCoolant/fmt/format_string", message);
-            Log.d("MQTT - Published", data.toString());
-        } catch (MqttException e) {
+            //Instantiate the class by passing the properties file
+            myClient = new DeviceClient(options);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+        myClient.connect();
+
+        JsonObject event = new JsonObject();
+        event.addProperty("fuelLevel", (Math.floor(Math.random() * 25) + 30) + "");
+        event.addProperty("engineCoolant", (Math.floor(Math.random() * 45) + 80) + "");
+
+        myClient.publishEvent("status", event, 0);
+        System.out.println("SUCCESSFULLY POSTED......");
+
+        myClient.disconnect();
     }
 
     public String jsonToString(ArrayList<ArrayList<String>> data) {
@@ -540,6 +557,8 @@ public class Home extends AppCompatActivity {
                                         }
 
                                     } catch (MqttException e) {
+                                        e.printStackTrace();
+                                    } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
                                 }

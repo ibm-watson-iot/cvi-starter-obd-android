@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="watson-iot-0.2.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.messaging/watson-iot/0.2.2/e6ffb79934d2ff454dd636ece5384d28eac09dc8/watson-iot-0.2.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.messaging/watson-iot/0.2.2/dae877bd502a20b438149e179134a6ef8ea07fe0/watson-iot-0.2.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
