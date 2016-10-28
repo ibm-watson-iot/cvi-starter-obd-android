@@ -113,9 +113,32 @@ public class Home extends AppCompatActivity {
                     requestPermissions(new String[] {Manifest.permission.BLUETOOTH_ADMIN},
                             BT_PERMISSIONS_CODE);
                 }
+
                 return;
             } else {
                 Log.i("Bluetooth Permissions", "Already Granted.");
+
+                Thread thread = new Thread() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            while (!isInterrupted()) {
+                                Thread.sleep(1000);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        fuelLevelValue.setText(Math.floor(Math.random() * 25) + 30 + "");
+                                    }
+                                });
+                            }
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                };
+
+                thread.start();
+
                 permissionsGranted();
             }
         }
