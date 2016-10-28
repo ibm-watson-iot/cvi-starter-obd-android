@@ -59,15 +59,19 @@ public class Home extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter = null;
     BluetoothDevice userDevice;
 
+    private BluetoothSocket socket = null;
+    private boolean socketConnected = false;
+
     Set<BluetoothDevice> pairedDevicesSet;
     final ArrayList<String> deviceNames = new ArrayList<>();
     final ArrayList<String> deviceAdresses = new ArrayList<>();
-    String userDeviceAddress;
+    private String userDeviceAddress;
 
     private static final String TAG = BluetoothManager.class.getName();
 
-    TextView fuelLevelValue;
-    ProgressBar progressBar;
+    private TextView engineCoolantValue;
+    private TextView fuelLevelValue;
+    private ProgressBar progressBar;
 
     protected static MqttAsyncClient mqtt;
     private static MqttConnectOptions options = new MqttConnectOptions();
@@ -119,16 +123,44 @@ public class Home extends AppCompatActivity {
                 Log.i("Bluetooth Permissions", "Already Granted.");
 
                 Thread thread = new Thread() {
-
                     @Override
                     public void run() {
                         try {
                             while (!isInterrupted()) {
                                 Thread.sleep(1000);
+
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        fuelLevelValue.setText(Math.floor(Math.random() * 25) + 30 + "");
+                                        if (socketConnected) {
+                                            FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+
+                                            try {
+                                                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+
+                                                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+
+                                                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+
+                                            try {
+                                                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+
+                                            engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                        }
                                     }
                                 });
                             }
@@ -195,8 +227,7 @@ public class Home extends AppCompatActivity {
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
 
-//                                   connectSocket(userDeviceAddress);
-                                   checkDeviceRegistry();
+                                   connectSocket(userDeviceAddress);
                                }
                            })
                            .show();
@@ -363,17 +394,11 @@ public class Home extends AppCompatActivity {
     }
 
     public void connectSocket(String userDeviceAddress) {
-        final TextView fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
-//        final TextView speedValue = (TextView) findViewById(R.id.speedValue);
-        final TextView engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
-
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
         userDevice = device;
 
         UUID uuid = UUID.fromString(API.getUUID());
-
-        BluetoothSocket socket = null;
 
         Log.d(TAG, "Starting Bluetooth connection..");
 
@@ -386,7 +411,12 @@ public class Home extends AppCompatActivity {
 
         try {
             socket.connect();
+
             Log.i("Bluetooth Connection", "CONNECTED");
+
+            socketConnected = true;
+
+            checkDeviceRegistry();
         } catch (IOException e) {
             Log.e("Bluetooth Connection", e.getMessage());
 
@@ -397,37 +427,41 @@ public class Home extends AppCompatActivity {
                 socket.connect();
 
                 Log.i("Bluetooth Connection", "CONNECTED");
+
+                socketConnected = true;
+
+                checkDeviceRegistry();
             }
             catch (Exception e2) {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");
             }
         }
 
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-//                SpeedCommand speedCommand = new SpeedCommand();
-//                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+//        while (!Thread.currentThread().isInterrupted()) {
+//            try {
+////                SpeedCommand speedCommand = new SpeedCommand();
+////                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+////
+////                Log.d("Speed", speedCommand.getFormattedResult());
+////                speedValue.setText(speedCommand.getFormattedResult());
 //
-//                Log.d("Speed", speedCommand.getFormattedResult());
-//                speedValue.setText(speedCommand.getFormattedResult());
-
-                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
-
-                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-
-                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+//                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+//                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+//
+//                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+//                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
+//
+//                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+//                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+//
+//                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+//                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void deviceRegistered() throws JSONException {
