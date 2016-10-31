@@ -97,6 +97,7 @@ public class Home extends AppCompatActivity {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(progressBar);
 
+        engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
         fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
 
         new API(getApplicationContext());
@@ -465,57 +466,57 @@ public class Home extends AppCompatActivity {
     }
 
     public void deviceRegistered() throws JSONException {
-        final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
-        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:443";
-
-        MemoryPersistence persistence = new MemoryPersistence();
-        try {
-            mqtt = new MqttAsyncClient(broker, clientIdPid, persistence);
-
-            options.setCleanSession(true);
-            options.setUserName("use-token-auth");
-            options.setPassword(API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")).toCharArray());
-            options.setKeepAliveInterval(90);
-            options.setAutomaticReconnect(true);
-
-            mqtt.setCallback(new MqttCallbackExtended() {
-                @Override
-                public void connectComplete(boolean reconnect, String serverURI) {
-                    // Subscriptions
-                    if (reconnect){
-                        Log.d("MQTT", "Automatically Reconnected " + serverURI);
-                    } else {
-                        Log.d("MQTT", "Connected for the first time! " + serverURI);
-                    }
-                }
-
-                public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    // Not used
-                }
-
-                public void deliveryComplete(IMqttDeliveryToken token) {
-                    // Not used
-                }
-
-                public void connectionLost(Throwable cause) {
-                    Log.e("MQTT", "Connection Lost - " + cause.getMessage());
-                }
-            });
-
-            Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
-            mqtt.connect(options);
+//        final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
+//        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:443";
+//
+//        MemoryPersistence persistence = new MemoryPersistence();
+//        try {
+//            mqtt = new MqttAsyncClient(broker, clientIdPid, persistence);
+//
+//            options.setCleanSession(true);
+//            options.setUserName("use-token-auth");
+//            options.setPassword(API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")).toCharArray());
+//            options.setKeepAliveInterval(90);
+//            options.setAutomaticReconnect(true);
+//
+//            mqtt.setCallback(new MqttCallbackExtended() {
+//                @Override
+//                public void connectComplete(boolean reconnect, String serverURI) {
+//                    // Subscriptions
+//                    if (reconnect){
+//                        Log.d("MQTT", "Automatically Reconnected " + serverURI);
+//                    } else {
+//                        Log.d("MQTT", "Connected for the first time! " + serverURI);
+//                    }
+//                }
+//
+//                public void messageArrived(String topic, MqttMessage message) throws Exception {
+//                    // Not used
+//                }
+//
+//                public void deliveryComplete(IMqttDeliveryToken token) {
+//                    // Not used
+//                }
+//
+//                public void connectionLost(Throwable cause) {
+//                    Log.e("MQTT", "Connection Lost - " + cause.getMessage());
+//                }
+//            });
+//
+//            Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
+//            mqtt.connect(options);
 
             timer = new Timer();
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-                        if (mqtt.isConnected()) {
+//                        if (mqtt.isConnected()) {
                             mqttPublish();
-                        } else {
-                            Log.e("MQTT", "No Connection to the Server");
-                        }
-
+//                        } else {
+//                            Log.e("MQTT", "No Connection to the Server");
+//                        }
+//
                     } catch (MqttException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -523,15 +524,15 @@ public class Home extends AppCompatActivity {
                     }
                 }
             }, timerDelay, timerPeriod);
-        } catch(MqttException me) {
-            Log.e("Reason", me.getReasonCode() + "");
-            Log.e("Message", me.getMessage());
-            Log.e("Localized Message", me.getLocalizedMessage());
-            Log.e("Cause", me.getCause() + "");
-            Log.e("Exception", me + "");
-
-            me.printStackTrace();
-        }
+//        } catch(MqttException me) {
+//            Log.e("Reason", me.getReasonCode() + "");
+//            Log.e("Message", me.getMessage());
+//            Log.e("Localized Message", me.getLocalizedMessage());
+//            Log.e("Cause", me.getCause() + "");
+//            Log.e("Exception", me + "");
+//
+//            me.printStackTrace();
+//        }
     }
 
     public void mqttPublish() throws MqttException, JSONException {
