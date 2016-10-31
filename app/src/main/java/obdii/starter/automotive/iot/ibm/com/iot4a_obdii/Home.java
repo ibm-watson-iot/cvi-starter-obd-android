@@ -454,6 +454,11 @@ public class Home extends AppCompatActivity {
             }
             catch (Exception e2) {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");
+                
+                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+
+                progressBar.setVisibility(View.GONE);
+                getSupportActionBar().setTitle("Connection Failed");
             }
         }
 
