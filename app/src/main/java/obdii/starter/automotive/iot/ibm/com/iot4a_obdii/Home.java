@@ -1,6 +1,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.Manifest;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -27,6 +28,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
@@ -135,37 +138,33 @@ public class Home extends AppCompatActivity {
                             while (!isInterrupted()) {
                                 Thread.sleep(1000);
 
+//                                queueCommands();
+
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         if (socketConnected) {
                                             FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                            EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                                            SpeedCommand speedCommand = new SpeedCommand();
 
                                             try {
                                                 fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-
                                                 Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-
                                                 fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
 
-                                            EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-
-                                            try {
                                                 engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+//                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+
+                                                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                                Log.d("Speed", speedCommand.getFormattedResult());
+                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
-
-                                            Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-
-                                            engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
                                         }
                                     }
                                 });
@@ -181,6 +180,16 @@ public class Home extends AppCompatActivity {
             }
         }
     }
+
+//    private void queueCommands() {
+//        if (isServiceBound) {
+//            for (ObdCommand Command : ObdConfig.getCommands()) {
+//                service.queueJob(new ObdCommandJob(Command));
+//            }
+//
+//            Service service.
+//        }
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
