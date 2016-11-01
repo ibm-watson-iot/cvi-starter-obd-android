@@ -138,8 +138,6 @@ public class Home extends AppCompatActivity {
                             while (!isInterrupted()) {
                                 Thread.sleep(1000);
 
-//                                queueCommands();
-
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -159,7 +157,7 @@ public class Home extends AppCompatActivity {
 
                                                 speedCommand.run(socket.getInputStream(), socket.getOutputStream());
                                                 Log.d("Speed", speedCommand.getFormattedResult());
-                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                                engineCoolantValue.setText(speedCommand.getFormattedResult());
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             } catch (InterruptedException e) {
@@ -180,16 +178,6 @@ public class Home extends AppCompatActivity {
             }
         }
     }
-
-//    private void queueCommands() {
-//        if (isServiceBound) {
-//            for (ObdCommand Command : ObdConfig.getCommands()) {
-//                service.queueJob(new ObdCommandJob(Command));
-//            }
-//
-//            Service service.
-//        }
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -461,32 +449,6 @@ public class Home extends AppCompatActivity {
                 getSupportActionBar().setTitle("Connection Failed");
             }
         }
-
-//        while (!Thread.currentThread().isInterrupted()) {
-//            try {
-////                SpeedCommand speedCommand = new SpeedCommand();
-////                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
-////
-////                Log.d("Speed", speedCommand.getFormattedResult());
-////                speedValue.setText(speedCommand.getFormattedResult());
-//
-//                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-//                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-//
-//                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-//                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
-//
-//                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-//                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-//
-//                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-//                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 
     public void deviceRegistered() throws JSONException {
