@@ -77,6 +77,8 @@ public class Home extends AppCompatActivity {
     private TextView engineCoolantValue;
     private TextView fuelLevelValue;
     private ProgressBar progressBar;
+    private Button changeNetwork;
+    private Button changeFrequency;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
@@ -101,12 +103,18 @@ public class Home extends AppCompatActivity {
         engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
         fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
 
+        changeNetwork = (Button) findViewById(R.id.changeNetwork);
+        changeFrequency = (Button) findViewById(R.id.changeFrequency);
+
         new API(getApplicationContext());
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
+
+            changeNetwork.setEnabled(false);
+            changeFrequency.setEnabled(false);
         } else {
             int permissionGiven = 0;
 
@@ -546,5 +554,9 @@ public class Home extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    public void changeNetwork(View view) {
+        permissionsGranted();
     }
 }
