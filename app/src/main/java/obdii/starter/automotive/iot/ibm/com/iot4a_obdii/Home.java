@@ -68,9 +68,10 @@ public class Home extends AppCompatActivity {
     private boolean socketConnected = false;
 
     Set<BluetoothDevice> pairedDevicesSet;
-    final ArrayList<String> deviceNames = new ArrayList<>();
-    final ArrayList<String> deviceAdresses = new ArrayList<>();
+    ArrayList<String> deviceNames = new ArrayList<>();
+    ArrayList<String> deviceAdresses = new ArrayList<>();
     private String userDeviceAddress;
+    private String userDeviceName;
 
     private static final String TAG = BluetoothManager.class.getName();
 
@@ -92,7 +93,7 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         progressBar = new ProgressBar(this);
-        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
         progressBar.setIndeterminate(true);
         progressBar.setScaleX(0.5f);
         progressBar.setScaleY(0.5f);
@@ -202,6 +203,10 @@ public class Home extends AppCompatActivity {
         } else {
             pairedDevicesSet = bluetoothAdapter.getBondedDevices();
 
+            // In case user clicks on Change Network, need to repopulate the devices list
+            deviceNames = new ArrayList<>();
+            deviceAdresses = new ArrayList<>();
+
             if (pairedDevicesSet.size() > 0) {
                 for (BluetoothDevice device : pairedDevicesSet)
                 {
@@ -230,6 +235,10 @@ public class Home extends AppCompatActivity {
                                    dialog.dismiss();
                                    int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                    userDeviceAddress = deviceAdresses.get(position);
+                                   userDeviceName = deviceNames.get(position);
+
+                                   progressBar.setVisibility(View.VISIBLE);
+                                   getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
 
                                    connectSocket(userDeviceAddress);
                                }
@@ -242,58 +251,77 @@ public class Home extends AppCompatActivity {
     }
 
     public void connectSocket(String userDeviceAddress) {
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
+        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
         userDevice = device;
 
-        UUID uuid = UUID.fromString(API.getUUID());
+        final UUID uuid = UUID.fromString(API.getUUID());
 
         Log.d(TAG, "Starting Bluetooth connection..");
 
-        try {
-            socket = device.createRfcommSocketToServiceRecord(uuid);
-        } catch (Exception e) {
-            Log.e("Bluetooth Connection", "Socket couldn't be created");
-            e.printStackTrace();
-        }
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    socket = device.createRfcommSocketToServiceRecord(uuid);
+                } catch (Exception e) {
+                    Log.e("Bluetooth Connection", "Socket couldn't be created");
+                    e.printStackTrace();
+                }
 
-        try {
-            socket.connect();
+                try {
+                    socket.connect();
 
-            Log.i("Bluetooth Connection", "CONNECTED");
+                    Log.i("Bluetooth Connection", "CONNECTED");
 
-            socketConnected = true;
+                    socketConnected = true;
 
-            checkDeviceRegistry();
-        } catch (IOException e) {
-            Log.e("Bluetooth Connection", e.getMessage());
+                    checkDeviceRegistry();
+                } catch (IOException e) {
+                    Log.e("Bluetooth Connection", e.getMessage());
 
-            try {
-                Log.i("Bluetooth Connection", "Using fallback method");
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i("Bluetooth Connection", "Using fallback method");
+                            }
+                        });
 
-                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
-                socket.connect();
+                        socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
+                        socket.connect();
 
-                Log.i("Bluetooth Connection", "CONNECTED");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i("Bluetooth Connection", "CONNECTED");
+                            }
+                        });
 
-                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
+                        new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                        new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                        new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
+                        new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
 
-                socketConnected = true;
+                        socketConnected = true;
 
-                checkDeviceRegistry();
+                        checkDeviceRegistry();
+                    }
+                    catch (Exception e2) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.e("Bluetooth Connection", "Couldn't establish connection");
+
+                                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+
+                                progressBar.setVisibility(View.GONE);
+                                getSupportActionBar().setTitle("Connection Failed");
+                            }
+                        });
+                    }
+                }
             }
-            catch (Exception e2) {
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-
-                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-
-                progressBar.setVisibility(View.GONE);
-                getSupportActionBar().setTitle("Connection Failed");
-            }
-        }
+        }).start();
     }
 
     public void checkDeviceRegistry() {
