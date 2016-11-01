@@ -1,25 +1,27 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.Manifest;
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+
 import android.os.Build;
+import android.os.Bundle;
+
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+
 import android.util.Log;
-import android.view.LayoutInflater;
+
 import android.view.View;
-import android.view.ViewGroup;
+
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
@@ -37,15 +38,14 @@ import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
+
 import com.google.gson.JsonObject;
+
 import com.ibm.iotf.client.device.DeviceClient;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,7 +53,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
@@ -452,57 +451,12 @@ public class Home extends AppCompatActivity {
     }
 
     public void deviceRegistered() throws JSONException {
-//        final String clientIdPid = "d:" + API.orgId + ":" + API.typeId + ":" + currentDevice.getString("deviceId");
-//        final String broker      = "wss://" + API.orgId + ".messaging.internetofthings.ibmcloud.com:443";
-//
-//        MemoryPersistence persistence = new MemoryPersistence();
-//        try {
-//            mqtt = new MqttAsyncClient(broker, clientIdPid, persistence);
-//
-//            options.setCleanSession(true);
-//            options.setUserName("use-token-auth");
-//            options.setPassword(API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")).toCharArray());
-//            options.setKeepAliveInterval(90);
-//            options.setAutomaticReconnect(true);
-//
-//            mqtt.setCallback(new MqttCallbackExtended() {
-//                @Override
-//                public void connectComplete(boolean reconnect, String serverURI) {
-//                    // Subscriptions
-//                    if (reconnect){
-//                        Log.d("MQTT", "Automatically Reconnected " + serverURI);
-//                    } else {
-//                        Log.d("MQTT", "Connected for the first time! " + serverURI);
-//                    }
-//                }
-//
-//                public void messageArrived(String topic, MqttMessage message) throws Exception {
-//                    // Not used
-//                }
-//
-//                public void deliveryComplete(IMqttDeliveryToken token) {
-//                    // Not used
-//                }
-//
-//                public void connectionLost(Throwable cause) {
-//                    Log.e("MQTT", "Connection Lost - " + cause.getMessage());
-//                }
-//            });
-//
-//            Log.i("MQTT", "Connecting to broker: " + broker + " " + API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
-//            mqtt.connect(options);
-
             timer = new Timer();
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-//                        if (mqtt.isConnected()) {
                             mqttPublish();
-//                        } else {
-//                            Log.e("MQTT", "No Connection to the Server");
-//                        }
-//
                     } catch (MqttException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -510,15 +464,6 @@ public class Home extends AppCompatActivity {
                     }
                 }
             }, timerDelay, timerPeriod);
-//        } catch(MqttException me) {
-//            Log.e("Reason", me.getReasonCode() + "");
-//            Log.e("Message", me.getMessage());
-//            Log.e("Localized Message", me.getLocalizedMessage());
-//            Log.e("Cause", me.getCause() + "");
-//            Log.e("Exception", me + "");
-//
-//            me.printStackTrace();
-//        }
     }
 
     public void mqttPublish() throws MqttException, JSONException {
@@ -531,7 +476,7 @@ public class Home extends AppCompatActivity {
 
         DeviceClient myClient = null;
         try {
-            //Instantiate the class by passing the properties file
+            // Instantiate the class by passing the properties file
             myClient = new DeviceClient(options);
         } catch (Exception e) {
             e.printStackTrace();
