@@ -239,6 +239,61 @@ public class Home extends AppCompatActivity {
         }
     }
 
+    public void connectSocket(String userDeviceAddress) {
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
+        userDevice = device;
+
+        UUID uuid = UUID.fromString(API.getUUID());
+
+        Log.d(TAG, "Starting Bluetooth connection..");
+
+        try {
+            socket = device.createRfcommSocketToServiceRecord(uuid);
+        } catch (Exception e) {
+            Log.e("Bluetooth Connection", "Socket couldn't be created");
+            e.printStackTrace();
+        }
+
+        try {
+            socket.connect();
+
+            Log.i("Bluetooth Connection", "CONNECTED");
+
+            socketConnected = true;
+
+            checkDeviceRegistry();
+        } catch (IOException e) {
+            Log.e("Bluetooth Connection", e.getMessage());
+
+            try {
+                Log.i("Bluetooth Connection", "Using fallback method");
+
+                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
+                socket.connect();
+
+                Log.i("Bluetooth Connection", "CONNECTED");
+
+                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
+                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
+
+                socketConnected = true;
+
+                checkDeviceRegistry();
+            }
+            catch (Exception e2) {
+                Log.e("Bluetooth Connection", "Couldn't establish connection");
+
+                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+
+                progressBar.setVisibility(View.GONE);
+                getSupportActionBar().setTitle("Connection Failed");
+            }
+        }
+    }
+
     public void checkDeviceRegistry() {
         String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
 
@@ -395,61 +450,6 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    public void connectSocket(String userDeviceAddress) {
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
-        userDevice = device;
-
-        UUID uuid = UUID.fromString(API.getUUID());
-
-        Log.d(TAG, "Starting Bluetooth connection..");
-
-        try {
-            socket = device.createRfcommSocketToServiceRecord(uuid);
-        } catch (Exception e) {
-            Log.e("Bluetooth Connection", "Socket couldn't be created");
-            e.printStackTrace();
-        }
-
-        try {
-            socket.connect();
-
-            Log.i("Bluetooth Connection", "CONNECTED");
-
-            socketConnected = true;
-
-            checkDeviceRegistry();
-        } catch (IOException e) {
-            Log.e("Bluetooth Connection", e.getMessage());
-
-            try {
-                Log.i("Bluetooth Connection", "Using fallback method");
-
-                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
-                socket.connect();
-
-                Log.i("Bluetooth Connection", "CONNECTED");
-
-                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
-
-                socketConnected = true;
-
-                checkDeviceRegistry();
-            }
-            catch (Exception e2) {
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-
-                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-
-                progressBar.setVisibility(View.GONE);
-                getSupportActionBar().setTitle("Connection Failed");
-            }
-        }
-    }
-
     public void deviceRegistered() throws JSONException {
             timer = new Timer();
             timer.scheduleAtFixedRate(new TimerTask() {
@@ -539,12 +539,7 @@ public class Home extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     try {
-                                        if (mqtt.isConnected()) {
-                                            mqttPublish();
-                                        } else {
-                                            Log.e("MQTT", "No Connection to the Server");
-                                        }
-
+                                        mqttPublish();
                                     } catch (MqttException e) {
                                         e.printStackTrace();
                                     } catch (JSONException e) {
