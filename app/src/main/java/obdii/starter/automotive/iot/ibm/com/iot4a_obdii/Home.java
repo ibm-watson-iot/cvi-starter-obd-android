@@ -43,10 +43,8 @@ import com.google.gson.JsonObject;
 
 import com.ibm.iotf.client.device.DeviceClient;
 
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,10 +77,6 @@ public class Home extends AppCompatActivity {
     private TextView engineCoolantValue;
     private TextView fuelLevelValue;
     private ProgressBar progressBar;
-
-    protected static MqttAsyncClient mqtt;
-    private static MqttConnectOptions options = new MqttConnectOptions();
-    private static MemoryPersistence persistence = new MemoryPersistence();
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
