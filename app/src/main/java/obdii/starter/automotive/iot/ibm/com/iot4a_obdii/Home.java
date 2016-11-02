@@ -30,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
@@ -80,6 +79,9 @@ public class Home extends AppCompatActivity {
     private ProgressBar progressBar;
     private Button changeNetwork;
     private Button changeFrequency;
+
+    private float fuelLevel;
+    private float engineCoolant;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
@@ -146,20 +148,19 @@ public class Home extends AppCompatActivity {
                                         if (socketConnected) {
                                             FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
                                             EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-                                            SpeedCommand speedCommand = new SpeedCommand();
 
                                             try {
                                                 fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
                                                 Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                                fuelLevelValue.setText(fuelLevelCommand.getFormattedResult());
+                                                fuelLevel = fuelLevelCommand.getFuelLevel();
+
+                                                fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
 
                                                 engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
                                                 Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-//                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                                engineCoolant = engineCoolantTemperatureCommand.getTemperature();
 
-                                                speedCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                                Log.d("Speed", speedCommand.getFormattedResult());
-                                                engineCoolantValue.setText(speedCommand.getFormattedResult());
+                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             } catch (InterruptedException e) {
@@ -259,69 +260,52 @@ public class Home extends AppCompatActivity {
 
         Log.d(TAG, "Starting Bluetooth connection..");
 
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    socket = device.createRfcommSocketToServiceRecord(uuid);
-                } catch (Exception e) {
-                    Log.e("Bluetooth Connection", "Socket couldn't be created");
-                    e.printStackTrace();
-                }
+        try {
+            socket = device.createRfcommSocketToServiceRecord(uuid);
+        } catch (Exception e) {
+            Log.e("Bluetooth Connection", "Socket couldn't be created");
+            e.printStackTrace();
+        }
 
-                try {
-                    socket.connect();
+        try {
+            socket.connect();
 
-                    Log.i("Bluetooth Connection", "CONNECTED");
+            Log.i("Bluetooth Connection", "CONNECTED");
 
-                    socketConnected = true;
+            socketConnected = true;
 
-                    checkDeviceRegistry();
-                } catch (IOException e) {
-                    Log.e("Bluetooth Connection", e.getMessage());
+            checkDeviceRegistry();
+        } catch (IOException e) {
+            Log.e("Bluetooth Connection", e.getMessage());
 
-                    try {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.i("Bluetooth Connection", "Using fallback method");
-                            }
-                        });
+            try {
+                Log.i("Bluetooth Connection", "Using fallback method");
 
-                        socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
-                        socket.connect();
+                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
+                socket.connect();
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.i("Bluetooth Connection", "CONNECTED");
-                            }
-                        });
+                Log.i("Bluetooth Connection", "CONNECTED");
 
-                        new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                        new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                        new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                        new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
+                progressBar.setVisibility(View.GONE);
 
-                        socketConnected = true;
+                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
+                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
+                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
 
-                        checkDeviceRegistry();
-                    }
-                    catch (Exception e2) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.e("Bluetooth Connection", "Couldn't establish connection");
+                socketConnected = true;
 
-                                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-
-                                progressBar.setVisibility(View.GONE);
-                                getSupportActionBar().setTitle("Connection Failed");
-                            }
-                        });
-                    }
-                }
+                checkDeviceRegistry();
             }
-        }).start();
+            catch (Exception e2) {
+                Log.e("Bluetooth Connection", "Couldn't establish connection");
+
+                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+
+                progressBar.setVisibility(View.GONE);
+                getSupportActionBar().setTitle("Connection Failed");
+            }
+        }
     }
 
     public void checkDeviceRegistry() {
@@ -426,9 +410,9 @@ public class Home extends AppCompatActivity {
                             copyToClipboard.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                                    ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                                     ClipData clipData = ClipData.newPlainText("authToken", authToken);
-                                    clipboard.setPrimaryClip(clipData);
+                                    clipboardManager.setPrimaryClip(clipData);
 
                                     Toast.makeText(Home.this, "Successfully copied to your Clipboard!", Toast.LENGTH_SHORT).show();
                                 }
@@ -497,6 +481,14 @@ public class Home extends AppCompatActivity {
     }
 
     public void mqttPublish() throws MqttException, JSONException {
+        runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                  progressBar.setVisibility(View.VISIBLE);
+                  getSupportActionBar().setTitle("Live Data is Being Sent");
+              }
+        });
+
         Properties options = new Properties();
         options.setProperty("org", API.orgId);
         options.setProperty("type", API.typeId);
@@ -515,8 +507,8 @@ public class Home extends AppCompatActivity {
         myClient.connect();
 
         JsonObject event = new JsonObject();
-        event.addProperty("fuelLevel", (Math.floor(Math.random() * 25) + 30) + "");
-        event.addProperty("engineCoolant", (Math.floor(Math.random() * 45) + 80) + "");
+        event.addProperty("fuelLevel", fuelLevel + "");
+        event.addProperty("engineCoolant", engineCoolant + "");
 
         myClient.publishEvent("status", event, 0);
         System.out.println("SUCCESSFULLY POSTED......");
