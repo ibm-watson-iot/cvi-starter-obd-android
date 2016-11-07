@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -38,11 +40,14 @@ import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.JsonObject;
 
 import com.ibm.iotf.client.device.DeviceClient;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
+
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,7 +62,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
     final private int BT_PERMISSIONS_CODE = 000;
 
     BluetoothAdapter bluetoothAdapter = null;
@@ -578,5 +583,30 @@ public class Home extends AppCompatActivity {
 
     public void changeNetwork(View view) {
         permissionsGranted();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        
     }
 }
