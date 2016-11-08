@@ -8,15 +8,21 @@ import android.bluetooth.BluetoothSocket;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -40,14 +46,11 @@ import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.JsonObject;
 
 import com.ibm.iotf.client.device.DeviceClient;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-
-import com.google.android.gms.maps.OnMapReadyCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +58,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
@@ -62,7 +66,16 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-public class Home extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
+public class Home extends AppCompatActivity implements LocationListener {
+    LocationManager locationManager;
+    Location location;
+    String provider;
+
+    private final int GPS_INTENT = 000;
+    private final int SETTINGS_INTENT = 001;
+
+    private boolean networkIntentNeeded = false;
+
     final private int BT_PERMISSIONS_CODE = 000;
 
     BluetoothAdapter bluetoothAdapter = null;
@@ -586,27 +599,118 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Locat
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        locationManager.requestLocationUpdates(provider, 500, 1, this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
+        Log.i("Location Data", "New Location - " + location.getLatitude() + ", " +  location.getLongitude());
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
     }
 
     @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
+    public void onProviderEnabled(String provider) {
 
     }
 
     @Override
-    public void onProviderEnabled(String s) {
+    public void onProviderDisabled(String provider) {
 
     }
 
-    @Override
-    public void onProviderDisabled(String s) {
+    public void getLocation(View view) {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
+        Location location = locationManager.getLastKnownLocation(provider);
+
+        onLocationChanged(location);
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        
+    private void getAccurateLocation() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && (networkInfo != null && networkInfo.isConnected())) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+
+            List<String> providers = locationManager.getProviders(true);
+            Location finalLocation = null;
+
+            for (String provider : providers) {
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+
+                Location lastKnown = locationManager.getLastKnownLocation(provider);
+
+                if (lastKnown == null) {
+                    continue;
+                }
+
+                if (finalLocation == null || (lastKnown.getAccuracy() < finalLocation.getAccuracy())) {
+                    finalLocation = lastKnown;
+                }
+            }
+
+            location = finalLocation;
+
+            if (location != null) {
+
+            } else {
+                Log.e("Location Data", "Not Working!");
+            }
+        } else {
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Toast.makeText(getApplicationContext(), "Please turn on your GPS", Toast.LENGTH_LONG).show();
+
+                Intent gpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivityForResult(gpsIntent, GPS_INTENT);
+
+                if (networkInfo == null) {
+                    networkIntentNeeded = true;
+                }
+            } else {
+                if (networkInfo == null) {
+                    Toast.makeText(getApplicationContext(), "Please turn on Mobile Data or WIFI", Toast.LENGTH_LONG).show();
+
+                    Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                    startActivityForResult(settingsIntent, SETTINGS_INTENT);
+                }
+            }
+        }
     }
 }
