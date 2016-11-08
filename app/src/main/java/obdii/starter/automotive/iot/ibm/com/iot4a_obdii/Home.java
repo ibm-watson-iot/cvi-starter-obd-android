@@ -57,8 +57,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +103,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private String userDeviceName;
 
     private static final String TAG = BluetoothManager.class.getName();
+
+    private String trip_id;
 
     private TextView engineCoolantValue;
     private TextView fuelLevelValue;
@@ -524,19 +528,22 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void deviceRegistered() throws JSONException {
-            timer = new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                            mqttPublish();
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        trip_id += "-" + UUID.randomUUID();
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                        mqttPublish();
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }, timerDelay, timerPeriod);
+            }
+        }, timerDelay, timerPeriod);
     }
 
     public void mqttPublish() throws MqttException, JSONException {
@@ -568,6 +575,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         JsonObject event = new JsonObject();
         event.addProperty("fuelLevel", fuelLevel + "");
         event.addProperty("engineCoolant", engineCoolant + "");
+        event.addProperty("lat", location.getLatitude());
+        event.addProperty("lng", location.getLongitude());
+        event.addProperty("trip_id", trip_id);
 
         myClient.publishEvent("status", event, 0);
         System.out.println("SUCCESSFULLY POSTED......");
