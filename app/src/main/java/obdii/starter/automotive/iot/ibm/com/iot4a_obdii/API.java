@@ -87,6 +87,20 @@ public class API {
         return sharedpreferences.getString(key, DOESNOTEXIST);
     }
 
+    public static boolean warningShown() {
+        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
+
+        boolean warningShown = sharedpreferences.getBoolean("iota-starter-obdii-warning-message", false);
+
+        if (warningShown) {
+            return warningShown;
+        } else {
+            sharedpreferences.edit().putBoolean("iota-starter-obdii-warning-message", true).apply();
+
+            return false;
+        }
+    }
+
     public static class doRequest extends AsyncTask<String, Void, JSONArray> {
 
         public interface TaskListener {

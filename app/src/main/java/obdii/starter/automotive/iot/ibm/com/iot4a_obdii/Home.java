@@ -58,7 +58,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
@@ -70,6 +73,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     LocationManager locationManager;
     Location location;
     String provider;
+
+    private final int INITIAL_PERMISSIONS = 000;
+
+    Map<String, String> permissions = new HashMap<>();
+    ArrayList<String> permissionNeeded = new ArrayList<>();
+
+    private boolean permissionsGranted = false;
 
     private final int GPS_INTENT = 000;
     private final int SETTINGS_INTENT = 001;
@@ -137,63 +147,49 @@ public class Home extends AppCompatActivity implements LocationListener {
             changeNetwork.setEnabled(false);
             changeFrequency.setEnabled(false);
         } else {
-            int permissionGiven = 0;
-
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                permissionGiven = checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN);
-            }
+                if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("internet", Manifest.permission.INTERNET);
 
-            if (permissionGiven != PackageManager.PERMISSION_GRANTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(new String[] {Manifest.permission.BLUETOOTH_ADMIN},
-                            BT_PERMISSIONS_CODE);
+                if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("networkState", Manifest.permission.ACCESS_NETWORK_STATE);
+
+                if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("coarseLocation", Manifest.permission.ACCESS_COARSE_LOCATION);
+
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("fineLocation", Manifest.permission.ACCESS_FINE_LOCATION);
+
+                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("externalStorage", Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
+                    permissions.put("bluetooth", Manifest.permission.BLUETOOTH_ADMIN);
+
+                for (Map.Entry<String, String> entry : permissions.entrySet()) {
+                    permissionNeeded.add(entry.getValue());
                 }
 
-                return;
+                if (permissionNeeded.size() > 0) {
+                    Object[] tempObjectArray = permissionNeeded.toArray();
+                    String[] permissionsArray = Arrays.copyOf(tempObjectArray, tempObjectArray.length, String[].class);
+
+                    requestPermissions(permissionsArray, INITIAL_PERMISSIONS);
+                } else {
+                    permissionsGranted = true;
+                }
             } else {
-                Log.i("Bluetooth Permissions", "Already Granted.");
-
-                Thread thread = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            while (!isInterrupted()) {
-                                Thread.sleep(1000);
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (socketConnected) {
-                                            FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                            EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-
-                                            try {
-                                                fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                                fuelLevel = fuelLevelCommand.getFuelLevel();
-
-                                                fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
-
-                                                engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                                engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-
-                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                };
-
-                thread.start();
+                if (!API.warningShown()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder
+                            .setTitle("Warning")
+                            .setMessage("This app requires permissions to your Locations, Bluetooth and Storage settings.\n\n" +
+                                    "If you are running the application to your phone from Android Studio, you will not be able to allow these permissions.\n\n" +
+                                    "If that is the case, please install the app through the provided APK file."
+                            )
+                            .setPositiveButton("Ok", null)
+                            .show();
+                }
 
                 permissionsGranted();
             }
@@ -201,17 +197,59 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         switch (requestCode) {
-            case BT_PERMISSIONS_CODE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            case INITIAL_PERMISSIONS:
+                if (results[0] == PackageManager.PERMISSION_GRANTED) {
+                    Thread thread = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                while (!isInterrupted()) {
+                                    Thread.sleep(1000);
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (socketConnected) {
+                                                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+
+                                                try {
+                                                    fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                                    Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                                    fuelLevel = fuelLevelCommand.getFuelLevel();
+
+                                                    fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
+
+                                                    engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                                    Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                                    engineCoolant = engineCoolantTemperatureCommand.getTemperature();
+
+                                                    engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            } catch (InterruptedException e) {
+                            }
+                        }
+                    };
+
+                    thread.start();
+
                     permissionsGranted();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Permissions Denied", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                super.onRequestPermissionsResult(requestCode, permissions, results);
         }
     }
 
@@ -259,7 +297,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                                    progressBar.setVisibility(View.VISIBLE);
                                    getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
 
-                                   connectSocket(userDeviceAddress);
+//                                   connectSocket(userDeviceAddress);
+                                   checkDeviceRegistry();
                                }
                            })
                            .show();
