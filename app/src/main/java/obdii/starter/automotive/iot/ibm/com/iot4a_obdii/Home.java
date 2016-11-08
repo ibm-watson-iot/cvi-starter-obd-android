@@ -534,23 +534,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         myClient.disconnect();
     }
 
-    public String jsonToString(ArrayList<ArrayList<String>> data) {
-        String temp = "{\"d\":{";
-        int accum = 0;
-
-        for (int i=0; i < data.size(); i++) {
-            if (accum == (data.size() - 1)) {
-                temp += "\"" + data.get(i).get(0) + "\": \"" + data.get(i).get(1) + "\"}}";
-            } else {
-                temp += "\"" + data.get(i).get(0) + "\": \"" + data.get(i).get(1) + "\", ";
-            }
-
-            accum += 1;
-        }
-
-        return temp;
-    }
-
     public void changeFrequency(View view) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
         View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
