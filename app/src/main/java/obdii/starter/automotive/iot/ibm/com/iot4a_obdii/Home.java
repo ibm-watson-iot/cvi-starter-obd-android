@@ -13,12 +13,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 
 import android.provider.Settings;
@@ -122,6 +122,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(new Criteria(), false);
+
         progressBar = new ProgressBar(this);
         progressBar.setVisibility(View.GONE);
         progressBar.setIndeterminate(true);
@@ -140,12 +143,13 @@ public class Home extends AppCompatActivity implements LocationListener {
         new API(getApplicationContext());
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
 
             changeNetwork.setEnabled(false);
             changeFrequency.setEnabled(false);
+
+            getSupportActionBar().setTitle("Bluetooth Failed");
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
@@ -159,9 +163,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
                     permissions.put("fineLocation", Manifest.permission.ACCESS_FINE_LOCATION);
-
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("externalStorage", Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                 if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
                     permissions.put("bluetooth", Manifest.permission.BLUETOOTH_ADMIN);
@@ -177,6 +178,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                     requestPermissions(permissionsArray, INITIAL_PERMISSIONS);
                 } else {
                     permissionsGranted = true;
+
+                    permissionsGranted();
                 }
             } else {
                 if (!API.warningShown()) {
@@ -649,6 +652,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d("LOCATION", "NEWW");
         getAccurateLocation();
     }
 
@@ -701,6 +705,8 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             if (location == null) {
                 Log.e("Location Data", "Not Working!");
+            } else {
+                Log.d("Location", "New Location Found!");
             }
         } else {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
