@@ -628,7 +628,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i("Location Data", "New Location - " + location.getLatitude() + ", " +  location.getLongitude());
+        getAccurateLocation();
     }
 
     @Override
@@ -644,16 +644,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     @Override
     public void onProviderDisabled(String provider) {
 
-    }
-
-    public void getLocation(View view) {
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        onLocationChanged(location);
     }
 
     private void getAccurateLocation() {
@@ -688,9 +678,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             location = finalLocation;
 
-            if (location != null) {
-
-            } else {
+            if (location == null) {
                 Log.e("Location Data", "Not Working!");
             }
         } else {
