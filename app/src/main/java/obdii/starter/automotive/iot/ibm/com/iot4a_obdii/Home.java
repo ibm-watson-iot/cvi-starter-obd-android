@@ -713,4 +713,22 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
         }
     }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == GPS_INTENT) {
+            if (networkIntentNeeded) {
+                Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
+
+                Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                startActivityForResult(settingsIntent, SETTINGS_INTENT);
+            } else {
+                getAccurateLocation();
+            }
+        } else if (requestCode == SETTINGS_INTENT) {
+            networkIntentNeeded = false;
+
+            getAccurateLocation();
+        }
+
+    }
 }
