@@ -297,8 +297,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                    progressBar.setVisibility(View.VISIBLE);
                                    getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
 
-//                                   connectSocket(userDeviceAddress);
-                                   checkDeviceRegistry();
+                                   connectSocket(userDeviceAddress);
                                }
                            })
                            .show();
