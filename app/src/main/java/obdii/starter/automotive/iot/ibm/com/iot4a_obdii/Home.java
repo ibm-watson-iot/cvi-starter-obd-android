@@ -82,12 +82,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     ArrayList<String> permissionNeeded = new ArrayList<>();
 
     private boolean permissionsGranted = false;
+    private boolean simulation = false;
 
     private final int GPS_INTENT = 000;
     private final int SETTINGS_INTENT = 001;
 
     private boolean networkIntentNeeded = false;
-    
+
     BluetoothAdapter bluetoothAdapter = null;
     BluetoothDevice userDevice;
 
@@ -112,6 +113,9 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private float fuelLevel;
     private float engineCoolant;
+
+    private double randomFuelLevel;
+    private double randomEngineCoolant;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
@@ -261,57 +265,99 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         thread.start();
 
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, 1);
-        } else {
-            pairedDevicesSet = bluetoothAdapter.getBondedDevices();
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+        alertDialog
+                .setCancelable(false)
+                .setTitle("Do you want to try out a simulated version?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.dismiss();
 
-            // In case user clicks on Change Network, need to repopulate the devices list
-            deviceNames = new ArrayList<>();
-            deviceAdresses = new ArrayList<>();
+                        simulation = true;
+                        setTripID();
 
-            if (pairedDevicesSet.size() > 0) {
-                for (BluetoothDevice device : pairedDevicesSet)
-                {
-                    deviceNames.add(device.getName());
-                    deviceAdresses.add(device.getAddress());
-                }
+                        randomFuelLevel = Math.floor(Math.random() * 100) + 5;
+                        randomEngineCoolant = Math.floor(Math.random() * 140) + 20;
 
-                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-                ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
+                        timer = new Timer();
+                        timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                try {
+                                    mqttPublish();
+                                } catch (MqttException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, timerDelay, timerPeriod);
 
-                int selectedDevice = -1;
-                for (int i = 0; i < deviceNames.size(); i++) {
-                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
-                        selectedDevice = i;
+                        changeNetwork.setEnabled(false);
                     }
-                }
+                })
+                .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.dismiss();
 
-                alertDialog
-                           .setCancelable(false)
-                           .setSingleChoiceItems(adapter, selectedDevice, null)
-                           .setTitle("Please Choose the OBDII Bluetooth Device")
-                           .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                               @Override
-                               public void onClick(DialogInterface dialog, int which)
-                               {
-                                   dialog.dismiss();
-                                   int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                   userDeviceAddress = deviceAdresses.get(position);
-                                   userDeviceName = deviceNames.get(position);
+                        if (!bluetoothAdapter.isEnabled()) {
+                            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            startActivityForResult(enableBluetooth, 1);
+                        } else {
+                            pairedDevicesSet = bluetoothAdapter.getBondedDevices();
 
-                                   progressBar.setVisibility(View.VISIBLE);
-                                   getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
+                            // In case user clicks on Change Network, need to repopulate the devices list
+                            deviceNames = new ArrayList<>();
+                            deviceAdresses = new ArrayList<>();
 
-                                   connectSocket(userDeviceAddress);
-                               }
-                           })
-                           .show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
-            }
-        }
+                            if (pairedDevicesSet.size() > 0) {
+                                for (BluetoothDevice device : pairedDevicesSet)
+                                {
+                                    deviceNames.add(device.getName());
+                                    deviceAdresses.add(device.getAddress());
+                                }
+
+                                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                                ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
+
+                                int selectedDevice = -1;
+                                for (int i = 0; i < deviceNames.size(); i++) {
+                                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
+                                        selectedDevice = i;
+                                    }
+                                }
+
+                                alertDialog
+                                        .setCancelable(false)
+                                        .setSingleChoiceItems(adapter, selectedDevice, null)
+                                        .setTitle("Please Choose the OBDII Bluetooth Device")
+                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which)
+                                            {
+                                                dialog.dismiss();
+                                                int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                                                userDeviceAddress = deviceAdresses.get(position);
+                                                userDeviceName = deviceNames.get(position);
+
+                                                progressBar.setVisibility(View.VISIBLE);
+                                                getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
+
+                                                connectSocket(userDeviceAddress);
+                                            }
+                                        })
+                                        .show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                })
+                .show();
     }
 
     public void connectSocket(String userDeviceAddress) {
@@ -528,8 +574,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void deviceRegistered() throws JSONException {
-        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        trip_id += "-" + UUID.randomUUID();
+        setTripID();
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -546,12 +591,19 @@ public class Home extends AppCompatActivity implements LocationListener {
         }, timerDelay, timerPeriod);
     }
 
+    public void setTripID() {
+        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        trip_id += "-" + UUID.randomUUID();
+    }
+
     public void mqttPublish() throws MqttException, JSONException {
         runOnUiThread(new Runnable() {
               @Override
               public void run() {
                   progressBar.setVisibility(View.VISIBLE);
-                  getSupportActionBar().setTitle("Live Data is Being Sent");
+                  getSupportActionBar().setTitle(
+                          simulation ? "Simulated Data is Being Sent" : "Live Data is Being Sent"
+                  );
               }
         });
 
@@ -573,11 +625,20 @@ public class Home extends AppCompatActivity implements LocationListener {
         myClient.connect();
 
         JsonObject event = new JsonObject();
-        event.addProperty("fuelLevel", fuelLevel + "");
-        event.addProperty("engineCoolant", engineCoolant + "");
-        event.addProperty("lat", location.getLatitude());
-        event.addProperty("lng", location.getLongitude());
-        event.addProperty("trip_id", trip_id);
+
+        if (simulation) {
+            event.addProperty("fuelLevel", randomFuelLevel + "");
+            event.addProperty("engineCoolant", randomEngineCoolant + "");
+            event.addProperty("lat", location.getLatitude());
+            event.addProperty("lng", location.getLongitude());
+            event.addProperty("trip_id", trip_id);
+        } else {
+            event.addProperty("fuelLevel", fuelLevel + "");
+            event.addProperty("engineCoolant", engineCoolant + "");
+            event.addProperty("lat", location.getLatitude());
+            event.addProperty("lng", location.getLongitude());
+            event.addProperty("trip_id", trip_id);
+        }
 
         myClient.publishEvent("status", event, 0);
         System.out.println("SUCCESSFULLY POSTED......");
