@@ -87,9 +87,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private final int SETTINGS_INTENT = 001;
 
     private boolean networkIntentNeeded = false;
-
-    final private int BT_PERMISSIONS_CODE = 000;
-
+    
     BluetoothAdapter bluetoothAdapter = null;
     BluetoothDevice userDevice;
 
@@ -208,48 +206,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         switch (requestCode) {
             case INITIAL_PERMISSIONS:
                 if (results[0] == PackageManager.PERMISSION_GRANTED) {
-                    Thread thread = new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                while (!isInterrupted()) {
-                                    Thread.sleep(1000);
-
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (socketConnected) {
-                                                FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                                EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-
-                                                try {
-                                                    fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                                    Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                                    fuelLevel = fuelLevelCommand.getFuelLevel();
-
-                                                    fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
-
-                                                    engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                                    Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                                    engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-
-                                                    engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                } catch (InterruptedException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            } catch (InterruptedException e) {
-                            }
-                        }
-                    };
-
-                    thread.start();
-
                     permissionsGranted();
                 } else {
                     Toast.makeText(getApplicationContext(), "Permissions Denied", Toast.LENGTH_SHORT).show();
@@ -261,6 +217,50 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void permissionsGranted() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(1000);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (socketConnected) {
+                                    Toast.makeText(Home.this, socketConnected + " efwe", Toast.LENGTH_LONG);
+
+                                    FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                    EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+
+                                    try {
+                                        fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                        Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                        fuelLevel = fuelLevelCommand.getFuelLevel();
+
+                                        fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
+
+                                        engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                        Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                        engineCoolant = engineCoolantTemperatureCommand.getTemperature();
+
+                                        engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        thread.start();
+
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
@@ -581,6 +581,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         myClient.publishEvent("status", event, 0);
         System.out.println("SUCCESSFULLY POSTED......");
+        Log.d("Posted", event.toString());
 
         myClient.disconnect();
     }
@@ -662,7 +663,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d("LOCATION", "NEWW");
         getAccurateLocation();
     }
 
@@ -716,7 +716,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             if (location == null) {
                 Log.e("Location Data", "Not Working!");
             } else {
-                Log.d("Location", "New Location Found!");
+                Log.d("Location Data", location.getLatitude() + location.getLongitude() + "");
             }
         } else {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -748,11 +748,13 @@ public class Home extends AppCompatActivity implements LocationListener {
                 startActivityForResult(settingsIntent, SETTINGS_INTENT);
             } else {
                 getAccurateLocation();
+                permissionsGranted();
             }
         } else if (requestCode == SETTINGS_INTENT) {
             networkIntentNeeded = false;
 
             getAccurateLocation();
+            permissionsGranted();
         }
 
     }
