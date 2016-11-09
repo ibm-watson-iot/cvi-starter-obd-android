@@ -276,26 +276,13 @@ public class Home extends AppCompatActivity implements LocationListener {
                         dialog.dismiss();
 
                         simulation = true;
-                        setTripID();
 
                         randomFuelLevel = Math.floor(Math.random() * 100) + 5;
                         randomEngineCoolant = Math.floor(Math.random() * 140) + 20;
 
-                        timer = new Timer();
-                        timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                try {
-                                    mqttPublish();
-                                } catch (MqttException e) {
-                                    e.printStackTrace();
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, timerDelay, timerPeriod);
-
                         changeNetwork.setEnabled(false);
+
+                        checkDeviceRegistry();
                     }
                 })
                 .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
@@ -418,7 +405,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void checkDeviceRegistry() {
-        String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
+        String url = "";
+
+        if (simulation) {
+            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + "simulatedDevice-" + API.getUUID();
+        } else {
+            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
+        }
 
         getSupportActionBar().setTitle("Checking Device Registeration");
         progressBar.setVisibility(View.VISIBLE);
@@ -558,7 +551,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             bodyObject
                     .put("typeId", API.typeId)
-                    .put("deviceId", userDeviceAddress.replaceAll(":", "-"));
+                    .put("deviceId", simulation ? "simulatedDevice-" + API.getUUID() : userDeviceAddress.replaceAll(":", "-"));
 
             bodyArray
                     .put(bodyObject);
@@ -574,7 +567,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void deviceRegistered() throws JSONException {
-        setTripID();
+        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        trip_id += "-" + UUID.randomUUID();
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -589,11 +583,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
         }, timerDelay, timerPeriod);
-    }
-
-    public void setTripID() {
-        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        trip_id += "-" + UUID.randomUUID();
     }
 
     public void mqttPublish() throws MqttException, JSONException {
