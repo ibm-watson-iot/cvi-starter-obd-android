@@ -408,7 +408,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         String url = "";
 
         if (simulation) {
-            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + "simulatedDevice-" + API.getUUID();
+            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + API.getUUID();
         } else {
             url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
         }
@@ -551,7 +551,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             bodyObject
                     .put("typeId", API.typeId)
-                    .put("deviceId", simulation ? "simulatedDevice-" + API.getUUID() : userDeviceAddress.replaceAll(":", "-"));
+                    .put("deviceId", simulation ? API.getUUID() : userDeviceAddress.replaceAll(":", "-"));
 
             bodyArray
                     .put(bodyObject);
