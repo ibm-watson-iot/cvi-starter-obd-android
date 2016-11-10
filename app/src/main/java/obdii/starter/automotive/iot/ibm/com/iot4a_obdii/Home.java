@@ -614,19 +614,27 @@ public class Home extends AppCompatActivity implements LocationListener {
         myClient.connect();
 
         JsonObject event = new JsonObject();
+        JsonObject data = new JsonObject();
+        event.add("d", data);
 
         if (simulation) {
-            event.addProperty("fuelLevel", randomFuelLevel + "");
-            event.addProperty("engineCoolant", randomEngineCoolant + "");
-            event.addProperty("lat", location.getLatitude());
-            event.addProperty("lng", location.getLongitude());
-            event.addProperty("trip_id", trip_id);
+            data.addProperty("lat", location.getLatitude());
+            data.addProperty("lng", location.getLongitude());
+            data.addProperty("trip_id", trip_id);
+
+            JsonObject props = new JsonObject();
+            props.addProperty("fuelLevel", randomFuelLevel + "");
+            props.addProperty("engineTemp", randomEngineCoolant + "");
+            data.add("props", props);
         } else {
-            event.addProperty("fuelLevel", fuelLevel + "");
-            event.addProperty("engineCoolant", engineCoolant + "");
             event.addProperty("lat", location.getLatitude());
             event.addProperty("lng", location.getLongitude());
             event.addProperty("trip_id", trip_id);
+
+            JsonObject props = new JsonObject();
+            props.addProperty("fuelLevel", fuelLevel + "");
+            props.addProperty("engineTemp", engineCoolant + "");
+            data.add("props", props);
         }
 
         myClient.publishEvent("status", event, 0);
