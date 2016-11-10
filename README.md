@@ -17,12 +17,12 @@ Once you want to stop the application from recording your data, simply press "En
 You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
-The IoT for Automotive - Mobility Starter Application mobile app interacts with the server component. The server component provides the back-end car sharing and system monitoring service that provides more features for car-hire companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the car-sharing server component, see [ibm-watson-iot/iota-starter-server](https://github.com/ibm-watson-iot/iota-starter-server).
+The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the car-sharing server component, see [ibm-watson-iot/iota-fleetmanagement-server](https://github.com/ibm-watson-iot/iota-fleetmanagement-server).
 
 
 ## Prerequisites
 
-Before you deploy the IoT for Automotive - Mobility Starter Application mobile app for Android, ensure that the following prerequisites are met:
+Before you deploy the Android application, ensure that the following prerequisites are met:
 
 - Install the Android Studio integrated development environment (IDE) V2.1.1 or later.
 - Install an Android emulator device that is running on at least API Level 21.
@@ -31,13 +31,11 @@ Before you deploy the IoT for Automotive - Mobility Starter Application mobile a
 
 ## Deploying the mobile app
 
-You can download and install the mobile app on iOS and Android mobile devices. For more information about trying the iOS version of the mobile app, see [IBM IoT for Automotive - Mobility Starter Application mobile app for iOS](https://github.com/ibm-watson-iot/iota-starter-carsharing).
+To try the Android application using Android Emulator, complete the following steps:
 
-To try the IoT for Automotive - Mobility Starter Application mobile app for Android with Android Emulator, complete the following steps:
+1. Clone the source code repository for the mobile app by using the following git command:    
 
-1. Clone the Mobility Starter Application source code repository for the sample mobile app by using the following git command:    
-
-    ```$ git clone https://github.com/ibm-watson-iot/iota-starter-carsharing-android```  
+    ```$ git clone https://github.com/ibm-watson-iot/iota-obdii-fleetmanagement-android```  
 
 2. Open the project in Android Studio.
 
@@ -49,22 +47,21 @@ To try the IoT for Automotive - Mobility Starter Application mobile app for Andr
  
     ![Gradle Plugin Update Dialog](GradlePluginUpdate.jpg)    
 
-3. Edit the **iota-starter-carsharing-android/app/java/carsharing.starter.automotive.iot.ibm.com.mobilestarterapp/ConnectedDriverAPI/API.java** file, and set the `connectedAppURL` variable to the URL for your IoT for Automotive - Mobility Starter Application server app.
-4. Edit the **iota-starter-carsharing-android/app/res/values/google_maps_api.xml** file and replace `YOUR_KEY_HERE` with your `google_maps_key`. For more information, see [Get API Key](https://developers.google.com/maps/documentation/android-api/signup).
+3. Edit the **iota-starter-carsharing-android/app/java/obdii.starter.automotive.iot.ibm.com.iot4a_obdii/API.java** file, and set the `orgId` variable to your Organization's ID on Bluemix, the `apiKey` and `apiToken` variables to your API key and Auth Token from your instance of the IoT Platform.
 
-5. In Android Studio, run the application by pressing **Run 'app'**.
+4. In Android Studio, run the application by pressing **Run 'app'**.
 
     If you use a virtual device, make sure that you use one with API level 21 as seen in the following dialog.
 
     ![Deployment Target](DeploymentTarget.jpg)
 
-6. To deploy the mobile app on your device, see [Build and Run Your App](https://developer.android.com/studio/run/index.html).
+5. To deploy the mobile app on your device, see [Build and Run Your App](https://developer.android.com/studio/run/index.html).
 
 ## Reporting defects
-To report a defect with the IoT for Automotive - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-carsharing-android/issues) section.
+To report a defect with the IoT for Automotive - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-obdii-fleetmanagement-android/issues) section.
 
 ## Privacy notice
-The IoT for Automotive - Mobility Starter Application on Bluemix stores all of the driving data that is obtained while you use the mobile app.
+The "IoT for Automotive - OBDII Fleet Management App for Android" on Bluemix stores all of the driving data that is obtained while you use the mobile app.
 
 ## Useful links
 
