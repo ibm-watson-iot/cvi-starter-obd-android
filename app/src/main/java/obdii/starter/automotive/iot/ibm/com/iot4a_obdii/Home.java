@@ -780,15 +780,14 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
 
-            location = finalLocation;
-
-            if (location == null) {
+            if (finalLocation == null) {
                 Log.e("Location Data", "Not Working!");
-
-                getAccurateLocation();
             } else {
-                Log.d("Location Data", location.getLatitude() + " " + location.getLongitude() + "");
+                Log.d("Location Data", finalLocation.getLatitude() + " " + finalLocation.getLongitude() + "");
+                location = finalLocation;
             }
+
+            if (location == null
         } else {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Toast.makeText(getApplicationContext(), "Please turn on your GPS", Toast.LENGTH_LONG).show();
