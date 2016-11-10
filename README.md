@@ -5,16 +5,16 @@
 The IBM IoT for Automotive - Mobility Starter Application uses the **IBM IoT Platform** that is available on **IBM Bluemix** to help you to quickly build a smart fleet management solution. The solution consists of a mobile app and a server component which is the **IBM IoT for Automotive - Fleet Management Starter Web Application**.
 
 ### Mobile app
-The starter app provides a mobile app for customers to quickly find and hire a car without human intervention from a car-hire company. If you are a customer who wants to hire a car, you can use the mobile app to do the following tasks:
+The starter app provides a mobile app to connect to an OBDII dongle plugged in to your car. If you are a user of the application, you can use the mobile app to do the following tasks:
 
-- Search for available cars by location on a GIS map
-- Search for available cars that meet your specific requirements
-- Reserve a car 
-- Unlock the car that you just hired and start driving the car
- 
-While you drive the car, the service tracks your location and also records your driving behavior. When you reach your driving destination, you can view information about each trip that you took in the car and you can also view your driving behavior score.
+- See real-time data from your car on the screen
+- Beam the data to the IBM IoT Platform, which will automatically get synced to the **Fleet Management Web Application**
 
-You can download and install the mobile app on iOS and Android mobile devices. For more information about deploying the iOS version of the mobile app, see [IBM IoT for Automotive - Mobility Starter Application mobile app for iOS](https://github.com/ibm-watson-iot/iota-starter-carsharing/blob/master/README.md).
+While you drive the car, the service tracks your location and also records the health of your car. This will happen in the background, which means you could lock your phone in the meantime or use other applications.
+
+Once you want to stop the application from recording your data, simply press "End Session", and the application will close.
+
+You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
 The IoT for Automotive - Mobility Starter Application mobile app interacts with the server component. The server component provides the back-end car sharing and system monitoring service that provides more features for car-hire companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the car-sharing server component, see [ibm-watson-iot/iota-starter-server](https://github.com/ibm-watson-iot/iota-starter-server).
