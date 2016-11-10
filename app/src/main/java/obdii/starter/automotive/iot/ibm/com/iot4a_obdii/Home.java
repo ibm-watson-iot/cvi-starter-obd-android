@@ -73,7 +73,7 @@ import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity implements LocationListener {
     LocationManager locationManager;
-    Location location;
+    Location location = null;
     String provider;
 
     private final int INITIAL_PERMISSIONS = 000;
@@ -114,8 +114,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private float fuelLevel;
     private float engineCoolant;
 
-    private double randomFuelLevel;
-    private double randomEngineCoolant;
+    private double randomFuelLevel = Math.floor(Math.random() * 100) + 5;
+    private double randomEngineCoolant = Math.floor(Math.random() * 140) + 20;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
@@ -231,28 +231,31 @@ public class Home extends AppCompatActivity implements LocationListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (socketConnected) {
-                                    Toast.makeText(Home.this, socketConnected + " efwe", Toast.LENGTH_LONG);
+                                if (simulation) {
+                                    fuelLevelValue.setText(Math.round(randomFuelLevel) + "%");
+                                    engineCoolantValue.setText(randomEngineCoolant + "C");
+                                } else {
+                                    if (socketConnected) {
+                                        FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                        EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
 
-                                    FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                    EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                                        try {
+                                            fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                            Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                            fuelLevel = fuelLevelCommand.getFuelLevel();
 
-                                    try {
-                                        fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                        Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                        fuelLevel = fuelLevelCommand.getFuelLevel();
+                                            fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
 
-                                        fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
+                                            engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
+                                            Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                            engineCoolant = engineCoolantTemperatureCommand.getTemperature();
 
-                                        engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                        Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                        engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-
-                                        engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
+                                            engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
                             }
@@ -276,9 +279,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                         dialog.dismiss();
 
                         simulation = true;
-
-                        randomFuelLevel = Math.floor(Math.random() * 100) + 5;
-                        randomEngineCoolant = Math.floor(Math.random() * 140) + 20;
 
                         changeNetwork.setEnabled(false);
 
@@ -405,6 +405,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void checkDeviceRegistry() {
+        getAccurateLocation();
+
         String url = "";
 
         if (simulation) {
@@ -586,62 +588,71 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void mqttPublish() throws MqttException, JSONException {
-        runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                  progressBar.setVisibility(View.VISIBLE);
-                  getSupportActionBar().setTitle(
-                          simulation ? "Simulated Data is Being Sent" : "Live Data is Being Sent"
-                  );
-              }
-        });
+        if (location != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progressBar.setVisibility(View.VISIBLE);
+                    getSupportActionBar().setTitle(
+                            simulation ? "Simulated Data is Being Sent" : "Live Data is Being Sent"
+                    );
+                }
+            });
 
-        Properties options = new Properties();
-        options.setProperty("org", API.orgId);
-        options.setProperty("type", API.typeId);
-        options.setProperty("id", currentDevice.getString("deviceId"));
-        options.setProperty("auth-method", "token");
-        options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
+            Properties options = new Properties();
+            options.setProperty("org", API.orgId);
+            options.setProperty("type", API.typeId);
+            options.setProperty("id", currentDevice.getString("deviceId"));
+            options.setProperty("auth-method", "token");
+            options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
 
-        DeviceClient myClient = null;
-        try {
-            // Instantiate the class by passing the properties file
-            myClient = new DeviceClient(options);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            DeviceClient myClient = null;
+            try {
+                myClient = new DeviceClient(options);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        myClient.connect();
+            myClient.connect();
 
-        JsonObject event = new JsonObject();
-        JsonObject data = new JsonObject();
-        event.add("d", data);
+            JsonObject event = new JsonObject();
+            JsonObject data = new JsonObject();
+            event.add("d", data);
 
-        if (simulation) {
-            data.addProperty("lat", location.getLatitude());
-            data.addProperty("lng", location.getLongitude());
-            data.addProperty("trip_id", trip_id);
+            if (simulation) {
+                data.addProperty("lat", location.getLatitude());
+                data.addProperty("lng", location.getLongitude());
+                data.addProperty("trip_id", trip_id);
 
-            JsonObject props = new JsonObject();
-            props.addProperty("fuelLevel", randomFuelLevel + "");
-            props.addProperty("engineTemp", randomEngineCoolant + "");
-            data.add("props", props);
+                JsonObject props = new JsonObject();
+                props.addProperty("fuelLevel", randomFuelLevel + "");
+                props.addProperty("engineTemp", randomEngineCoolant + "");
+                data.add("props", props);
+            } else {
+                event.addProperty("lat", location.getLatitude());
+                event.addProperty("lng", location.getLongitude());
+                event.addProperty("trip_id", trip_id);
+
+                JsonObject props = new JsonObject();
+                props.addProperty("fuelLevel", fuelLevel + "");
+                props.addProperty("engineTemp", engineCoolant + "");
+                data.add("props", props);
+            }
+
+            myClient.publishEvent("status", event, 0);
+            System.out.println("SUCCESSFULLY POSTED......");
+            Log.d("Posted", event.toString());
+
+            myClient.disconnect();
         } else {
-            event.addProperty("lat", location.getLatitude());
-            event.addProperty("lng", location.getLongitude());
-            event.addProperty("trip_id", trip_id);
-
-            JsonObject props = new JsonObject();
-            props.addProperty("fuelLevel", fuelLevel + "");
-            props.addProperty("engineTemp", engineCoolant + "");
-            data.add("props", props);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progressBar.setVisibility(View.VISIBLE);
+                    getSupportActionBar().setTitle("Waiting to Find Location");
+                }
+            });
         }
-
-        myClient.publishEvent("status", event, 0);
-        System.out.println("SUCCESSFULLY POSTED......");
-        Log.d("Posted", event.toString());
-
-        myClient.disconnect();
     }
 
     public void changeFrequency(View view) {
@@ -773,8 +784,10 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             if (location == null) {
                 Log.e("Location Data", "Not Working!");
+
+                getAccurateLocation();
             } else {
-                Log.d("Location Data", location.getLatitude() + location.getLongitude() + "");
+                Log.d("Location Data", location.getLatitude() + " " + location.getLongitude() + "");
             }
         } else {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -806,14 +819,11 @@ public class Home extends AppCompatActivity implements LocationListener {
                 startActivityForResult(settingsIntent, SETTINGS_INTENT);
             } else {
                 getAccurateLocation();
-                permissionsGranted();
             }
         } else if (requestCode == SETTINGS_INTENT) {
             networkIntentNeeded = false;
 
             getAccurateLocation();
-            permissionsGranted();
         }
-
     }
 }
