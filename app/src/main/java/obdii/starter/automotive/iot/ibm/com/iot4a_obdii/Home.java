@@ -101,6 +101,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private String userDeviceAddress;
     private String userDeviceName;
 
+    private DeviceClient deviceClient = null;
+
     private static final String TAG = BluetoothManager.class.getName();
 
     private String trip_id;
@@ -114,8 +116,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private float fuelLevel;
     private float engineCoolant;
 
-    private double randomFuelLevel = Math.floor(Math.random() * 100) + 5;
-    private double randomEngineCoolant = Math.floor(Math.random() * 140) + 20;
+    private double randomFuelLevel = Math.floor(Math.random() * 95) + 5;
+    private double randomEngineCoolant = Math.floor(Math.random() * 120) + 20;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
@@ -203,6 +205,13 @@ public class Home extends AppCompatActivity implements LocationListener {
                 permissionsGranted();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopPublishing();
+        disconnectDevice();
+        super.onDestroy();
     }
 
     @Override
@@ -568,26 +577,84 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void deviceRegistered() throws JSONException {
+    public void deviceRegistered() {
         trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         trip_id += "-" + UUID.randomUUID();
 
+        try {
+            if (createDeviceClient() != null) {
+                connectDevice();
+                startPublishing();
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private DeviceClient createDeviceClient() throws JSONException {
+        Properties options = new Properties();
+        options.setProperty("org", API.orgId);
+        options.setProperty("type", API.typeId);
+        options.setProperty("id", currentDevice.getString("deviceId"));
+        options.setProperty("auth-method", "token");
+        options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
+
+        try {
+            DeviceClient myClient = new DeviceClient(options);
+            deviceClient = myClient;
+            return myClient;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void connectDevice() throws MqttException {
+        if (deviceClient != null && !deviceClient.isConnected()) {
+            deviceClient.connect();
+        }
+    }
+
+    private void disconnectDevice() {
+        if (deviceClient != null && deviceClient.isConnected()) {
+            deviceClient.disconnect();
+        }
+        deviceClient = null;
+    }
+
+    private void startPublishing() {
+        // stop existing timer
+        stopPublishing();
+
+        // start new timer
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
-                        mqttPublish();
+                    if (simulation) {
+                        if (--randomFuelLevel < 5)
+                            randomFuelLevel = 50;
+                        randomEngineCoolant = Math.floor(Math.random() * (140 - randomEngineCoolant - 10)) + randomEngineCoolant - 10;
+                    }
+                    mqttPublish();
                 } catch (MqttException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }, timerDelay, timerPeriod);
     }
 
-    public void mqttPublish() throws MqttException, JSONException {
+    private void stopPublishing() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+    public void mqttPublish() throws MqttException {
         if (location != null) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -599,51 +666,30 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             });
 
-            Properties options = new Properties();
-            options.setProperty("org", API.orgId);
-            options.setProperty("type", API.typeId);
-            options.setProperty("id", currentDevice.getString("deviceId"));
-            options.setProperty("auth-method", "token");
-            options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
-
-            DeviceClient myClient = null;
-            try {
-                myClient = new DeviceClient(options);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            myClient.connect();
+            // Normally, the connection is kept alive, but it is closed when interval is long. Reconnect in this case.
+            connectDevice();
 
             JsonObject event = new JsonObject();
             JsonObject data = new JsonObject();
             event.add("d", data);
+            data.addProperty("lat", location.getLatitude());
+            data.addProperty("lng", location.getLongitude());
+            data.addProperty("trip_id", trip_id);
+
+            JsonObject props = new JsonObject();
+            data.add("props", props);
 
             if (simulation) {
-                data.addProperty("lat", location.getLatitude());
-                data.addProperty("lng", location.getLongitude());
-                data.addProperty("trip_id", trip_id);
-
-                JsonObject props = new JsonObject();
                 props.addProperty("fuelLevel", randomFuelLevel + "");
                 props.addProperty("engineTemp", randomEngineCoolant + "");
-                data.add("props", props);
             } else {
-                event.addProperty("lat", location.getLatitude());
-                event.addProperty("lng", location.getLongitude());
-                event.addProperty("trip_id", trip_id);
-
-                JsonObject props = new JsonObject();
                 props.addProperty("fuelLevel", fuelLevel + "");
                 props.addProperty("engineTemp", engineCoolant + "");
-                data.add("props", props);
             }
 
-            myClient.publishEvent("status", event, 0);
+            deviceClient.publishEvent("status", event, 0);
             System.out.println("SUCCESSFULLY POSTED......");
             Log.d("Posted", event.toString());
-
-            myClient.disconnect();
         } else {
             runOnUiThread(new Runnable() {
                 @Override
@@ -675,22 +721,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                         if (newFrequency != timerPeriod) {
                             timerPeriod = newFrequency;
-
-                            timer.cancel();
-
-                            timer = new Timer();
-                            timer.scheduleAtFixedRate(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        mqttPublish();
-                                    } catch (MqttException e) {
-                                        e.printStackTrace();
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }, timerDelay, timerPeriod);
+                            startPublishing();
                         }
                     }
                 })
