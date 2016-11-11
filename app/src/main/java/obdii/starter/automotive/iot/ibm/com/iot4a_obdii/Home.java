@@ -729,8 +729,11 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .show();
     }
 
-    public void changeNetwork(View view) {
-        permissionsGranted();
+    public void changeNetwork(View view) { permissionsGranted(); }
+
+    public void endSession(View view) {
+        Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
+        Home.this.finishAffinity();
     }
 
     @Override

@@ -107,4 +107,17 @@
 
     </LinearLayout>
 
+    <Button
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="End Session"
+        android:id="@+id/button"
+        android:layout_weight="5"
+        android:layout_marginRight="2.5dp"
+        android:onClick="endSession"
+        android:layout_below="@+id/linearLayout3"
+        android:layout_centerHorizontal="true"
+        android:nestedScrollingEnabled="false" />
+
 </RelativeLayout>
