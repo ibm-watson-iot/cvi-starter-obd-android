@@ -1,0 +1,6 @@
+IBM IoT for Automotive - Mobility Starter Application Redistributables:
+
+The following list includes files that are provided to Licensee pursuant to the Redistributables section of the IBM International Program License Agreements License Information that applies to this Program:
+
+All source files in the following directory (or subdirectories of this directory) may be compiled and redistributed in object form only:
+- ibm-watson-iot/IoT-Automotive-OBD2-android/app/src/
