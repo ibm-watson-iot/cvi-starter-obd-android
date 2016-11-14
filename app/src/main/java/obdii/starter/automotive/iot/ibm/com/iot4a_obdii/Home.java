@@ -447,6 +447,8 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                     result.remove(result.length() - 1);
 
+                    final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+
                     switch (statusCode) {
                         case 200:
                             Log.d("Check Device Registry", result.toString(4));
@@ -464,7 +466,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                             Log.d("Check Device Registry", "***Not Registered***");
                             progressBar.setVisibility(View.GONE);
 
-                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                             alertDialog
                                     .setCancelable(false)
                                     .setTitle("Your Device is NOT Registered!")
@@ -483,6 +484,30 @@ public class Home extends AppCompatActivity implements LocationListener {
                                         }
                                     })
                                     .show();
+                            break;
+                        default:
+                            Log.d("Failed to connect IoTP", "statusCode: " + statusCode);
+                            progressBar.setVisibility(View.GONE);
+
+                            alertDialog
+                                    .setCancelable(false)
+                                    .setTitle("Failed to connect to IBM IoT Platform")
+                                    .setMessage("Check orgId, apiKey and apiToken of your IBM IoT Platform. statusCode:" + statusCode)
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            getSupportActionBar().setTitle("Failed to connect to IBM IoT Platform");
+                                        }
+                                    })
+                                    .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            Toast.makeText(Home.this, "Cannot continue without connecting to IBM IoT Platform!", Toast.LENGTH_LONG).show();
+                                            Home.this.finishAffinity();
+                                        }
+                                    })
+                                    .show();
+                            break;
                     }
                 }
             });
