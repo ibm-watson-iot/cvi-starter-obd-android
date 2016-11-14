@@ -33,11 +33,11 @@ import java.util.UUID;
 
 public class API {
     // Platform API URLs
-    protected static final String orgId = "--- Set Your Organization's ID ---";
+    protected static final String orgId = "kibb33";
     protected static final String platformAPI = "https://" + orgId + ".internetofthings.ibmcloud.com/api/v0002";
 
-    protected static final String apiKey = "--- Set Your API Key ---";
-    protected static final String apiToken = "--- Set Your API Token ---";
+    protected static final String apiKey = "a-kibb33-rkhexfo7ml";
+    protected static final String apiToken = "lDfjTThkWv*@Ea_!4d";
     protected static final String credentials = API.apiKey + ":" + API.apiToken;
     protected static final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
 
