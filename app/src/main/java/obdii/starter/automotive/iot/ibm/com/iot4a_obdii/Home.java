@@ -102,6 +102,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     BluetoothAdapter bluetoothAdapter = null;
     BluetoothDevice userDevice;
 
+    private final UUID SPPUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
     private BluetoothSocket socket = null;
     private boolean socketConnected = false;
 
@@ -371,12 +373,10 @@ public class Home extends AppCompatActivity implements LocationListener {
         final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
         userDevice = device;
 
-        final UUID uuid = UUID.fromString(API.getUUID());
-
         Log.d(TAG, "Starting Bluetooth connection..");
 
         try {
-            socket = device.createRfcommSocketToServiceRecord(uuid);
+            socket = device.createRfcommSocketToServiceRecord(SPPUUID);
         } catch (Exception e) {
             Log.e("Bluetooth Connection", "Socket couldn't be created");
             e.printStackTrace();
