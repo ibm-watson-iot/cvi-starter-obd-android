@@ -690,6 +690,10 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void mqttPublish() throws MqttException {
+        if (deviceClient == null) {
+            // handle error here!!!
+            return;
+        }
         if (location != null) {
             runOnUiThread(new Runnable() {
                 @Override
