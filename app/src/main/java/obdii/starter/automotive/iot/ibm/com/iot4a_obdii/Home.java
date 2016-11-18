@@ -67,6 +67,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,21 +259,31 @@ public class Home extends AppCompatActivity implements LocationListener {
                                     engineCoolantValue.setText(randomEngineCoolant + "C");
                                 } else {
                                     if (socketConnected) {
-                                        FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                        EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-
                                         try {
-                                            fuelLevelCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                            Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                            fuelLevel = fuelLevelCommand.getFuelLevel();
-
-                                            fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
-
-                                            engineCoolantTemperatureCommand.run(socket.getInputStream(), socket.getOutputStream());
-                                            Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                            engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-
-                                            engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                            final InputStream inputStream = socket.getInputStream();
+                                            final OutputStream outputStream = socket.getOutputStream();
+                                            try {
+                                                final FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
+                                                fuelLevelCommand.run(inputStream, outputStream);
+                                                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
+                                                fuelLevel = fuelLevelCommand.getFuelLevel();
+                                                fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
+                                            } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
+                                                e.printStackTrace();
+                                            } catch (com.github.pires.obd.exceptions.NoDataException e) {
+                                                e.printStackTrace();
+                                            }
+                                            try {
+                                                final EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
+                                                engineCoolantTemperatureCommand.run(inputStream, outputStream);
+                                                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
+                                                engineCoolant = engineCoolantTemperatureCommand.getTemperature();
+                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
+                                            } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
+                                                e.printStackTrace();
+                                            } catch (com.github.pires.obd.exceptions.NoDataException e) {
+                                                e.printStackTrace();
+                                            }
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         } catch (InterruptedException e) {
