@@ -21,6 +21,10 @@ import org.json.JSONObject;
 
 import java.util.Properties;
 
+/*
+ IoT Platform Device Client
+ */
+
 public class IoTPlatformDevice {
 
     private DeviceClient deviceClient = null;

@@ -130,8 +130,8 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         new API(getApplicationContext());
 
-        final boolean bluetoothReady = obdBridge.setupBluetooth();
-        if (!bluetoothReady) {
+        if (!obdBridge.setupBluetooth()) {
+
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
             changeNetwork.setEnabled(false);
             changeFrequency.setEnabled(false);
