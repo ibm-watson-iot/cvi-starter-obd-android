@@ -1,10 +1,10 @@
 /**
  * Copyright 2016 IBM Corp. All Rights Reserved.
- *
+ * <p>
  * Licensed under the IBM License, a copy of which may be obtained at:
- *
+ * <p>
  * http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?li_formnum=L-DDIN-AEGGZJ&popup=y&title=IBM%20IoT%20for%20Automotive%20Sample%20Starter%20Apps%20%28Android-Mobile%20and%20Server-all%29
- *
+ * <p>
  * You may not use this file except in compliance with the license.
  */
 
@@ -32,7 +32,9 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -45,15 +47,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
-import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 
 import com.google.gson.JsonObject;
@@ -67,8 +66,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,60 +81,44 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity implements LocationListener {
-    LocationManager locationManager;
-    Location location = null;
-    String provider;
+
+    private LocationManager locationManager;
+    private Location location = null;
+    private String provider;
 
     private final int INITIAL_PERMISSIONS = 000;
 
-    Map<String, String> permissions = new HashMap<>();
-    ArrayList<String> permissionNeeded = new ArrayList<>();
+    private final Map<String, String> permissions = new HashMap<>();
+    private final ArrayList<String> permissionNeeded = new ArrayList<>();
 
     private boolean permissionsGranted = false;
-    private boolean simulation = false;
 
     private final int GPS_INTENT = 000;
     private final int SETTINGS_INTENT = 001;
 
     private boolean networkIntentNeeded = false;
 
-    BluetoothAdapter bluetoothAdapter = null;
-    BluetoothDevice userDevice;
-
-    private final UUID SPPUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-    private BluetoothSocket socket = null;
-    private boolean socketConnected = false;
-
-    Set<BluetoothDevice> pairedDevicesSet;
-    ArrayList<String> deviceNames = new ArrayList<>();
-    ArrayList<String> deviceAdresses = new ArrayList<>();
-    private String userDeviceAddress;
-    private String userDeviceName;
+    private Set<BluetoothDevice> pairedDevicesSet;
+    private ArrayList<String> deviceNames = new ArrayList<>();
+    private ArrayList<String> deviceAdresses = new ArrayList<>();
+    private String userDeviceAddress = "UndefinedAddress";
+    private String userDeviceName = "UndefinedName";
 
     private DeviceClient deviceClient = null;
 
-    private static final String TAG = BluetoothManager.class.getName();
-
     private String trip_id;
 
-    private TextView engineCoolantValue;
-    private TextView fuelLevelValue;
     private ProgressBar progressBar;
     private Button changeNetwork;
     private Button changeFrequency;
-
-    private float fuelLevel;
-    private float engineCoolant;
-
-    private double randomFuelLevel = Math.floor(Math.random() * 95) + 5;
-    private double randomEngineCoolant = Math.floor(Math.random() * 120) + 20;
 
     private int timerDelay = 5000;
     private int timerPeriod = 15000;
     private Timer timer;
 
     private JSONObject currentDevice;
+
+    private ObdBridge obdBridge = new ObdBridge();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,25 +134,24 @@ public class Home extends AppCompatActivity implements LocationListener {
         progressBar.setScaleX(0.5f);
         progressBar.setScaleY(0.5f);
 
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(progressBar);
-
-        engineCoolantValue = (TextView) findViewById(R.id.engineCoolantValue);
-        fuelLevelValue = (TextView) findViewById(R.id.fuelLevelValue);
+        final ActionBar supportActionBar = getSupportActionBar();
+        supportActionBar.setDisplayShowCustomEnabled(true);
+        supportActionBar.setCustomView(progressBar);
 
         changeNetwork = (Button) findViewById(R.id.changeNetwork);
         changeFrequency = (Button) findViewById(R.id.changeFrequency);
 
+        obdBridge.setObdParameterList(this);
+
         new API(getApplicationContext());
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
+        final boolean bluetoothReady = obdBridge.setupBluetooth();
+        if (!bluetoothReady) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
-
             changeNetwork.setEnabled(false);
             changeFrequency.setEnabled(false);
+            supportActionBar.setTitle("Bluetooth Failed");
 
-            getSupportActionBar().setTitle("Bluetooth Failed");
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
@@ -215,7 +195,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                             .setPositiveButton("Ok", null)
                             .show();
                 }
-
                 permissionsGranted();
             }
         }
@@ -224,6 +203,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     @Override
     protected void onDestroy() {
         stopPublishing();
+        obdBridge.stopObdScanThread();
         disconnectDevice();
         super.onDestroy();
     }
@@ -243,75 +223,22 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void permissionsGranted() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    while (!isInterrupted()) {
-                        Thread.sleep(1000);
+    private void permissionsGranted() {
+        System.out.println("PERMISSIONS GRANTED");
+        obdBridge.startObdScanThread(this);
+        showObdScanModeDialog();
+    }
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (simulation) {
-                                    fuelLevelValue.setText(Math.round(randomFuelLevel) + "%");
-                                    engineCoolantValue.setText(randomEngineCoolant + "C");
-                                } else {
-                                    if (socketConnected) {
-                                        try {
-                                            final InputStream inputStream = socket.getInputStream();
-                                            final OutputStream outputStream = socket.getOutputStream();
-                                            try {
-                                                final FuelLevelCommand fuelLevelCommand = new FuelLevelCommand();
-                                                fuelLevelCommand.run(inputStream, outputStream);
-                                                Log.d("Fuel Level", fuelLevelCommand.getFormattedResult());
-                                                fuelLevel = fuelLevelCommand.getFuelLevel();
-                                                fuelLevelValue.setText(Math.round(fuelLevelCommand.getFuelLevel()) + "%");
-                                            } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
-                                                e.printStackTrace();
-                                            } catch (com.github.pires.obd.exceptions.NoDataException e) {
-                                                e.printStackTrace();
-                                            }
-                                            try {
-                                                final EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = new EngineCoolantTemperatureCommand();
-                                                engineCoolantTemperatureCommand.run(inputStream, outputStream);
-                                                Log.d("Engine Coolant", engineCoolantTemperatureCommand.getFormattedResult());
-                                                engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-                                                engineCoolantValue.setText(engineCoolantTemperatureCommand.getFormattedResult());
-                                            } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
-                                                e.printStackTrace();
-                                            } catch (com.github.pires.obd.exceptions.NoDataException e) {
-                                                e.printStackTrace();
-                                            }
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    }
-                } catch (InterruptedException e) {
-                }
-            }
-        };
-
-        thread.start();
-
+    private void showObdScanModeDialog() {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
         alertDialog
                 .setCancelable(false)
                 .setTitle("Do you want to try out a simulated version?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
+                    public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-
-                        simulation = true;
+                        obdBridge.setSimulation(true);
 
                         changeNetwork.setEnabled(false);
 
@@ -320,23 +247,21 @@ public class Home extends AppCompatActivity implements LocationListener {
                 })
                 .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
+                    public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
 
-                        if (!bluetoothAdapter.isEnabled()) {
+                        if (!obdBridge.isBluetoothEnabled()) {
                             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             startActivityForResult(enableBluetooth, 1);
                         } else {
-                            pairedDevicesSet = bluetoothAdapter.getBondedDevices();
+                            pairedDevicesSet = obdBridge.getPairedDeviceSet();
 
                             // In case user clicks on Change Network, need to repopulate the devices list
                             deviceNames = new ArrayList<>();
                             deviceAdresses = new ArrayList<>();
 
-                            if (pairedDevicesSet.size() > 0) {
-                                for (BluetoothDevice device : pairedDevicesSet)
-                                {
+                            if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
+                                for (BluetoothDevice device : pairedDevicesSet) {
                                     deviceNames.add(device.getName());
                                     deviceAdresses.add(device.getAddress());
                                 }
@@ -357,8 +282,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                         .setTitle("Please Choose the OBDII Bluetooth Device")
                                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                             @Override
-                                            public void onClick(DialogInterface dialog, int which)
-                                            {
+                                            public void onClick(DialogInterface dialog, int which) {
                                                 dialog.dismiss();
                                                 int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                                 userDeviceAddress = deviceAdresses.get(position);
@@ -367,7 +291,15 @@ public class Home extends AppCompatActivity implements LocationListener {
                                                 progressBar.setVisibility(View.VISIBLE);
                                                 getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
 
-                                                connectSocket(userDeviceAddress);
+                                                boolean connected = obdBridge.connectBluetoothSocket(userDeviceAddress);
+                                                if (connected) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    checkDeviceRegistry();
+                                                } else {
+                                                    Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+                                                    progressBar.setVisibility(View.GONE);
+                                                    getSupportActionBar().setTitle("Connection Failed");
+                                                }
                                             }
                                         })
                                         .show();
@@ -380,67 +312,13 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .show();
     }
 
-    public void connectSocket(String userDeviceAddress) {
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
-        userDevice = device;
 
-        Log.d(TAG, "Starting Bluetooth connection..");
-
-        try {
-            socket = device.createRfcommSocketToServiceRecord(SPPUUID);
-        } catch (Exception e) {
-            Log.e("Bluetooth Connection", "Socket couldn't be created");
-            e.printStackTrace();
-        }
-
-        try {
-            socket.connect();
-
-            Log.i("Bluetooth Connection", "CONNECTED");
-
-            socketConnected = true;
-
-            checkDeviceRegistry();
-        } catch (IOException e) {
-            Log.e("Bluetooth Connection", e.getMessage());
-
-            try {
-                Log.i("Bluetooth Connection", "Using fallback method");
-
-                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device, 1);
-                socket.connect();
-
-                Log.i("Bluetooth Connection", "CONNECTED");
-
-                progressBar.setVisibility(View.GONE);
-
-                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
-
-                socketConnected = true;
-
-                checkDeviceRegistry();
-            }
-            catch (Exception e2) {
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-
-                Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-
-                progressBar.setVisibility(View.GONE);
-                getSupportActionBar().setTitle("Connection Failed");
-            }
-        }
-    }
-
-    public void checkDeviceRegistry() {
+    private void checkDeviceRegistry() {
         getAccurateLocation();
 
         String url = "";
 
-        if (simulation) {
+        if (obdBridge.isSimulation()) {
             url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + API.getUUID();
         } else {
             url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
@@ -607,9 +485,10 @@ public class Home extends AppCompatActivity implements LocationListener {
             JSONArray bodyArray = new JSONArray();
             JSONObject bodyObject = new JSONObject();
 
+            final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : userDeviceAddress.replaceAll(":", "-");
             bodyObject
                     .put("typeId", API.typeId)
-                    .put("deviceId", simulation ? API.getUUID() : userDeviceAddress.replaceAll(":", "-"));
+                    .put("deviceId", device_id);
 
             bodyArray
                     .put(bodyObject);
@@ -624,38 +503,45 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
+    private String getSimulatedDeviceID() {
+        return API.getUUID();
+    }
+
     public void deviceRegistered() {
-        trip_id = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        trip_id += "-" + UUID.randomUUID();
+        trip_id = createTripId();
 
         try {
-            if (createDeviceClient() != null) {
+            if (getDeviceClient() != null) {
                 connectDevice();
                 startPublishing();
             }
         } catch (MqttException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private DeviceClient createDeviceClient() throws JSONException {
-        Properties options = new Properties();
+    @NonNull
+    private String createTripId() {
+        String tid = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        tid += "-" + UUID.randomUUID();
+        return tid;
+    }
+
+    private synchronized DeviceClient getDeviceClient() throws Exception {
+        if (deviceClient != null) {
+            return deviceClient;
+        }
+        final Properties options = new Properties();
         options.setProperty("org", API.orgId);
         options.setProperty("type", API.typeId);
         options.setProperty("id", currentDevice.getString("deviceId"));
         options.setProperty("auth-method", "token");
         options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
 
-        try {
-            DeviceClient myClient = new DeviceClient(options);
-            deviceClient = myClient;
-            return myClient;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        deviceClient = new DeviceClient(options);
+        return deviceClient;
     }
 
     private void connectDevice() throws MqttException {
@@ -681,11 +567,6 @@ public class Home extends AppCompatActivity implements LocationListener {
             @Override
             public void run() {
                 try {
-                    if (simulation) {
-                        if (--randomFuelLevel < 5)
-                            randomFuelLevel = 50;
-                        randomEngineCoolant = Math.floor(Math.random() * (140 - randomEngineCoolant - 10)) + randomEngineCoolant - 10;
-                    }
                     mqttPublish();
                 } catch (MqttException e) {
                     e.printStackTrace();
@@ -702,54 +583,32 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void mqttPublish() throws MqttException {
-        if (deviceClient == null) {
-            // handle error here!!!
-            return;
-        }
         if (location != null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressBar.setVisibility(View.VISIBLE);
-                    getSupportActionBar().setTitle(
-                            simulation ? "Simulated Data is Being Sent" : "Live Data is Being Sent"
-                    );
-                }
-            });
-
             // Normally, the connection is kept alive, but it is closed when interval is long. Reconnect in this case.
             connectDevice();
+            if (deviceClient != null) {
+                showMqttStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", true);
+                final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
+                deviceClient.publishEvent("status", event, 0);
 
-            JsonObject event = new JsonObject();
-            JsonObject data = new JsonObject();
-            event.add("d", data);
-            data.addProperty("lat", location.getLatitude());
-            data.addProperty("lng", location.getLongitude());
-            data.addProperty("trip_id", trip_id);
-
-            JsonObject props = new JsonObject();
-            data.add("props", props);
-
-            if (simulation) {
-                props.addProperty("fuelLevel", randomFuelLevel + "");
-                props.addProperty("engineTemp", randomEngineCoolant + "");
+                System.out.println("SUCCESSFULLY POSTED......");
+                Log.d("Posted", event.toString());
             } else {
-                props.addProperty("fuelLevel", fuelLevel + "");
-                props.addProperty("engineTemp", engineCoolant + "");
+                showMqttStatus("Device Not Connected to IoT Platform", false);
             }
-
-            deviceClient.publishEvent("status", event, 0);
-            System.out.println("SUCCESSFULLY POSTED......");
-            Log.d("Posted", event.toString());
         } else {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressBar.setVisibility(View.VISIBLE);
-                    getSupportActionBar().setTitle("Waiting to Find Location");
-                }
-            });
+            showMqttStatus("Waiting to Find Location", true);
         }
+    }
+
+    private void showMqttStatus(final String message, final boolean progress) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(progress ? View.VISIBLE : View.INVISIBLE);
+                getSupportActionBar().setTitle(message);
+            }
+        });
     }
 
     public void changeFrequency(View view) {
@@ -780,7 +639,9 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .show();
     }
 
-    public void changeNetwork(View view) { permissionsGranted(); }
+    public void changeNetwork(View view) {
+        permissionsGranted();
+    }
 
     public void endSession(View view) {
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
@@ -799,19 +660,15 @@ public class Home extends AppCompatActivity implements LocationListener {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-
         locationManager.requestLocationUpdates(provider, 500, 1, this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-
         locationManager.removeUpdates(this);
     }
 
@@ -859,7 +716,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 if (lastKnown == null) {
                     continue;
                 }
-
                 if (finalLocation == null || (lastKnown.getAccuracy() < finalLocation.getAccuracy())) {
                     finalLocation = lastKnown;
                 }
