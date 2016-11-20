@@ -13,8 +13,6 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothSocket;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -49,15 +47,7 @@ import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.protocol.EchoOffCommand;
-import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
-import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
-import com.github.pires.obd.commands.protocol.TimeoutCommand;
-import com.github.pires.obd.enums.ObdProtocols;
-
 import com.google.gson.JsonObject;
-
-import com.ibm.iotf.client.device.DeviceClient;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -65,7 +55,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +62,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,8 +92,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     private String userDeviceAddress = "UndefinedAddress";
     private String userDeviceName = "UndefinedName";
 
-    private DeviceClient deviceClient = null;
-
     private String trip_id;
 
     private ProgressBar progressBar;
@@ -116,9 +102,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private int timerPeriod = 15000;
     private Timer timer;
 
-    private JSONObject currentDevice;
-
     private ObdBridge obdBridge = new ObdBridge();
+    private IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,7 +189,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     protected void onDestroy() {
         stopPublishing();
         obdBridge.stopObdScanThread();
-        disconnectDevice();
+        iotpDevice.disconnectDevice();
         super.onDestroy();
     }
 
@@ -225,7 +210,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void permissionsGranted() {
         System.out.println("PERMISSIONS GRANTED");
-        obdBridge.startObdScanThread(this);
+        obdBridge.startObdScanThread();
         showObdScanModeDialog();
     }
 
@@ -346,8 +331,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                             getSupportActionBar().setTitle("Device Already Registered");
                             progressBar.setVisibility(View.GONE);
-
-                            currentDevice = result.getJSONObject(0);
+                            iotpDevice.setDeviceDefinition(result.getJSONObject(0));
                             deviceRegistered();
 
                             break;
@@ -465,7 +449,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
                                             try {
-                                                currentDevice = result.getJSONObject(0);
+                                                iotpDevice.setDeviceDefinition(result.getJSONObject(0));
                                                 deviceRegistered();
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
@@ -511,8 +495,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         trip_id = createTripId();
 
         try {
-            if (getDeviceClient() != null) {
-                connectDevice();
+            if (iotpDevice.createDeviceClient() != null) {
+                iotpDevice.connectDevice();
                 startPublishing();
             }
         } catch (MqttException e) {
@@ -529,33 +513,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         return tid;
     }
 
-    private synchronized DeviceClient getDeviceClient() throws Exception {
-        if (deviceClient != null) {
-            return deviceClient;
-        }
-        final Properties options = new Properties();
-        options.setProperty("org", API.orgId);
-        options.setProperty("type", API.typeId);
-        options.setProperty("id", currentDevice.getString("deviceId"));
-        options.setProperty("auth-method", "token");
-        options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
-
-        deviceClient = new DeviceClient(options);
-        return deviceClient;
-    }
-
-    private void connectDevice() throws MqttException {
-        if (deviceClient != null && !deviceClient.isConnected()) {
-            deviceClient.connect();
-        }
-    }
-
-    private void disconnectDevice() {
-        if (deviceClient != null && deviceClient.isConnected()) {
-            deviceClient.disconnect();
-        }
-        deviceClient = null;
-    }
 
     private void startPublishing() {
         // stop existing timer
@@ -582,15 +539,12 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void mqttPublish() throws MqttException {
+    private void mqttPublish() throws MqttException {
         if (location != null) {
-            // Normally, the connection is kept alive, but it is closed when interval is long. Reconnect in this case.
-            connectDevice();
-            if (deviceClient != null) {
+            final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
+            final boolean success = iotpDevice.publishEvent(event);
+            if (success) {
                 showMqttStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", true);
-                final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
-                deviceClient.publishEvent("status", event, 0);
-
                 System.out.println("SUCCESSFULLY POSTED......");
                 Log.d("Posted", event.toString());
             } else {

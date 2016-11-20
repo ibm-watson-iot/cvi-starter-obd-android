@@ -31,7 +31,7 @@ public class ObdParameters {
     static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
 
-        final ObdParameter engineCoolant = new ObdParameter((TextView) activity.findViewById(R.id.engineCoolantValue), "Engine Coolant", new EngineCoolantTemperatureCommand()) {
+        final ObdParameter engineCoolant = new ObdParameter((TextView) activity.findViewById(R.id.engineCoolantValue), activity, "Engine Coolant", new EngineCoolantTemperatureCommand()) {
             private double engineCoolant = Math.floor(Math.random() * 120) + 20;
             private String valueText;
 
@@ -59,7 +59,7 @@ public class ObdParameters {
         };
         obdParameters.add(engineCoolant);
 
-        final ObdParameter fuelLevel = new ObdParameter((TextView) activity.findViewById(R.id.fuelLevelValue), "Fuel Level", new FuelLevelCommand()) {
+        final ObdParameter fuelLevel = new ObdParameter((TextView) activity.findViewById(R.id.fuelLevelValue), activity, "Fuel Level", new FuelLevelCommand()) {
             private double fuelLevel = Math.floor(Math.random() * 95) + 5;
             private String valueText;
 

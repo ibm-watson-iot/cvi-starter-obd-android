@@ -29,11 +29,13 @@ import java.io.OutputStream;
 abstract public class ObdParameter {
 
     final private TextView textView;
+    final private Activity activity;
     final private String label;
     final private ObdCommand obdCommand;
 
-    public ObdParameter(final TextView textView, final String label, final ObdCommand obdCommand) {
+    public ObdParameter(final TextView textView, final Activity activity, final String label, final ObdCommand obdCommand) {
         this.textView = textView;
+        this.activity = activity;
         this.label = label;
         this.obdCommand = obdCommand;
     }
@@ -46,10 +48,10 @@ abstract public class ObdParameter {
         return obdCommand;
     }
 
-    public void showScannedValue(final BluetoothSocket socket, final boolean simulation, final Activity activity) {
+    public void showScannedValue(final BluetoothSocket socket, final boolean simulation) {
         if (simulation) {
             fetchValue(null, simulation);
-            showText(getValueText(), activity);
+            showText(getValueText());
         } else {
             String value = "";
             if (socket == null) {
@@ -72,12 +74,12 @@ abstract public class ObdParameter {
                     value = "Error";
                 }
             }
-            showText(value, activity);
+            showText(value);
         }
 
     }
 
-    private void showText(final String text, final Activity activity) {
+    private void showText(final String text) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {

@@ -141,7 +141,7 @@ public class ObdBridge {
         return event;
     }
 
-    public synchronized void startObdScanThread(final Activity activity) {
+    public synchronized void startObdScanThread() {
         if (obdScanThread != null) {
             return;
         }
@@ -154,7 +154,7 @@ public class ObdBridge {
                     while (!isInterrupted()) {
                         Thread.sleep(OBD_REFRESH_INTERVAL_MS);
                         for (ObdParameter obdParam : obdParameterList) {
-                            obdParam.showScannedValue(socket, simulation, activity);
+                            obdParam.showScannedValue(socket, simulation);
                         }
                     }
                 } catch (InterruptedException e) {
