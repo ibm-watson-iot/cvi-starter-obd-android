@@ -98,9 +98,9 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
-    private int timerDelay = 5000;
-    private int timerPeriod = 15000;
-    private Timer timer;
+    private int uploadTimerDelay = 5000;
+    private int uploadTimerPeriod = 15000;
+    private Timer uploadTimer;
 
     private ObdBridge obdBridge = new ObdBridge();
     private IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
@@ -514,13 +514,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
 
-    private void startPublishing() {
-        // stop existing timer
+    private synchronized void startPublishing() {
+        // stop existing uploadTimer
         stopPublishing();
 
-        // start new timer
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        // start new uploadTimer
+        uploadTimer = new Timer();
+        uploadTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -529,13 +529,13 @@ public class Home extends AppCompatActivity implements LocationListener {
                     e.printStackTrace();
                 }
             }
-        }, timerDelay, timerPeriod);
+        }, uploadTimerDelay, uploadTimerPeriod);
     }
 
-    private void stopPublishing() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
+    private synchronized void stopPublishing() {
+        if (uploadTimer != null) {
+            uploadTimer.cancel();
+            uploadTimer = null;
         }
     }
 
@@ -583,8 +583,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                     public void onClick(DialogInterface dialogInterface, int which) {
                         int newFrequency = numberPicker.getValue() * 1000;
 
-                        if (newFrequency != timerPeriod) {
-                            timerPeriod = newFrequency;
+                        if (newFrequency != uploadTimerPeriod) {
+                            uploadTimerPeriod = newFrequency;
                             startPublishing();
                         }
                     }
