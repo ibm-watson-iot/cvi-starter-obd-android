@@ -540,6 +540,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                     mqttPublish();
                 } catch (MqttException e) {
                     e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }, uploadTimerDelay, uploadTimerPeriod);

@@ -10,7 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
+import com.github.pires.obd.commands.engine.OilTempCommand;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -32,6 +32,34 @@ public class ObdParameters {
     @NonNull
     static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
+
+        final ObdParameter engineOil = new ObdParameter((TextView) activity.findViewById(R.id.engineOilValue), activity, "Engine Oil", new OilTempCommand()) {
+            private double engineOil = Math.floor(Math.random() * 120) + 20;
+            private String valueText;
+
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                if (simulation) {
+                    engineOil = Math.floor(Math.random() * (140 - engineOil - 10)) + engineOil - 10;
+                    valueText = engineOil + "C";
+                } else {
+                    final OilTempCommand oilTempCommand = (OilTempCommand) obdCommand;
+                    engineOil = oilTempCommand.getTemperature();
+                    valueText = obdCommand.getFormattedResult();
+                }
+            }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("engineOilTemp", engineOil + "");
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(engineOil);
 
         final ObdParameter engineCoolant = new ObdParameter((TextView) activity.findViewById(R.id.engineCoolantValue), activity, "Engine Coolant", new EngineCoolantTemperatureCommand()) {
             private double engineCoolant = Math.floor(Math.random() * 120) + 20;
