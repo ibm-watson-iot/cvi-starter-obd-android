@@ -10,6 +10,7 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ import java.util.List;
  */
 
 public class ObdParameters {
+
     @NonNull
     static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
@@ -91,4 +93,5 @@ public class ObdParameters {
 
         return obdParameters;
     }
+
 }

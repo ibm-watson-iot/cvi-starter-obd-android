@@ -10,7 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -19,8 +18,6 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
@@ -49,6 +46,7 @@ public class ObdBridge {
     private Thread obdScanThread = null;
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
+
 
     public boolean setupBluetooth() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
