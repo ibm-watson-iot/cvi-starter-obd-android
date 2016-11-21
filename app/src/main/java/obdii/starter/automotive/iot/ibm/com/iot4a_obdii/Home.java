@@ -134,12 +134,13 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
 
-            boolean runSimulationWithoutBluetooth = true;
-            if (!runSimulationWithoutBluetooth) {
+            boolean doNotRunSimulationWithoutBluetooth = false;
+            if (doNotRunSimulationWithoutBluetooth) {
                 changeNetwork.setEnabled(false);
                 changeFrequency.setEnabled(false);
                 supportActionBar.setTitle("Bluetooth Failed");
             } else {
+                // force to run simulation for testing purpose
                 changeFrequency.setEnabled(true);
                 supportActionBar.setTitle("Simulated OBD Scan");
                 obdBridge.setSimulation(true);
