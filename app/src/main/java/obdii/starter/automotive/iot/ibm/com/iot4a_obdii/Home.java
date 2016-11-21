@@ -133,9 +133,19 @@ public class Home extends AppCompatActivity implements LocationListener {
         if (!obdBridge.setupBluetooth()) {
 
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
-            changeNetwork.setEnabled(false);
-            changeFrequency.setEnabled(false);
-            supportActionBar.setTitle("Bluetooth Failed");
+
+            boolean runSimulationWithoutBluetooth = true;
+            if (!runSimulationWithoutBluetooth) {
+                changeNetwork.setEnabled(false);
+                changeFrequency.setEnabled(false);
+                supportActionBar.setTitle("Bluetooth Failed");
+            } else {
+                changeFrequency.setEnabled(true);
+                supportActionBar.setTitle("Simulated OBD Scan");
+                obdBridge.setSimulation(true);
+                obdBridge.startObdScanThread();
+                runSimulatedObdScan();
+            }
 
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
@@ -223,11 +233,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        obdBridge.setSimulation(true);
-
-                        changeNetwork.setEnabled(false);
-
-                        checkDeviceRegistry();
+                        runSimulatedObdScan();
                     }
                 })
                 .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
@@ -295,6 +301,12 @@ public class Home extends AppCompatActivity implements LocationListener {
                     }
                 })
                 .show();
+    }
+
+    private void runSimulatedObdScan() {
+        obdBridge.setSimulation(true);
+        changeNetwork.setEnabled(false);
+        checkDeviceRegistry();
     }
 
 
