@@ -8,6 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home">
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -15,8 +16,39 @@
         android:layout_weight="5"
         android:layout_gravity="center_vertical"
         android:layout_centerHorizontal="true"
-        android:id="@+id/linearLayout4"
+        android:id="@+id/linearLayout5"
         android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Engine RPM"
+            android:id="@+id/engineRPM"
+            android:layout_gravity="center_horizontal"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="N/A"
+            android:id="@+id/engineRPMValue"
+            android:layout_gravity="center_horizontal"
+            android:textSize="17dp"
+            android:layout_marginTop="10dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:layout_below="@+id/linearLayout5"
+        android:layout_gravity="center_vertical"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/linearLayout4"
+        android:layout_marginTop="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -46,8 +78,8 @@
         android:layout_below="@+id/linearLayout4"
         android:layout_gravity="center_vertical"
         android:layout_centerHorizontal="true"
-        android:id="@+id/linearLayout2"
-        android:layout_marginTop="30dp">
+        android:id="@+id/linearLayout3"
+        android:layout_marginTop="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,9 +105,9 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/linearLayout2"
-        android:layout_marginTop="30dp"
-        android:id="@+id/linearLayout">
+        android:layout_below="@+id/linearLayout3"
+        android:layout_marginTop="20dp"
+        android:id="@+id/linearLayout2">
 
         <LinearLayout
             android:orientation="vertical"
@@ -108,11 +140,11 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:id="@+id/linearLayout3"
+        android:layout_marginTop="20dp"
+        android:id="@+id/linearLayout1"
         android:layout_alignParentEnd="false"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/linearLayout">
+        android:layout_below="@+id/linearLayout2">
 
         <Button style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
@@ -146,7 +178,7 @@
         android:layout_weight="5"
         android:layout_marginRight="2.5dp"
         android:onClick="endSession"
-        android:layout_below="@+id/linearLayout3"
+        android:layout_below="@+id/linearLayout1"
         android:layout_centerHorizontal="true"
         android:nestedScrollingEnabled="false" />
 
