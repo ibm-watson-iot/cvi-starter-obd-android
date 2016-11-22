@@ -71,6 +71,20 @@ public class API {
         }
     }
 
+    public static boolean disclaimerShown(boolean agreed) {
+        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
+
+        boolean disclaimerShownAndAgreed = sharedpreferences.getBoolean("iota-starter-obdii-disclaimer", false);
+
+        if (disclaimerShownAndAgreed) {
+            return disclaimerShownAndAgreed;
+        } else if (!disclaimerShownAndAgreed && agreed) {
+            sharedpreferences.edit().putBoolean("iota-starter-obdii-disclaimer", true).apply();
+        }
+
+        return false;
+    }
+
     public static void storeData(String key, String value) {
         sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
         sharedpreferences.edit().putString(key, value).apply();

@@ -55,6 +55,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,8 +128,68 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         new API(getApplicationContext());
 
-        if (!obdBridge.setupBluetooth()) {
+        try {
+            checkForDisclaimer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void checkForDisclaimer() throws IOException {
+        System.out.println("XXX " + !API.disclaimerShown(false));
+
+        if (!API.disclaimerShown(false)) {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int choice) {
+                    switch (choice) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            API.disclaimerShown(true);
+
+                            startApp();
+
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            Toast toast = Toast.makeText(Home.this, "Cannot use this application without agreeing to the disclaimer", Toast.LENGTH_SHORT);
+                            toast.show();
+
+                            Home.this.finishAffinity();
+
+                            break;
+                    }
+                }
+            };
+
+            final InputStream is = getResources().getAssets().open("LICENSE");
+            String line;
+            StringBuffer message = new StringBuffer();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            try {
+                br = new BufferedReader(new InputStreamReader(is));
+                while ((line = br.readLine()) != null) {
+                    message.append(line + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) br.close();
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+            builder
+                    .setTitle("Disclaimer")
+                    .setMessage(message)
+                    .setNegativeButton("Disagree", dialogClickListener)
+                    .setPositiveButton("Agree", dialogClickListener)
+                    .show();
+        } else {
+            startApp();
+        }
+    }
+
+    public void startApp() {
+        if (!obdBridge.setupBluetooth()) {
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth! Will be running on Simulation Mode", Toast.LENGTH_LONG).show();
 
             final boolean doNotRunSimulationWithoutBluetooth = false;
