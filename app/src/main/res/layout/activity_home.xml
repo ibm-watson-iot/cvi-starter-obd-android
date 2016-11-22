@@ -182,4 +182,13 @@
         android:layout_centerHorizontal="true"
         android:nestedScrollingEnabled="false" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Version: 1.0.0 Build: 20161122"
+        android:id="@+id/versionAndBuild"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

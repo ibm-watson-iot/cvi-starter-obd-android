@@ -126,7 +126,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         if (!obdBridge.setupBluetooth()) {
 
-            Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth! Will be running on Simulation Mode", Toast.LENGTH_LONG).show();
 
             final boolean doNotRunSimulationWithoutBluetooth = false;
             if (doNotRunSimulationWithoutBluetooth) {
