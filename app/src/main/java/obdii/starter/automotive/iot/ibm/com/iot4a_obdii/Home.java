@@ -136,8 +136,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void checkForDisclaimer() throws IOException {
-        System.out.println("XXX " + !API.disclaimerShown(false));
-
         if (!API.disclaimerShown(false)) {
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
