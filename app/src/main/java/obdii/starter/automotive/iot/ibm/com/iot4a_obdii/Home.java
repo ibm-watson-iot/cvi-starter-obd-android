@@ -76,9 +76,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private final int INITIAL_PERMISSIONS = 000;
 
-    private final Map<String, String> permissions = new HashMap<>();
-    private final ArrayList<String> permissionNeeded = new ArrayList<>();
-
     private boolean permissionsGranted = false;
 
     private final int GPS_INTENT = 000;
@@ -86,11 +83,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private boolean networkIntentNeeded = false;
 
-    private Set<BluetoothDevice> pairedDevicesSet;
-    private ArrayList<String> deviceNames = new ArrayList<>();
-    private ArrayList<String> deviceAdresses = new ArrayList<>();
-    private String userDeviceAddress = "UndefinedAddress";
-    private String userDeviceName = "UndefinedName";
+    private String userDeviceAddress = null;
 
     private String trip_id;
 
@@ -149,6 +142,9 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                final Map<String, String> permissions = new HashMap<>();
+                final ArrayList<String> permissionNeeded = new ArrayList<>();
+
                 if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
                     permissions.put("internet", Manifest.permission.INTERNET);
 
@@ -167,7 +163,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 for (Map.Entry<String, String> entry : permissions.entrySet()) {
                     permissionNeeded.add(entry.getValue());
                 }
-
                 if (permissionNeeded.size() > 0) {
                     Object[] tempObjectArray = permissionNeeded.toArray();
                     String[] permissionsArray = Arrays.copyOf(tempObjectArray, tempObjectArray.length, String[].class);
@@ -265,62 +260,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-
-                        obdBridge.setSimulation(false);
-                        if (!obdBridge.isBluetoothEnabled()) {
-                            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                            startActivityForResult(enableBluetooth, 1);
-                        } else {
-                            pairedDevicesSet = obdBridge.getPairedDeviceSet();
-
-                            // In case user clicks on Change Network, need to repopulate the devices list
-                            deviceNames = new ArrayList<>();
-                            deviceAdresses = new ArrayList<>();
-
-                            if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
-                                for (BluetoothDevice device : pairedDevicesSet) {
-                                    deviceNames.add(device.getName());
-                                    deviceAdresses.add(device.getAddress());
-                                }
-
-                                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
-                                ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
-
-                                int selectedDevice = -1;
-                                for (int i = 0; i < deviceNames.size(); i++) {
-                                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
-                                        selectedDevice = i;
-                                    }
-                                }
-
-                                alertDialog
-                                        .setCancelable(false)
-                                        .setSingleChoiceItems(adapter, selectedDevice, null)
-                                        .setTitle("Please Choose the OBDII Bluetooth Device")
-                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                                int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                                userDeviceAddress = deviceAdresses.get(position);
-                                                userDeviceName = deviceNames.get(position);
-
-                                                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-
-                                                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
-                                                    progressBar.setVisibility(View.GONE);
-                                                    checkDeviceRegistry();
-                                                } else {
-                                                    Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-                                                    showStatus("Connection Failed", View.GONE);
-                                                }
-                                            }
-                                        })
-                                        .show();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                        runRealObdScan();
                     }
                 })
                 .show();
@@ -334,14 +274,70 @@ public class Home extends AppCompatActivity implements LocationListener {
         changeFrequency.setEnabled(true);
     }
 
+    private void runRealObdScan() {
+        obdBridge.setSimulation(false);
+        if (!obdBridge.isBluetoothEnabled()) {
+            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBluetooth, 1);
+        } else {
+            final Set<BluetoothDevice> pairedDevicesSet = obdBridge.getPairedDeviceSet();
+
+            // In case user clicks on Change Network, need to repopulate the devices list
+            final ArrayList<String> deviceNames = new ArrayList<>();
+            final ArrayList<String> deviceAddresses = new ArrayList<>();
+
+            if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
+                for (BluetoothDevice device : pairedDevicesSet) {
+                    deviceNames.add(device.getName());
+                    deviceAddresses.add(device.getAddress());
+                }
+
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
+
+                int selectedDevice = -1;
+                for (int i = 0; i < deviceNames.size(); i++) {
+                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
+                        selectedDevice = i;
+                    }
+                }
+
+                alertDialog
+                        .setCancelable(false)
+                        .setSingleChoiceItems(adapter, selectedDevice, null)
+                        .setTitle("Please Choose the OBDII Bluetooth Device")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                                userDeviceAddress = deviceAddresses.get(position);
+                                final String userDeviceName = deviceNames.get(position);
+
+                                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+
+                                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
+                                    progressBar.setVisibility(View.GONE);
+                                    checkDeviceRegistry();
+
+                                } else {
+                                    Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+                                    showStatus("Connection Failed", View.GONE);
+                                }
+                            }
+                        })
+                        .show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void checkDeviceRegistry() {
         getAccurateLocation();
 
-        final String url = obdBridge.isSimulation() ?
-                API.platformAPI + "/device/types/" + API.typeId + "/devices/" + API.getUUID()
-                :
-                API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
-
+        final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : getRealDeviceID();
+        final String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + device_id;
         try {
             showStatus("Checking Device Registration", View.VISIBLE);
             final API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
@@ -363,7 +359,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                             showStatus("Device Already Registered", View.GONE);
                             iotpDevice.setDeviceDefinition(result.getJSONObject(0));
                             deviceRegistered();
-
                             break;
                         case 404:
                         case 405:
@@ -453,7 +448,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                             final View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
-
                             final EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
                             authTokenField.setText(authToken);
 
@@ -497,7 +491,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             final JSONArray bodyArray = new JSONArray();
             final JSONObject bodyObject = new JSONObject();
-            final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : userDeviceAddress.replaceAll(":", "-");
+            final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : getRealDeviceID();
             bodyObject
                     .put("typeId", API.typeId)
                     .put("deviceId", device_id);
@@ -516,6 +510,10 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private String getSimulatedDeviceID() {
         return API.getUUID();
+    }
+
+    private String getRealDeviceID() {
+        return userDeviceAddress.replaceAll(":", "-");
     }
 
     public void deviceRegistered() {

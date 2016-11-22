@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.commands.engine.OilTempCommand;
@@ -29,25 +30,60 @@ import java.util.List;
 
 public class ObdParameters {
 
+    static String formatTemperature(double temperature) {
+        double imperialUnit = temperature * 1.8f + 32;
+
+        return String.format("%.1f%s", temperature, "C") + " (" + String.format("%.1f%s", imperialUnit, "F") + ")";
+    }
+
     @NonNull
     static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
 
-        final ObdParameter engineOil = new ObdParameter((TextView) activity.findViewById(R.id.engineOilValue), activity, "Engine Oil", new OilTempCommand()) {
-            private double engineOil = Math.floor(Math.random() * 120) + 20;
+        final ObdParameter engineRPM = new ObdParameter((TextView) activity.findViewById(R.id.engineRPMValue), activity, "Engine RPM", new RPMCommand()) {
+            private long engineRPM = Math.round(Math.random() * 600) + 600;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineOil = Math.floor(Math.random() * (140 - engineOil - 10)) + engineOil - 10;
-                    valueText = engineOil + "C";
+                    engineRPM = Math.round(Math.random() * 600) + 600;
+                    valueText = engineRPM + "RPM";
                 } else {
-                    final OilTempCommand oilTempCommand = (OilTempCommand) obdCommand;
-                    engineOil = oilTempCommand.getTemperature();
+                    final RPMCommand rpmCommand = (RPMCommand) obdCommand;
+                    engineRPM = rpmCommand.getRPM();
                     valueText = obdCommand.getFormattedResult();
                 }
             }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("engineRPM", engineRPM + "");
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(engineRPM);
+
+        final ObdParameter engineOil = new ObdParameter((TextView) activity.findViewById(R.id.engineOilValue), activity, "Engine Oil", new OilTempCommand()) {
+            private double engineOil = Math.random() * 120 + 20;
+            private String valueText;
+
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                if (simulation) {
+                    engineOil = Math.random() * (140 - engineOil - 10) + engineOil - 10;
+
+                } else {
+                    final OilTempCommand oilTempCommand = (OilTempCommand) obdCommand;
+                    engineOil = oilTempCommand.getTemperature();
+                }
+                valueText = formatTemperature(engineOil);
+            }
+
 
             @Override
             protected void setJsonProp(JsonObject json) {
@@ -62,19 +98,18 @@ public class ObdParameters {
         obdParameters.add(engineOil);
 
         final ObdParameter engineCoolant = new ObdParameter((TextView) activity.findViewById(R.id.engineCoolantValue), activity, "Engine Coolant", new EngineCoolantTemperatureCommand()) {
-            private double engineCoolant = Math.floor(Math.random() * 120) + 20;
+            private double engineCoolant = Math.random() * 120 + 20;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineCoolant = Math.floor(Math.random() * (140 - engineCoolant - 10)) + engineCoolant - 10;
-                    valueText = engineCoolant + "C";
+                    engineCoolant = Math.random() * (140 - engineCoolant - 10) + engineCoolant - 10;
                 } else {
                     final EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = (EngineCoolantTemperatureCommand) obdCommand;
                     engineCoolant = engineCoolantTemperatureCommand.getTemperature();
-                    valueText = obdCommand.getFormattedResult();
                 }
+                valueText = formatTemperature(engineCoolant);
             }
 
             @Override
