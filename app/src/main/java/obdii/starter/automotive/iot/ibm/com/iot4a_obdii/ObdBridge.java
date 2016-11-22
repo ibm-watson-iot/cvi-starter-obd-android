@@ -114,7 +114,7 @@ public class ObdBridge {
         return simulation;
     }
 
-    public void setObdParameterList(final AppCompatActivity activity) {
+    public void initializeObdParameterList(final AppCompatActivity activity) {
         obdParameterList = ObdParameters.getObdParameterList(activity);
     }
 

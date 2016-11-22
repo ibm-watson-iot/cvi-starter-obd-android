@@ -95,6 +95,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private String trip_id;
 
     private ProgressBar progressBar;
+    private ActionBar supportActionBar;
     private Button changeNetwork;
     private Button changeFrequency;
 
@@ -119,14 +120,14 @@ public class Home extends AppCompatActivity implements LocationListener {
         progressBar.setScaleX(0.5f);
         progressBar.setScaleY(0.5f);
 
-        final ActionBar supportActionBar = getSupportActionBar();
+        supportActionBar = getSupportActionBar();
         supportActionBar.setDisplayShowCustomEnabled(true);
         supportActionBar.setCustomView(progressBar);
 
         changeNetwork = (Button) findViewById(R.id.changeNetwork);
         changeFrequency = (Button) findViewById(R.id.changeFrequency);
 
-        obdBridge.setObdParameterList(this);
+        obdBridge.initializeObdParameterList(this);
 
         new API(getApplicationContext());
 
@@ -134,18 +135,16 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_SHORT).show();
 
-            boolean doNotRunSimulationWithoutBluetooth = false;
+            final boolean doNotRunSimulationWithoutBluetooth = false;
             if (doNotRunSimulationWithoutBluetooth) {
+                // terminate the app
                 changeNetwork.setEnabled(false);
                 changeFrequency.setEnabled(false);
-                supportActionBar.setTitle("Bluetooth Failed");
+                showStatus("Bluetooth Failed");
             } else {
-                // force to run simulation for testing purpose
-                changeFrequency.setEnabled(true);
-                supportActionBar.setTitle("Simulated OBD Scan");
-                obdBridge.setSimulation(true);
-                obdBridge.startObdScanThread();
+                // force to run in simulation mode for testing purpose
                 runSimulatedObdScan();
+                showStatus("Simulated OBD Scan");
             }
 
         } else {
@@ -181,7 +180,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             } else {
                 if (!API.warningShown()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder
                             .setTitle("Warning")
                             .setMessage("This app requires permissions to your Locations, Bluetooth and Storage settings.\n\n" +
@@ -194,6 +193,31 @@ public class Home extends AppCompatActivity implements LocationListener {
                 permissionsGranted();
             }
         }
+    }
+
+    private void showStatus(final String msg) {
+        if (supportActionBar == null) {
+            return;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                supportActionBar.setTitle(msg);
+            }
+        });
+    }
+
+    private void showStatus(final String msg, final int progressBarVisibility) {
+        if (progressBar == null || supportActionBar == null) {
+            return;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                supportActionBar.setTitle(msg);
+                progressBar.setVisibility(progressBarVisibility);
+            }
+        });
     }
 
     @Override
@@ -242,6 +266,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
 
+                        obdBridge.setSimulation(false);
                         if (!obdBridge.isBluetoothEnabled()) {
                             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             startActivityForResult(enableBluetooth, 1);
@@ -280,17 +305,14 @@ public class Home extends AppCompatActivity implements LocationListener {
                                                 userDeviceAddress = deviceAdresses.get(position);
                                                 userDeviceName = deviceNames.get(position);
 
-                                                progressBar.setVisibility(View.VISIBLE);
-                                                getSupportActionBar().setTitle("Connecting to \"" + userDeviceName + "\"");
+                                                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
 
-                                                boolean connected = obdBridge.connectBluetoothSocket(userDeviceAddress);
-                                                if (connected) {
+                                                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
                                                     progressBar.setVisibility(View.GONE);
                                                     checkDeviceRegistry();
                                                 } else {
                                                     Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-                                                    progressBar.setVisibility(View.GONE);
-                                                    getSupportActionBar().setTitle("Connection Failed");
+                                                    showStatus("Connection Failed", View.GONE);
                                                 }
                                             }
                                         })
@@ -308,30 +330,26 @@ public class Home extends AppCompatActivity implements LocationListener {
         obdBridge.setSimulation(true);
         changeNetwork.setEnabled(false);
         checkDeviceRegistry();
+        obdBridge.startObdScanThread();
+        changeFrequency.setEnabled(true);
     }
-
 
     private void checkDeviceRegistry() {
         getAccurateLocation();
 
-        String url = "";
-
-        if (obdBridge.isSimulation()) {
-            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + API.getUUID();
-        } else {
-            url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
-        }
-
-        getSupportActionBar().setTitle("Checking Device Registeration");
-        progressBar.setVisibility(View.VISIBLE);
+        final String url = obdBridge.isSimulation() ?
+                API.platformAPI + "/device/types/" + API.typeId + "/devices/" + API.getUUID()
+                :
+                API.platformAPI + "/device/types/" + API.typeId + "/devices/" + userDeviceAddress.replaceAll(":", "-");
 
         try {
-            API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
+            showStatus("Checking Device Registration", View.VISIBLE);
+            final API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(JSONArray result) throws JSONException {
 
-                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
-                    int statusCode = serverResponse.getInt("statusCode");
+                    final JSONObject serverResponse = result.getJSONObject(result.length() - 1);
+                    final int statusCode = serverResponse.getInt("statusCode");
 
                     result.remove(result.length() - 1);
 
@@ -342,8 +360,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             Log.d("Check Device Registry", result.toString(4));
                             Log.d("Check Device Registry", "***Already Registered***");
 
-                            getSupportActionBar().setTitle("Device Already Registered");
-                            progressBar.setVisibility(View.GONE);
+                            showStatus("Device Already Registered", View.GONE);
                             iotpDevice.setDeviceDefinition(result.getJSONObject(0));
                             deviceRegistered();
 
@@ -383,7 +400,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
-                                            getSupportActionBar().setTitle("Failed to connect to IBM IoT Platform");
+                                            showStatus("Failed to connect to IBM IoT Platform");
                                         }
                                     })
                                     .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -407,20 +424,19 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void registerDevice() {
-        String url = API.addDevices;
 
-        getSupportActionBar().setTitle("Registering Your Device");
-        progressBar.setVisibility(View.VISIBLE);
+    public void registerDevice() {
+        final String url = API.addDevices;
 
         try {
-            API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
+            showStatus("Registering Your Device", View.VISIBLE);
+            final API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
                 public void postExecute(final JSONArray result) throws JSONException {
                     Log.d("Register Device", result.toString(4));
 
-                    JSONObject serverResponse = result.getJSONObject(result.length() - 1);
-                    int statusCode = serverResponse.getInt("statusCode");
+                    final JSONObject serverResponse = result.getJSONObject(result.length() - 1);
+                    final int statusCode = serverResponse.getInt("statusCode");
 
                     result.remove(result.length() - 1);
 
@@ -436,12 +452,12 @@ public class Home extends AppCompatActivity implements LocationListener {
                             }
 
                             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
-                            View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
+                            final View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
 
-                            EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
+                            final EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
                             authTokenField.setText(authToken);
 
-                            Button copyToClipboard = (Button) authTokenAlert.findViewById(R.id.copyToClipboard);
+                            final Button copyToClipboard = (Button) authTokenAlert.findViewById(R.id.copyToClipboard);
                             copyToClipboard.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
@@ -479,14 +495,12 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             });
 
-            JSONArray bodyArray = new JSONArray();
-            JSONObject bodyObject = new JSONObject();
-
+            final JSONArray bodyArray = new JSONArray();
+            final JSONObject bodyObject = new JSONObject();
             final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : userDeviceAddress.replaceAll(":", "-");
             bodyObject
                     .put("typeId", API.typeId)
                     .put("deviceId", device_id);
-
             bodyArray
                     .put(bodyObject);
 
@@ -559,30 +573,21 @@ public class Home extends AppCompatActivity implements LocationListener {
             final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
             final boolean success = iotpDevice.publishEvent(event);
             if (success) {
-                showMqttStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", true);
+                showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
                 System.out.println("SUCCESSFULLY POSTED......");
                 Log.d("Posted", event.toString());
             } else {
-                showMqttStatus("Device Not Connected to IoT Platform", false);
+                showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);
             }
         } else {
-            showMqttStatus("Waiting to Find Location", true);
+            showStatus("Waiting to Find Location", View.VISIBLE);
         }
     }
 
-    private void showMqttStatus(final String message, final boolean progress) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progressBar.setVisibility(progress ? View.VISIBLE : View.INVISIBLE);
-                getSupportActionBar().setTitle(message);
-            }
-        });
-    }
 
     public void changeFrequency(View view) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
-        View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
+        final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
         final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
         numberPicker.setMinValue(5);
@@ -662,8 +667,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void getAccurateLocation() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && (networkInfo != null && networkInfo.isConnected())) {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -672,7 +677,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
-            List<String> providers = locationManager.getProviders(true);
+            final List<String> providers = locationManager.getProviders(true);
             Location finalLocation = null;
 
             for (String provider : providers) {
@@ -680,7 +685,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     return;
                 }
 
-                Location lastKnown = locationManager.getLastKnownLocation(provider);
+                final Location lastKnown = locationManager.getLastKnownLocation(provider);
 
                 if (lastKnown == null) {
                     continue;
@@ -700,7 +705,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Toast.makeText(getApplicationContext(), "Please turn on your GPS", Toast.LENGTH_LONG).show();
 
-                Intent gpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                final Intent gpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivityForResult(gpsIntent, GPS_INTENT);
 
                 if (networkInfo == null) {
@@ -710,7 +715,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 if (networkInfo == null) {
                     Toast.makeText(getApplicationContext(), "Please turn on Mobile Data or WIFI", Toast.LENGTH_LONG).show();
 
-                    Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                    final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
                     startActivityForResult(settingsIntent, SETTINGS_INTENT);
                 }
             }
@@ -722,7 +727,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             if (networkIntentNeeded) {
                 Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
 
-                Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
                 startActivityForResult(settingsIntent, SETTINGS_INTENT);
             } else {
                 getAccurateLocation();
