@@ -10,11 +10,13 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
@@ -36,6 +38,12 @@ public class ObdParameters {
         return String.format("%.1f%s", temperature, "C") + " (" + String.format("%.1f%s", imperialUnit, "F") + ")";
     }
 
+    static String formatSpeed(double speed) {
+        double imperialUnit = speed * 0.621371192f;
+
+        return String.format("%.1f%s", speed, "km/h") + " (" + String.format("%.1f%s", imperialUnit, "mph") + ")";
+    }
+
     @NonNull
     static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
@@ -48,12 +56,11 @@ public class ObdParameters {
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
                     engineRPM = Math.round(Math.random() * 600) + 600;
-                    valueText = engineRPM + "RPM";
                 } else {
                     final RPMCommand rpmCommand = (RPMCommand) obdCommand;
                     engineRPM = rpmCommand.getRPM();
-                    valueText = obdCommand.getFormattedResult();
                 }
+                valueText = engineRPM + "";
             }
 
             @Override
@@ -67,6 +74,44 @@ public class ObdParameters {
             }
         };
         obdParameters.add(engineRPM);
+
+        final ObdParameter speed = new ObdParameter((TextView) activity.findViewById(R.id.speedValue), activity, "Speed", new SpeedCommand()) {
+            private double speed = 0;
+            private double delta = 10.0;
+            private String valueText;
+
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                if (simulation) {
+                    if (speed >= 150.0) {
+                        delta = -10.0;
+                    } else if (speed <= 0.0) {
+                        speed = 0.0;
+                        delta = 10.0;
+                    } else if (Math.random() < 0.2) {
+                        delta *= -1.0;
+                    }
+                    speed += delta;
+
+                } else {
+                    final SpeedCommand speedCommand = (SpeedCommand) obdCommand;
+                    speed = speedCommand.getMetricSpeed();
+                }
+                valueText = formatSpeed(speed);
+            }
+
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("speed", speed + "");
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(speed);
 
         final ObdParameter engineOil = new ObdParameter((TextView) activity.findViewById(R.id.engineOilValue), activity, "Engine Oil", new OilTempCommand()) {
             private double engineOil = Math.random() * 120 + 20;
@@ -153,6 +198,54 @@ public class ObdParameters {
             }
         };
         obdParameters.add(fuelLevel);
+
+        final ObdParameter longitude = new ObdParameter((TextView) activity.findViewById(R.id.longitudeValue), activity, "Longitude", null) {
+            private double longitudeValue = 0.0;
+            private String valueText;
+
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                if (Home.location != null) {
+                    longitudeValue = Home.location.getLongitude();
+                }
+                valueText = String.format("%1$.7f", longitudeValue);
+            }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("lng", longitudeValue + "");
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(longitude);
+
+        final ObdParameter latitude = new ObdParameter((TextView) activity.findViewById(R.id.latitudeValue), activity, "Latitude", null) {
+            private double latitude = 0.0;
+            private String valueText;
+
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                if (Home.location != null) {
+                    latitude = Home.location.getLatitude();
+                }
+                valueText = valueText = String.format("%1$.7f", latitude);
+            }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("lat", latitude + "");
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(latitude);
 
         return obdParameters;
     }

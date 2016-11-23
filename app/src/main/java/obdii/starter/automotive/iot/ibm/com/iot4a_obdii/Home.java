@@ -77,8 +77,8 @@ import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
 public class Home extends AppCompatActivity implements LocationListener {
 
     private LocationManager locationManager;
-    private Location location = null;
     private String provider;
+    static Location location = null;
 
     private final int INITIAL_PERMISSIONS = 000;
 
@@ -639,8 +639,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private void mqttPublish() throws MqttException {
         if (location != null) {
             final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
-            final boolean success = iotpDevice.publishEvent(event);
-            if (success) {
+            if (iotpDevice.publishEvent(event)) {
                 showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
                 System.out.println("SUCCESSFULLY POSTED......");
                 Log.d("Posted", event.toString());

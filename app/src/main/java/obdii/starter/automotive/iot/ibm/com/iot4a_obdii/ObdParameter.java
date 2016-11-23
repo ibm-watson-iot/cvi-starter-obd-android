@@ -52,6 +52,10 @@ abstract public class ObdParameter {
         if (simulation) {
             fetchValue(null, simulation);
             showText(getValueText());
+        } else if (obdCommand == null) {
+            // parameter without obd command
+            fetchValue(obdCommand, simulation);
+            showText(getValueText());
         } else {
             String value = "";
             if (socket == null) {
@@ -63,7 +67,7 @@ abstract public class ObdParameter {
                     obdCommand.run(in, out);
                     fetchValue(obdCommand, simulation);
                     value = getValueText();
-                    Log.d(label, obdCommand.getFormattedResult());
+                    Log.d(label, value);
                 } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
                     // reach here when OBD device is not connected
                     value = "Bluetooth Connection Error";

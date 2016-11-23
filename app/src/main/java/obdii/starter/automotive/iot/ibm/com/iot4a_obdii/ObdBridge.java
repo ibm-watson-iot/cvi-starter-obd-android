@@ -126,8 +126,8 @@ public class ObdBridge {
         final JsonObject event = new JsonObject();
         final JsonObject data = new JsonObject();
         event.add("d", data);
-        data.addProperty("lat", location.getLatitude());
-        data.addProperty("lng", location.getLongitude());
+        //data.addProperty("lat", location.getLatitude());
+        //data.addProperty("lng", location.getLongitude());
         data.addProperty("trip_id", trip_id);
 
         final JsonObject props = new JsonObject();
