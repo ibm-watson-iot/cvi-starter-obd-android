@@ -72,6 +72,8 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
+
 public class Home extends AppCompatActivity implements LocationListener {
 
     private LocationManager locationManager;
@@ -571,7 +573,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private String getSimulatedDeviceID() {
-        return API.getUUID();
+        final String key = "simulated-device-id";
+        String device_id = API.getStoredData(key);
+        if (device_id == null || DOESNOTEXIST.equals(device_id)) {
+            device_id = API.getUUID();
+            API.storeData(key, device_id);
+        }
+        return device_id;
     }
 
     private String getRealDeviceID() {
