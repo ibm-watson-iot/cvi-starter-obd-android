@@ -49,13 +49,13 @@ public class ObdParameters {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
 
         final ObdParameter engineRPM = new ObdParameter((TextView) activity.findViewById(R.id.engineRPMValue), activity, "Engine RPM", new RPMCommand()) {
-            private long engineRPM = Math.round(Math.random() * 600) + 600;
+            private long engineRPM = Math.round(Math.random() * 3000) + 600;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineRPM = Math.round(Math.random() * 600) + 600;
+                    engineRPM = Math.round(Math.random() * 3000) + 600;
                 } else {
                     final RPMCommand rpmCommand = (RPMCommand) obdCommand;
                     engineRPM = rpmCommand.getRPM();
@@ -76,23 +76,34 @@ public class ObdParameters {
         obdParameters.add(engineRPM);
 
         final ObdParameter speed = new ObdParameter((TextView) activity.findViewById(R.id.speedValue), activity, "Speed", new SpeedCommand()) {
-            private double speed = 0;
-            private double delta = 10.0;
+            private final double max_speed = Math.random() > 0.5 ? 130.0 : 90.0;
+            private final double speed_increment = 6.3;
+            private double speed = 30.0;
+            private double delta = 0;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    if (speed >= 150.0) {
-                        delta = -10.0;
+                    if (speed >= max_speed) {
+                        delta = -1.0 * speed_increment;
                     } else if (speed <= 0.0) {
                         speed = 0.0;
-                        delta = 10.0;
-                    } else if (Math.random() < 0.2) {
-                        delta *= -1.0;
+                        delta = speed_increment;
+                    } else {
+                        final double random = Math.random();
+                        if (random < 0.4) {
+                            delta = -1.0 * speed_increment;
+                        } else if (random > 0.6) {
+                            delta = speed_increment;
+                        } else {
+                            delta = 0;
+                        }
                     }
                     speed += delta;
-
+                    if (speed <= 0.0) {
+                        speed = 0.01;
+                    }
                 } else {
                     final SpeedCommand speedCommand = (SpeedCommand) obdCommand;
                     speed = speedCommand.getMetricSpeed();
