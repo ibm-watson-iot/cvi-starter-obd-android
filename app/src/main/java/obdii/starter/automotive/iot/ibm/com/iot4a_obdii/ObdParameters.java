@@ -100,10 +100,14 @@ public class ObdParameters {
                 valueText = formatSpeed(speed);
             }
 
+            @Override
+            protected boolean isBaseProp() {
+                return true;
+            }
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("speed", speed + "");
+                json.addProperty("speed", speed);
             }
 
             @Override
@@ -212,8 +216,13 @@ public class ObdParameters {
             }
 
             @Override
+            protected boolean isBaseProp() {
+                return true;
+            }
+
+            @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("lng", longitudeValue + "");
+                json.addProperty("lng", longitudeValue);
             }
 
             @Override
@@ -236,8 +245,13 @@ public class ObdParameters {
             }
 
             @Override
+            protected boolean isBaseProp() {
+                return true;
+            }
+
+            @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("lat", latitude + "");
+                json.addProperty("lat", latitude);
             }
 
             @Override

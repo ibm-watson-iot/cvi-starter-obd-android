@@ -131,11 +131,11 @@ public class ObdBridge {
         data.addProperty("trip_id", trip_id);
 
         final JsonObject props = new JsonObject();
-        data.add("props", props);
 
         for (ObdParameter obdParameter : obdParameterList) {
-            obdParameter.setJsonProp(props);
+            obdParameter.setJsonProp(obdParameter.isBaseProp() ? data : props);
         }
+        data.add("props", props);
         return event;
     }
 

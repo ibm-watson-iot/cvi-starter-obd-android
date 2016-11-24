@@ -93,6 +93,10 @@ abstract public class ObdParameter {
         });
     }
 
+    protected boolean isBaseProp() {
+        return false; // return true for IoT4A standard car probe properties
+    }
+
     /*
     get actual OBD parameter value (obdCommand has already run at this call
      */
