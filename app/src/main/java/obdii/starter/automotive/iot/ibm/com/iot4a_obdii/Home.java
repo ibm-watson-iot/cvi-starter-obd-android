@@ -354,7 +354,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         obdBridge.setSimulation(true);
         changeNetwork.setEnabled(false);
         checkDeviceRegistry();
-        obdBridge.startObdScanThread();
         changeFrequency.setEnabled(true);
     }
 
@@ -431,7 +430,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 } finally {
                     if (connected) {
                         showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
-                        obdBridge.startObdScanThread();
                         checkDeviceRegistry();
                     } else {
                         showToastText("Unable to connect to the device, please make sure to choose the right network");
@@ -457,9 +455,9 @@ public class Home extends AppCompatActivity implements LocationListener {
     private void checkDeviceRegistry() {
         getAccurateLocation();
 
-        final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : getRealDeviceID();
-        final String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + device_id;
         try {
+            final String device_id = obdBridge.getDeviceId();
+            final String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + device_id;
             showStatus("Checking Device Registration", View.VISIBLE);
             final API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
                 @Override
@@ -467,7 +465,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                     final JSONObject serverResponse = result.getJSONObject(result.length() - 1);
                     final int statusCode = serverResponse.getInt("statusCode");
-
                     result.remove(result.length() - 1);
 
                     final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
@@ -480,6 +477,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             showStatus("Device Already Registered", View.GONE);
                             iotpDevice.setDeviceDefinition(result.getJSONObject(0));
                             deviceRegistered();
+
                             break;
                         case 404:
                         case 405:
@@ -537,6 +535,8 @@ public class Home extends AppCompatActivity implements LocationListener {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        } catch (DeviceNotConnectedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -561,11 +561,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                         case 202:
                             final String authToken = result.getJSONObject(0).getString("authToken");
                             final String deviceId = result.getJSONObject(0).getString("deviceId");
-                            final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
-
-                            if (!API.getStoredData(sharedPrefsKey).equals(authToken)) {
-                                API.storeData(sharedPrefsKey, authToken);
-                            }
+                            iotpDevice.setDeviceToken(deviceId, authToken);
 
                             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                             final View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
@@ -611,7 +607,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             final JSONArray bodyArray = new JSONArray();
             final JSONObject bodyObject = new JSONObject();
-            final String device_id = obdBridge.isSimulation() ? getSimulatedDeviceID() : getRealDeviceID();
+            final String device_id = obdBridge.getDeviceId();
             bodyObject
                     .put("typeId", API.typeId)
                     .put("deviceId", device_id);
@@ -625,21 +621,9 @@ public class Home extends AppCompatActivity implements LocationListener {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (DeviceNotConnectedException e) {
+            e.printStackTrace();
         }
-    }
-
-    private String getSimulatedDeviceID() {
-        final String key = "simulated-device-id";
-        String device_id = API.getStoredData(key);
-        if (device_id == null || DOESNOTEXIST.equals(device_id)) {
-            device_id = API.getUUID();
-            API.storeData(key, device_id);
-        }
-        return device_id;
-    }
-
-    private String getRealDeviceID() {
-        return userDeviceAddress.replaceAll(":", "-");
     }
 
     public void deviceRegistered() {
@@ -648,6 +632,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         try {
             if (iotpDevice.createDeviceClient() != null) {
                 iotpDevice.connectDevice();
+
+                obdBridge.startObdScanThread();
                 startPublishing();
             }
         } catch (MqttException e) {

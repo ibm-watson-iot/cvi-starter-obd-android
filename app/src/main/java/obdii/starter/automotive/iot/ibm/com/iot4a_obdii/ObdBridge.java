@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
+
 /*
  * OBD Bridge
  */
@@ -56,12 +58,42 @@ public class ObdBridge {
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
 
+    private String userDeviceAddress = null;
+
     @Override
     protected void finalize() throws Throwable {
         stopObdScanThread();
         closeBluetoothSocket();
         super.finalize();
     }
+
+    public String getDeviceId() throws DeviceNotConnectedException {
+        return isSimulation() ? getSimulatedDeviceId() : getRealDeviceId();
+    }
+
+    private String getSimulatedDeviceId() {
+        final String key = "simulated-device-id";
+        String device_id = API.getStoredData(key);
+        if (device_id == null || DOESNOTEXIST.equals(device_id)) {
+            device_id = API.getUUID();
+            API.storeData(key, device_id);
+        }
+        return device_id;
+    }
+
+    private String getRealDeviceId() throws DeviceNotConnectedException {
+        if (userDeviceAddress == null) {
+            throw new DeviceNotConnectedException();
+        }
+        final String key = "device-id-" + userDeviceAddress.replaceAll(":", "-");
+        String device_id = API.getStoredData(key);
+        if (device_id == null || DOESNOTEXIST.equals(device_id)) {
+            device_id = API.getUUID();
+            API.storeData(key, device_id);
+        }
+        return device_id;
+    }
+
 
     public boolean setupBluetooth() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -80,19 +112,10 @@ public class ObdBridge {
         }
     }
 
-    public synchronized void closeBluetoothSocket() {
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            socket = null;
-        }
-    }
 
     public synchronized boolean connectBluetoothSocket(final String userDeviceAddress) {
         closeBluetoothSocket();
+        this.userDeviceAddress = userDeviceAddress;
 
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
@@ -138,6 +161,7 @@ public class ObdBridge {
         }
     }
 
+
     private void initializeOBD2Device(final BluetoothSocket socket) throws IOException, InterruptedException {
         //runObdCommand(socket, new ObdRawCommand("ATD")); // Set all to defaults
         runObdCommand(socket, new ObdWarmstartCommand()); // reset
@@ -155,6 +179,18 @@ public class ObdBridge {
         final OutputStream outs = socket.getOutputStream();
         //cmd.setResponseTimeDelay((long)10);
         cmd.run(ins, outs);
+    }
+
+    public synchronized void closeBluetoothSocket() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            socket = null;
+            this.userDeviceAddress = null;
+        }
     }
 
     public void setSimulation(final boolean simulation) {

@@ -34,6 +34,21 @@ public class IoTPlatformDevice {
         currentDevice = deviceDefinition;
     }
 
+    public String getDeviceToken(final String deviceId) {
+        final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
+        return API.getStoredData(sharedPrefsKey);
+    }
+    public boolean hasDeviceToken(final String deviceId) {
+        return !API.DOESNOTEXIST.equals(getDeviceToken(deviceId));
+    }
+
+    public void setDeviceToken(final String deviceId, final String authToken) {
+        final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
+        if (!API.getStoredData(sharedPrefsKey).equals(authToken)) {
+            API.storeData(sharedPrefsKey, authToken);
+        }
+    }
+
     public synchronized DeviceClient createDeviceClient() throws Exception {
         if (deviceClient != null) {
             return deviceClient;
@@ -41,9 +56,11 @@ public class IoTPlatformDevice {
         final Properties options = new Properties();
         options.setProperty("org", API.orgId);
         options.setProperty("type", API.typeId);
-        options.setProperty("id", currentDevice.getString("deviceId"));
+        final String deviceId = currentDevice.getString("deviceId");
+        options.setProperty("id", deviceId);
         options.setProperty("auth-method", "token");
-        options.setProperty("auth-token", API.getStoredData("iota-obdii-auth-" + currentDevice.getString("deviceId")));
+        final String token = getDeviceToken(deviceId);
+        options.setProperty("auth-token", token);
 
         deviceClient = new DeviceClient(options);
         return deviceClient;
