@@ -48,7 +48,7 @@ abstract public class ObdParameter {
         return obdCommand;
     }
 
-    public void showScannedValue(final BluetoothSocket socket, final boolean simulation) {
+    public synchronized void showScannedValue(final BluetoothSocket socket, final boolean simulation) {
         if (simulation) {
             fetchValue(null, simulation);
             showText(getValueText());

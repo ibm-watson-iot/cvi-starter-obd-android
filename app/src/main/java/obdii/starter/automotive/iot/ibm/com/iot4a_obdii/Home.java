@@ -288,6 +288,16 @@ public class Home extends AppCompatActivity implements LocationListener {
         });
     }
 
+
+    private void showToastText(final String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(Home.this, msg, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         stopPublishing();
@@ -424,7 +434,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                         obdBridge.startObdScanThread();
                         checkDeviceRegistry();
                     } else {
-                        Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+                        showToastText("Unable to connect to the device, please make sure to choose the right network");
                         showStatus("Connection Failed", View.GONE);
                     }
                     Log.i("BT Connection Thread", "ENDED");
@@ -434,6 +444,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         };
         bluetoothConnectionThread.start();
     }
+
 
     private synchronized void stopBluetoothConnection() {
         if (bluetoothConnectionThread != null) {

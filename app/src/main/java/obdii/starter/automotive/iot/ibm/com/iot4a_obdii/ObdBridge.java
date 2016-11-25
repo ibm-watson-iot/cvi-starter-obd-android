@@ -19,9 +19,16 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.commands.protocol.AdaptiveTimingCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.HeadersOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdRawCommand;
+import com.github.pires.obd.commands.protocol.ObdResetCommand;
+import com.github.pires.obd.commands.protocol.ObdWarmstartCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
+import com.github.pires.obd.commands.protocol.SpacesOffCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.google.gson.JsonObject;
@@ -98,6 +105,7 @@ public class ObdBridge {
         }
         try {
             socket.connect();
+            initializeOBD2Device(socket);
             Log.i("Bluetooth Connection", "CONNECTED");
             socketConnected = true;
             return true;
@@ -109,15 +117,8 @@ public class ObdBridge {
 
                 socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
                 socket.connect();
-
+                initializeOBD2Device(socket);
                 Log.i("Bluetooth Connection", "CONNECTED");
-
-                final InputStream ins = socket.getInputStream();
-                final OutputStream outs = socket.getOutputStream();
-                new EchoOffCommand().run(ins, outs);
-                new LineFeedOffCommand().run(ins, outs);
-                new TimeoutCommand(125).run(ins, outs);
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(ins, outs);
                 socketConnected = true;
                 return true;
 
@@ -126,7 +127,34 @@ public class ObdBridge {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");
                 return false;
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Log.e("BT Connection Error: ", e.getMessage());
+            return false;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            Log.e("BT Connection Error: ", e.getMessage());
+            return false;
         }
+    }
+
+    private void initializeOBD2Device(final BluetoothSocket socket) throws IOException, InterruptedException {
+        //runObdCommand(socket, new ObdRawCommand("ATD")); // Set all to defaults
+        runObdCommand(socket, new ObdWarmstartCommand()); // reset
+        //runObdCommand(socket, new ObdResetCommand());
+        runObdCommand(socket, new EchoOffCommand());
+        runObdCommand(socket, new LineFeedOffCommand());
+        runObdCommand(socket, new HeadersOffCommand());
+        runObdCommand(socket, new TimeoutCommand(125));
+        runObdCommand(socket, new AdaptiveTimingCommand(1));
+        runObdCommand(socket, new SelectProtocolCommand(ObdProtocols.AUTO));
+    }
+
+    private void runObdCommand(final BluetoothSocket socket, final ObdCommand cmd) throws IOException, InterruptedException {
+        final InputStream ins = socket.getInputStream();
+        final OutputStream outs = socket.getOutputStream();
+        //cmd.setResponseTimeDelay((long)10);
+        cmd.run(ins, outs);
     }
 
     public void setSimulation(final boolean simulation) {
@@ -174,11 +202,14 @@ public class ObdBridge {
                     System.out.println("Obd Scan Thread: STARTED");
                     while (!isInterrupted()) {
                         Thread.sleep(OBD_REFRESH_INTERVAL_MS);
-                        for (ObdParameter obdParam : obdParameterList) {
-                            obdParam.showScannedValue(socket, simulation);
+                        if (simulation || socketConnected) {
+                            for (ObdParameter obdParam : obdParameterList) {
+                                obdParam.showScannedValue(socket, simulation);
+                            }
                         }
                     }
                 } catch (InterruptedException e) {
+
                 } finally {
                     Log.i("Obd Scan Thread", "ENDED");
                     System.out.println("Obd Scan Thread: ENDED");
