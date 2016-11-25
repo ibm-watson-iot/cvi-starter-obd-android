@@ -73,9 +73,9 @@ abstract public class ObdParameter {
                     value = "Bluetooth Connection Error";
                 } catch (com.github.pires.obd.exceptions.NoDataException e) {
                     // reach here when this OBD parameter is not supported
-                    value = "No Data";
+                    value = "No OBD2 Data";
                 } catch (Exception e) {
-                    value = "Bluetooth Error: " + e.getMessage();
+                    value = "No Bluetooth Connection";
                     e.printStackTrace();
                 }
             }

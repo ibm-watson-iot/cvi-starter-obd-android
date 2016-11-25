@@ -27,6 +27,8 @@ import com.github.pires.obd.enums.ObdProtocols;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +49,12 @@ public class ObdBridge {
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
 
+    @Override
+    protected void finalize() throws Throwable {
+        stopObdScanThread();
+        closeBluetoothSocket();
+        super.finalize();
+    }
 
     public boolean setupBluetooth() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -65,7 +73,20 @@ public class ObdBridge {
         }
     }
 
-    public boolean connectBluetoothSocket(final String userDeviceAddress) {
+    public synchronized void closeBluetoothSocket() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            socket = null;
+        }
+    }
+
+    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress) {
+        closeBluetoothSocket();
+
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
         Log.d(TAG, "Starting Bluetooth connection..");
@@ -91,10 +112,12 @@ public class ObdBridge {
 
                 Log.i("Bluetooth Connection", "CONNECTED");
 
-                new EchoOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new LineFeedOffCommand().run(socket.getInputStream(), socket.getOutputStream());
-                new TimeoutCommand(125).run(socket.getInputStream(), socket.getOutputStream());
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(socket.getInputStream(), socket.getOutputStream());
+                final InputStream ins = socket.getInputStream();
+                final OutputStream outs = socket.getOutputStream();
+                new EchoOffCommand().run(ins, outs);
+                new LineFeedOffCommand().run(ins, outs);
+                new TimeoutCommand(125).run(ins, outs);
+                new SelectProtocolCommand(ObdProtocols.AUTO).run(ins, outs);
                 socketConnected = true;
                 return true;
 
@@ -146,9 +169,9 @@ public class ObdBridge {
         obdScanThread = new Thread() {
             @Override
             public void run() {
-                Log.i("Obd Scan Thread", "STARTED");
-                System.out.println("Obd Scan Thread: STARTED");
                 try {
+                    Log.i("Obd Scan Thread", "STARTED");
+                    System.out.println("Obd Scan Thread: STARTED");
                     while (!isInterrupted()) {
                         Thread.sleep(OBD_REFRESH_INTERVAL_MS);
                         for (ObdParameter obdParam : obdParameterList) {
@@ -156,6 +179,9 @@ public class ObdBridge {
                         }
                     }
                 } catch (InterruptedException e) {
+                } finally {
+                    Log.i("Obd Scan Thread", "ENDED");
+                    System.out.println("Obd Scan Thread: ENDED");
                 }
             }
         };
@@ -164,8 +190,6 @@ public class ObdBridge {
 
     public synchronized void stopObdScanThread() {
         if (obdScanThread != null) {
-            System.out.println("Obd Scan Thread: INTERRUPTED");
-            Log.i("Obd Scan Thread", "INTERRUPTED");
             obdScanThread.interrupt();
             obdScanThread = null;
         }

@@ -76,21 +76,21 @@ import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
 
 public class Home extends AppCompatActivity implements LocationListener {
 
+    private static final int INITIAL_PERMISSIONS = 000;
+    private static final int GPS_INTENT = 000;
+    private static final int SETTINGS_INTENT = 001;
+
+    private static final int BLUETOOTH_CONNECTION_RETRY_COUNT = 10;
+    private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL = 6000;
+
     private LocationManager locationManager;
     private String provider;
     static Location location = null;
 
-    private final int INITIAL_PERMISSIONS = 000;
-
     private boolean permissionsGranted = false;
-
-    private final int GPS_INTENT = 000;
-    private final int SETTINGS_INTENT = 001;
-
     private boolean networkIntentNeeded = false;
 
     private String userDeviceAddress = null;
-
     private String trip_id;
 
     private ProgressBar progressBar;
@@ -102,8 +102,17 @@ public class Home extends AppCompatActivity implements LocationListener {
     private int uploadTimerPeriod = 15000;
     private Timer uploadTimer;
 
-    private ObdBridge obdBridge = new ObdBridge();
-    private IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
+    private Thread bluetoothConnectionThread = null;
+
+    private final ObdBridge obdBridge = new ObdBridge();
+    private final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
+
+    @Override
+    protected void finalize() throws Throwable {
+        stopBluetoothConnection();
+        iotpDevice.disconnectDevice();
+        super.finalize();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -282,8 +291,9 @@ public class Home extends AppCompatActivity implements LocationListener {
     @Override
     protected void onDestroy() {
         stopPublishing();
-        obdBridge.stopObdScanThread();
         iotpDevice.disconnectDevice();
+        obdBridge.stopObdScanThread();
+        stopBluetoothConnection();
         super.onDestroy();
     }
 
@@ -304,7 +314,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void permissionsGranted() {
         System.out.println("PERMISSIONS GRANTED");
-        obdBridge.startObdScanThread();
+
         showObdScanModeDialog();
     }
 
@@ -349,23 +359,19 @@ public class Home extends AppCompatActivity implements LocationListener {
             // In case user clicks on Change Network, need to repopulate the devices list
             final ArrayList<String> deviceNames = new ArrayList<>();
             final ArrayList<String> deviceAddresses = new ArrayList<>();
-
             if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
                 for (BluetoothDevice device : pairedDevicesSet) {
                     deviceNames.add(device.getName());
                     deviceAddresses.add(device.getAddress());
                 }
-
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                 final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
-
                 int selectedDevice = -1;
                 for (int i = 0; i < deviceNames.size(); i++) {
                     if (deviceNames.get(i).toLowerCase().contains("obd")) {
                         selectedDevice = i;
                     }
                 }
-
                 alertDialog
                         .setCancelable(false)
                         .setSingleChoiceItems(adapter, selectedDevice, null)
@@ -376,18 +382,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                 dialog.dismiss();
                                 final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                 userDeviceAddress = deviceAddresses.get(position);
-                                final String userDeviceName = deviceNames.get(position);
-
-                                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-
-                                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
-                                    progressBar.setVisibility(View.GONE);
-                                    checkDeviceRegistry();
-
-                                } else {
-                                    Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
-                                    showStatus("Connection Failed", View.GONE);
-                                }
+                                startBluetoothConnection(deviceNames.get(position));
                             }
                         })
                         .show();
@@ -395,6 +390,57 @@ public class Home extends AppCompatActivity implements LocationListener {
                 Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private synchronized void startBluetoothConnection(final String userDeviceName) {
+        stopBluetoothConnection();
+
+        bluetoothConnectionThread = new Thread() {
+            @Override
+            public void run() {
+                boolean connected = false;
+                int retryCount = 0;
+                try {
+                    Log.i("BT Connection Thread", "STARTED");
+                    System.out.println("BT Connection Thread: STARTED");
+                    showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+                    while (!isInterrupted()) {
+                        if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
+                            connected = true;
+                            break;
+                        } else if (++retryCount < BLUETOOTH_CONNECTION_RETRY_COUNT) {
+                            showStatus("Retry Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+                            Thread.sleep(BLUETOOTH_CONNECTION_RETRY_INTERVAL);
+                        } else {
+                            connected = false;
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+
+                } finally {
+                    if (connected) {
+                        showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
+                        obdBridge.startObdScanThread();
+                        checkDeviceRegistry();
+                    } else {
+                        Toast.makeText(Home.this, "Unable to connect to the device, please make sure to choose the right network", Toast.LENGTH_LONG).show();
+                        showStatus("Connection Failed", View.GONE);
+                    }
+                    Log.i("BT Connection Thread", "ENDED");
+                    System.out.println("BT Connection Thread: ENDED");
+                }
+            }
+        };
+        bluetoothConnectionThread.start();
+    }
+
+    private synchronized void stopBluetoothConnection() {
+        if (bluetoothConnectionThread != null) {
+            bluetoothConnectionThread.interrupt();
+            bluetoothConnectionThread = null;
+        }
+        obdBridge.closeBluetoothSocket();
     }
 
     private void checkDeviceRegistry() {
@@ -548,7 +594,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                         default:
                             break;
                     }
-
                     progressBar.setVisibility(View.GONE);
                 }
             });
@@ -651,7 +696,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-
     public void changeFrequency(View view) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
         final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
@@ -686,6 +730,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     public void endSession(View view) {
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
+        stopBluetoothConnection();
         Home.this.finishAffinity();
     }
 
