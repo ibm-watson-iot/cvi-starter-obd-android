@@ -10,9 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.location.Location;
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 import com.ibm.iotf.client.device.DeviceClient;
 
@@ -20,6 +17,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONObject;
 
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /*
  IoT Platform Device Client
@@ -27,8 +26,19 @@ import java.util.Properties;
 
 public class IoTPlatformDevice {
 
+    static interface ProbeDatatGenerator {
+        public JsonObject generateData();
+
+        public void nofityPostResult(boolean success, JsonObject event);
+    }
+
     private DeviceClient deviceClient = null;
     private JSONObject currentDevice;
+
+    private int uploadTimerDelay = 5000;
+    private int uploadTimerPeriod = 15000;
+    private Timer uploadTimer;
+
 
     public void setDeviceDefinition(JSONObject deviceDefinition) {
         currentDevice = deviceDefinition;
@@ -38,6 +48,7 @@ public class IoTPlatformDevice {
         final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
         return API.getStoredData(sharedPrefsKey);
     }
+
     public boolean hasDeviceToken(final String deviceId) {
         return !API.DOESNOTEXIST.equals(getDeviceToken(deviceId));
     }
@@ -79,9 +90,49 @@ public class IoTPlatformDevice {
         deviceClient = null;
     }
 
-    public boolean publishEvent(final JsonObject event) throws MqttException {
+
+    public int getUploadTimerPeriod() {
+        return uploadTimerPeriod;
+    }
+
+    public void setUploadTimerPeriod(final int value) {
+        uploadTimerPeriod = value;
+    }
+
+    public synchronized void startPublishing(final ProbeDatatGenerator eventGenerator) {
+        // stop existing uploadTimer
+        stopPublishing();
+
+        // start new uploadTimer
+        uploadTimer = new Timer();
+        uploadTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    final JsonObject event = eventGenerator.generateData();
+                    if (event != null) {
+                        eventGenerator.nofityPostResult(publishEvent(event), event);
+                    }
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, uploadTimerDelay, uploadTimerPeriod);
+    }
+
+    public synchronized void stopPublishing() {
+        if (uploadTimer != null) {
+            uploadTimer.cancel();
+            uploadTimer = null;
+        }
+    }
+
+    private boolean publishEvent(final JsonObject event) throws MqttException {
         // Normally, the connection is kept alive, but it is closed when interval is long. Reconnect in this case.
         connectDevice();
+
         if (deviceClient != null) {
             deviceClient.publishEvent("status", event, 0);
             return true;

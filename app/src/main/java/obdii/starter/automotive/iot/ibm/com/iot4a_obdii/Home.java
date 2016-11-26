@@ -67,12 +67,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
-import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
 
 public class Home extends AppCompatActivity implements LocationListener {
 
@@ -95,10 +91,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     private ActionBar supportActionBar;
     private Button changeNetwork;
     private Button changeFrequency;
-
-    private int uploadTimerDelay = 5000;
-    private int uploadTimerPeriod = 15000;
-    private Timer uploadTimer;
 
     private Thread bluetoothConnectionThread = null;
 
@@ -297,7 +289,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     protected void onDestroy() {
-        stopPublishing();
+        iotpDevice.stopPublishing();
         iotpDevice.disconnectDevice();
         obdBridge.stopObdScanThread();
         stopBluetoothConnection();
@@ -536,7 +528,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-
     public void registerDevice() {
         final String url = API.addDevices;
 
@@ -630,7 +621,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 iotpDevice.connectDevice();
 
                 obdBridge.startObdScanThread();
-                startPublishing();
+                startPublishingProbeData();
             }
         } catch (MqttException e) {
             e.printStackTrace();
@@ -646,47 +637,29 @@ public class Home extends AppCompatActivity implements LocationListener {
         return tid;
     }
 
-
-    private synchronized void startPublishing() {
-        // stop existing uploadTimer
-        stopPublishing();
-
-        // start new uploadTimer
-        uploadTimer = new Timer();
-        uploadTimer.scheduleAtFixedRate(new TimerTask() {
+    private void startPublishingProbeData() {
+        iotpDevice.startPublishing(new IoTPlatformDevice.ProbeDatatGenerator() {
             @Override
-            public void run() {
-                try {
-                    mqttPublish();
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            public JsonObject generateData() {
+                if (location != null) {
+                    return obdBridge.generateMqttEvent(location, trip_id);
+                } else {
+                    showStatus("Waiting to Find Location", View.VISIBLE);
+                    return null;
                 }
             }
-        }, uploadTimerDelay, uploadTimerPeriod);
-    }
 
-    private synchronized void stopPublishing() {
-        if (uploadTimer != null) {
-            uploadTimer.cancel();
-            uploadTimer = null;
-        }
-    }
-
-    private void mqttPublish() throws MqttException {
-        if (location != null) {
-            final JsonObject event = obdBridge.generateMqttEvent(location, trip_id);
-            if (iotpDevice.publishEvent(event)) {
-                showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
-                System.out.println("SUCCESSFULLY POSTED......");
-                Log.d("Posted", event.toString());
-            } else {
-                showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);
+            @Override
+            public void nofityPostResult(final boolean success, final JsonObject event) {
+                if (success) {
+                    showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
+                    System.out.println("SUCCESSFULLY POSTED......");
+                    Log.d("Posted", event.toString());
+                } else {
+                    showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);
+                }
             }
-        } else {
-            showStatus("Waiting to Find Location", View.VISIBLE);
-        }
+        });
     }
 
     public void changeFrequency(View view) {
@@ -707,9 +680,9 @@ public class Home extends AppCompatActivity implements LocationListener {
                     public void onClick(DialogInterface dialogInterface, int which) {
                         final int newFrequency = numberPicker.getValue() * 1000;
 
-                        if (newFrequency != uploadTimerPeriod) {
-                            uploadTimerPeriod = newFrequency;
-                            startPublishing();
+                        if (newFrequency != iotpDevice.getUploadTimerPeriod()) {
+                            iotpDevice.setUploadTimerPeriod(newFrequency);
+                            startPublishingProbeData();
                         }
                     }
                 })
