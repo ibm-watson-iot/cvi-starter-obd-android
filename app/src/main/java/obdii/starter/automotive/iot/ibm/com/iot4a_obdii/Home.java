@@ -87,10 +87,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private String provider;
     static Location location = null;
 
-    private boolean permissionsGranted = false;
     private boolean networkIntentNeeded = false;
 
-    private String userDeviceAddress = null;
     private String trip_id;
 
     private ProgressBar progressBar;
@@ -241,9 +239,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                     String[] permissionsArray = Arrays.copyOf(tempObjectArray, tempObjectArray.length, String[].class);
 
                     requestPermissions(permissionsArray, INITIAL_PERMISSIONS);
-                } else {
-                    permissionsGranted = true;
 
+                } else {
                     permissionsGranted();
                 }
             } else {
@@ -390,8 +387,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                userDeviceAddress = deviceAddresses.get(position);
-                                startBluetoothConnection(deviceNames.get(position));
+                                startBluetoothConnection(deviceAddresses.get(position), deviceNames.get(position));
                             }
                         })
                         .show();
@@ -401,7 +397,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private synchronized void startBluetoothConnection(final String userDeviceName) {
+    private synchronized void startBluetoothConnection(final String userDeviceAddress, final String userDeviceName) {
         stopBluetoothConnection();
 
         bluetoothConnectionThread = new Thread() {
@@ -709,7 +705,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        int newFrequency = numberPicker.getValue() * 1000;
+                        final int newFrequency = numberPicker.getValue() * 1000;
 
                         if (newFrequency != uploadTimerPeriod) {
                             uploadTimerPeriod = newFrequency;
