@@ -650,7 +650,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
 
             @Override
-            public void nofityPostResult(final boolean success, final JsonObject event) {
+            public void notifyPostResult(final boolean success, final JsonObject event) {
                 if (success) {
                     showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
                     System.out.println("SUCCESSFULLY POSTED......");

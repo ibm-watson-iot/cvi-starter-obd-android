@@ -29,7 +29,7 @@ public class IoTPlatformDevice {
     static interface ProbeDatatGenerator {
         public JsonObject generateData();
 
-        public void nofityPostResult(boolean success, JsonObject event);
+        public void notifyPostResult(boolean success, JsonObject event);
     }
 
     private DeviceClient deviceClient = null;
@@ -111,7 +111,7 @@ public class IoTPlatformDevice {
                 try {
                     final JsonObject event = eventGenerator.generateData();
                     if (event != null) {
-                        eventGenerator.nofityPostResult(publishEvent(event), event);
+                        eventGenerator.notifyPostResult(publishEvent(event), event);
                     }
                 } catch (MqttException e) {
                     e.printStackTrace();
