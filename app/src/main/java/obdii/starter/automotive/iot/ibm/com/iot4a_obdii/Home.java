@@ -340,14 +340,12 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void runSimulatedObdScan() {
-        obdBridge.setSimulation(true);
         changeNetwork.setEnabled(false);
-        checkDeviceRegistry();
+        checkDeviceRegistry(true);
         changeFrequency.setEnabled(true);
     }
 
     private void runRealObdScan() {
-        obdBridge.setSimulation(false);
         if (!obdBridge.isBluetoothEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 1);
@@ -418,7 +416,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 } finally {
                     if (connected) {
                         showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
-                        checkDeviceRegistry();
+                        checkDeviceRegistry(false);
                     } else {
                         showToastText("Unable to connect to the device, please make sure to choose the right network");
                         showStatus("Connection Failed", View.GONE);
@@ -440,11 +438,11 @@ public class Home extends AppCompatActivity implements LocationListener {
         obdBridge.closeBluetoothSocket();
     }
 
-    private void checkDeviceRegistry() {
+    private void checkDeviceRegistry(final boolean simulation) {
         getAccurateLocation();
 
         try {
-            final String device_id = obdBridge.getDeviceId();
+            final String device_id = obdBridge.getDeviceId(simulation);
             final String url = API.platformAPI + "/device/types/" + API.typeId + "/devices/" + device_id;
             showStatus("Checking Device Registration", View.VISIBLE);
             final API.doRequest task = new API.doRequest(new API.doRequest.TaskListener() {
@@ -464,7 +462,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
                             showStatus("Device Already Registered", View.GONE);
                             iotpDevice.setDeviceDefinition(result.getJSONObject(0));
-                            deviceRegistered();
+                            deviceRegistered(simulation);
 
                             break;
                         case 404:
@@ -479,7 +477,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
-                                            registerDevice();
+                                            registerDevice(simulation);
                                         }
                                     })
                                     .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -519,6 +517,8 @@ public class Home extends AppCompatActivity implements LocationListener {
             });
 
             task.execute(url, "GET", null, null, API.credentialsBase64).get();
+            System.out.println("CHECKING DEVICE REGISTRATION SUCCESSFULLY GOT......");
+            Log.d("Got", url);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -528,7 +528,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void registerDevice() {
+    public void registerDevice(final boolean simulation) {
         final String url = API.addDevices;
 
         try {
@@ -577,7 +577,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                                         public void onClick(DialogInterface dialogInterface, int which) {
                                             try {
                                                 iotpDevice.setDeviceDefinition(result.getJSONObject(0));
-                                                deviceRegistered();
+                                                deviceRegistered(simulation);
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
@@ -594,14 +594,16 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             final JSONArray bodyArray = new JSONArray();
             final JSONObject bodyObject = new JSONObject();
-            final String device_id = obdBridge.getDeviceId();
+            final String device_id = obdBridge.getDeviceId(simulation);
             bodyObject
                     .put("typeId", API.typeId)
                     .put("deviceId", device_id);
             bodyArray
                     .put(bodyObject);
-
-            task.execute(url, "POST", null, bodyArray.toString(), API.credentialsBase64).get();
+            final String payload = bodyArray.toString();
+            task.execute(url, "POST", null, payload, API.credentialsBase64).get();
+            System.out.println("REGISTER DEVICE REQUEST SUCCESSFULLY POSTED......");
+            Log.d("Posted", payload);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -613,14 +615,14 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    public void deviceRegistered() {
+    public void deviceRegistered(final boolean simulation) {
         trip_id = createTripId();
 
         try {
             if (iotpDevice.createDeviceClient() != null) {
                 iotpDevice.connectDevice();
 
-                obdBridge.startObdScanThread();
+                obdBridge.startObdScanThread(simulation);
                 startPublishingProbeData();
             }
         } catch (MqttException e) {
@@ -653,7 +655,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             public void notifyPostResult(final boolean success, final JsonObject event) {
                 if (success) {
                     showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
-                    System.out.println("SUCCESSFULLY POSTED......");
+                    System.out.println("DATA SUCCESSFULLY POSTED......");
                     Log.d("Posted", event.toString());
                 } else {
                     showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);

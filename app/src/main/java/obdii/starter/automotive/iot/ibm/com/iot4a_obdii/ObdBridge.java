@@ -67,8 +67,8 @@ public class ObdBridge {
         super.finalize();
     }
 
-    public String getDeviceId() throws DeviceNotConnectedException {
-        return isSimulation() ? getSimulatedDeviceId() : getRealDeviceId();
+    public String getDeviceId(final boolean simulation) throws DeviceNotConnectedException {
+        return simulation ? getSimulatedDeviceId() : getRealDeviceId();
     }
 
     private String getSimulatedDeviceId() {
@@ -88,7 +88,7 @@ public class ObdBridge {
         final String key = "device-id-" + userDeviceAddress.replaceAll(":", "-");
         String device_id = API.getStoredData(key);
         if (device_id == null || DOESNOTEXIST.equals(device_id)) {
-            device_id = API.getUUID();
+            device_id = UUID.randomUUID().toString();
             API.storeData(key, device_id);
         }
         return device_id;
@@ -193,10 +193,6 @@ public class ObdBridge {
         }
     }
 
-    public void setSimulation(final boolean simulation) {
-        this.simulation = simulation;
-    }
-
     public boolean isSimulation() {
         return simulation;
     }
@@ -226,10 +222,11 @@ public class ObdBridge {
         return event;
     }
 
-    public synchronized void startObdScanThread() {
+    public synchronized void startObdScanThread(final boolean simulation) {
         if (obdScanThread != null) {
             return;
         }
+        this.simulation = simulation;
         obdScanThread = new Thread() {
             @Override
             public void run() {

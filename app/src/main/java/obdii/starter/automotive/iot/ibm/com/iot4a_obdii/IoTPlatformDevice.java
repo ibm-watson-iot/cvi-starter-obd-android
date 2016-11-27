@@ -42,6 +42,10 @@ public class IoTPlatformDevice {
 
     public void setDeviceDefinition(JSONObject deviceDefinition) {
         currentDevice = deviceDefinition;
+        if (deviceClient != null) {
+            disconnectDevice();
+            deviceClient = null;
+        }
     }
 
     public String getDeviceToken(final String deviceId) {
@@ -64,6 +68,9 @@ public class IoTPlatformDevice {
         if (deviceClient != null) {
             return deviceClient;
         }
+        if (currentDevice == null) {
+            throw new NoDeviceDefinition();
+        }
         final Properties options = new Properties();
         options.setProperty("org", API.orgId);
         options.setProperty("type", API.typeId);
@@ -74,6 +81,7 @@ public class IoTPlatformDevice {
         options.setProperty("auth-token", token);
 
         deviceClient = new DeviceClient(options);
+        System.out.println("IOTP DEVICE CLIENT CREATED: "+options.toString());
         return deviceClient;
     }
 
