@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="project" default="main" basedir=".">
+	<description>
+		NOTE: This file is only for GHE
+		Overwrite the dest repo content with the 'release' branch in the source repo
+	</description>
+
+	<property file="_ghe_copy_mobile_repo.properties"/>
+	<!-- 0. review the reposiroty urls
+	      - src.url and dest.url for repositories
+	      - src.opts and dest.opts for branches
+	-->
+	<!-- 1. provide credentials in _ghe_copy_mobile_repo.properties
+	# src (dev)
+	src.user=<ghe user>
+	src.pass=<ghe pass>
+	
+	# destination (mirror)
+	dest.user=<ghe user>
+	dest.pass=<ghe pass>
+	-->
+	<!-- 2. or define properties here
+	<property name="src.user" value=""/>
+	<property name="src.pass" value=""/>
+	<property name="dest.user" value=""/>
+	<property name="dest.pass" value=""/>
+	-->
+	<!-- 3. dry-run and check the result (w/ -Ddry-run=true)
+	     4. run the script
+	     5. delete temporary directories
+	        - _tmp.src_clone.YYYYMMDD
+	        - _tmp.dest_clone.YYYYMMDD
+	-->
+	
+	<property name="dry-run" value="false"/>
+	
+	<tstamp>
+		<format property="TAG_NAME" pattern="yyyyMMdd_HHmm" locale="en" timezone="Etc/GMT-9"/>
+	</tstamp>
+	
+	<property name="src.url" value="https://github.ibm.com/Watson-IoT/IoT-Automotive-OBD2-android.git"/>
+	<property name="src.opts" value="--depth 1 -b release --single-branch"/>
+	<property name="src.clone" location="_tmp.src_clone.${TAG_NAME}"/>
+	
+	<property name="dest.url" value="https://github.ibm.com/Watson-IoT/IoT-Automotive-OBD2-android.git"/>
+	<property name="dest.opts" value="-b mirror --single-branch"/>
+	<property name="dest.clone" location="_tmp.dest_clone.${TAG_NAME}"/>
+	
+	<!-- for public GitHub -->
+	<property name="iotp.orgid" value="Set Your IoT Platform Organization ID"/>
+	<property name="iotp.apikey" value="Set Your IoT Platform API Key"/>
+	<property name="iotp.apitoken" value="Set Your IoT Platform API Token"/>
+	
+	<!-- ================================= 
+          target: main              
+         ================================= -->
+	<target name="main" depends="" description="description">
+		<echo>Start copying repo w/ tag ${TAG_NAME}...</echo>
+		<antcall target="git.clone">
+			<param name="repo.url" value="${src.url}"/>
+			<param name="repo.user" value="${src.user}"/>
+			<param name="repo.pass" value="${src.pass}"/>
+			<param name="repo.opts" value="${src.opts}"/>
+			<param name="repo.clone" value="${src.clone}"/>
+		</antcall>
+		<antcall target="git.clone">
+			<param name="repo.url" value="${dest.url}"/>
+			<param name="repo.user" value="${dest.user}"/>
+			<param name="repo.pass" value="${dest.pass}"/>
+			<param name="repo.opts" value="${dest.opts}"/>
+			<param name="repo.clone" value="${dest.clone}"/>
+		</antcall>
+
+		<antcall target="copy_contents"/>
+		<antcall target="push_contents"/>
+		
+		<!--
+		<echo>Cleaning up tmp...</echo>
+		<delete dir="${src.clone}"/>
+		<delete dir="${dest.clone}"/>
+		-->
+		<echo>Done.</echo>
+	</target>
+
+	<target name="commit_contents" depends="stage_contents" if="contents_changed">
+		<echo>Tagging source</echo>
+		<exec executable="git" dir="${src.clone}" failonerror="true">
+			<arg line="tag -a"/>
+			<arg value="${TAG_NAME}"/>
+			<arg line="-m"/>
+			<arg value="Version ${TAG_NAME}"/>
+		</exec>
+		<echo>Commiting the changes...</echo>
+		<exec executable="git" dir="${dest.clone}" failonerror="true">
+			<arg line="commit -m"/>
+			<arg value="${TAG_NAME}"/>
+		</exec>
+	</target>
+	
+	<target name="push_contents" depends="commit_contents" unless="${dry-run}">
+		<exec executable="git" dir="${src.clone}">
+			<arg line="push origin ${TAG_NAME}"/>
+		</exec>
+		<echo>Pushing the changes...</echo>
+		<exec executable="git" dir="${dest.clone}" failonerror="true">
+			<arg line="push"/>
+		</exec>
+		<echo>Destination repo is updated with the content tagged as ${TAG_NAME}.</echo>
+	</target>
+
+	<target name="stage_contents">
+		<echo>Staging changes...</echo>
+		<exec executable="git" dir="${dest.clone}" failonerror="true">
+			<arg line="add --all ."/>
+		</exec>
+		<exec executable="git" dir="${dest.clone}" failonerror="false" resultproperty="gitindexresult">
+			<arg line="diff-index --quiet --cached HEAD"/>
+		</exec>
+		<echo>  Flag if there are staged chagnges: ${gitindexresult}</echo>
+		<script language="javascript">
+			var r = project.getProperty("gitindexresult");
+			if(r != 0){
+				project.setProperty("contents_changed", true);
+			}
+		</script>
+	</target>
+
+	<target name="copy_contents">
+		<!-- check repos -->
+		<antcall target="check.clone">
+			<param name="repo.clone" value="${src.clone}"/>
+		</antcall>
+		<antcall target="check.clone">
+			<param name="repo.clone" value="${dest.clone}"/>
+		</antcall>
+
+		<!-- delete all in target -->
+		<delete>
+			<fileset dir="${dest.clone}">
+				<include name="**/*"/>
+				<exclude name="**/.project"/>
+			</fileset>
+			<fileset dir="${dest.clone}" defaultexcludes="no">
+				<include name="**/.gitignore"/>
+			</fileset>
+		</delete>
+		
+		<!-- add all files to target -->
+		<copy todir="${dest.clone}" overwrite="true" includeEmptyDirs="false">
+			<fileset dir="${src.clone}">
+				<include name="**/*"/>
+				<exclude name="**/_ghe*"/>
+				<exclude name="**/_ghe*/**/*"/>
+				<!-- exclude Android Studio project data  -->
+				<exclude name=".idea"/>
+				<exclude name=".idea/**/*"/>
+				<!-- exclude caches and derived files  -->
+				<exclude name="build"/>
+				<exclude name="build/**/*"/>
+				<!-- exclude gradle wrapper  -->
+				<exclude name="gradlew"/>
+				<exclude name="gradlew.bat"/>
+				<exclude name="gradle"/>
+				<exclude name="gradle/**/*"/>
+				<!-- keep therse for applying patch to Paho MQTT library in order to work with IBM MQTT websocket 
+				<exclude name="app/src/main/java/org/eclipse/paho"/>
+				<exclude name="app/src/main/java/org/eclipse/paho/**/*"/>
+				-->
+				<!-- exclude user/envrionment specific files -->
+				<exclude name="local.properties"/>
+				<exclude name="**/*.iml"/>
+				<exclude name="**/.DS_Store"/>
+			</fileset>
+		</copy>
+		<copy todir="${dest.clone}/app/src/debug/res/values" overwrite="true" includeEmptyDirs="false">
+			<fileset dir="${src.clone}/app/src/release/res/values">
+				<include name="google_maps_api.xml"/>
+			</fileset>
+		</copy>
+		<!-- copy license file to assets dir -->
+		<copy todir="${dest.clone}/app/src/main/assets" overwrite="true" includeEmptyDirs="false">
+			<fileset dir="${src.clone}">
+				<include name="LICENSE"/>
+			</fileset>
+		</copy>
+		<!-- copy .gitignore -->
+		<copy todir="${dest.clone}" overwrite="true" includeEmptyDirs="false">
+			<fileset dir="${src.clone}" defaultexcludes="false">
+				<include name="**/.gitignore"/>
+			</fileset>
+		</copy>
+		<copy todir="${dest.clone}/app/src/debug/res/values" overwrite="true" includeEmptyDirs="false">
+			<fileset dir="${src.clone}/app/src/release/res/values" defaultexcludes="false">
+				<include name="*.xml"/>
+			</fileset>
+		</copy>
+		
+		<!-- replace -dev server url w/ common server's -->
+		<replaceregexp flags="m"
+			match="static\s+final\s+String\s+orgId\s*=.*$"
+			replace="static final String orgId = &quot;${iotp.orgid}&quot;;"
+			byline="true">
+			<fileset id="fileset.API.java" dir="${dest.clone}/app/src/main">
+				<include name="**/iot4a_obdii/API.java"/>
+			</fileset>
+		</replaceregexp>
+		<replaceregexp flags="m"
+			match="static\s+final\s+String\s+apikey\s*=.*$"
+			replace="static final String apiKey = &quot;${iotp.apikey}&quot;;"
+			byline="true">
+			<fileset refid="fileset.API.java"></fileset>
+		</replaceregexp>
+		<replaceregexp flags="m"
+			match="static\s+final\s+String\s+apiToken\s*=.*$"
+			replace="static final String apiToken = &quot;${iotp.apitoken}&quot;;"
+			byline="true">
+			<fileset refid="fileset.API.java"></fileset>
+		</replaceregexp>
+		
+		<!-- Bundle ID should be com.ibm.cio.be.iphone.iot.automotive.obd2.android -->
+		<!-- COMMENTED OUT FOR NOW: BUNDLE ID is in app/build.gradle
+		<replaceregexp flags="m" file="${dest.clone}/app/build.gradle"
+			match="applicationId\s+.*$"
+			replace="applicationId = &quot;${common.bundle.id}&quot;"
+			byline="true" />
+		-->
+	</target>
+
+	<!-- check if "repo.clone" is a valid clone repo -->
+	<target name="check.clone">
+		<available type="dir" file="${repo.clone}/.git" property="clone_valid" />
+		<fail unless="clone_valid" message="The clone ${repo.clone} is not a Git repository."/>
+	</target>
+
+	<target name="git.clone">
+		<echo>Cloning repo ${repo.url} to ${repo.clone}...</echo>
+		<fail unless="repo.url" />
+		<fail unless="repo.clone" />
+		<property name="repo.opts" value=""/>
+		<!-- default options -->
+		<script language="javascript">
+			var repo = project.getProperty("repo.url");
+			var user = project.getProperty("repo.user");
+			var pass = project.getProperty("repo.pass");
+			var auth = '' + (user ? user : '') + (pass ? ':'+pass : '');
+			if(auth){
+				repo = repo.replace('://', '://' + auth + '@');
+			}
+			project.setProperty("_repo", repo);
+		</script>
+		<exec executable="git" failonerror="true">
+			<arg value="clone"/>
+			<arg line="${repo.opts}"/>
+			<arg value="${_repo}"/>
+			<arg path="${repo.clone}"/>
+		</exec>
+	</target>
+</project>
