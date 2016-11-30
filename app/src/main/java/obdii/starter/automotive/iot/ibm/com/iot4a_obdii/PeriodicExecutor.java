@@ -58,13 +58,13 @@ public class PeriodicExecutor {
                     try {
                         while (!mythread.isInterrupted()) {
                             try {
-                                synchronized (object) {
-                                    if (mythread != null && !mythread.isInterrupted()) {
-                                        if (!task.run()) {
-                                            mythread.interrupt();
-                                            break;
-                                        }
+                                if (mythread != null && !mythread.isInterrupted()) {
+                                    if (!task.run()) {
+                                        mythread.interrupt();
+                                        break;
                                     }
+                                }
+                                synchronized (object) {
                                     object.wait(period);
                                 }
                             } catch (InterruptedException e) {

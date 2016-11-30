@@ -27,6 +27,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.provider.Settings;
@@ -47,6 +49,10 @@ import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.JsonObject;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -101,6 +107,11 @@ public class Home extends AppCompatActivity implements LocationListener {
     private final PeriodicExecutor bluetoothConnectionExecutor = new PeriodicExecutor(BLUETOOTH_CONNECTION_RETRY_DELAY, BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS);
     private static final int MAX_RETRY = 10;
     private int retryCount = 0;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void finalize() throws Throwable {
@@ -138,6 +149,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     public void checkForDisclaimer() throws IOException {
@@ -208,7 +222,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
 
         } else {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 final Map<String, String> permissions = new HashMap<>();
                 final ArrayList<String> permissionNeeded = new ArrayList<>();
 
@@ -404,7 +418,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             @Override
             public boolean run() {
-                boolean completed = true;
                 if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
@@ -682,20 +695,37 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void changeNetwork(View view) {
-        bluetoothConnectionExecutor.cancel();
+        resetBluetoothConnection();
+
         permissionsGranted();
     }
 
     public void endSession(View view) {
+        resetBluetoothConnection();
+
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
-        bluetoothConnectionExecutor.cancel();
-        obdBridge.closeBluetoothSocket();
         Home.this.finishAffinity();
+    }
+
+    private void resetBluetoothConnection() {
+        bluetoothConnectionExecutor.cancel();
+        // do the following async as it may take time
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                obdBridge.closeBluetoothSocket();
+            }
+        }).start();
     }
 
     @Override
     public void onStart() {
-        super.onStart();
+        super.onStart();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
 
     @Override
@@ -776,7 +806,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Toast.makeText(getApplicationContext(), "Please turn on your GPS", Toast.LENGTH_LONG).show();
 
-                final Intent gpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                final Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivityForResult(gpsIntent, GPS_INTENT);
 
                 if (networkInfo == null) {
@@ -808,5 +838,31 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             getAccurateLocation();
         }
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Home Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 }

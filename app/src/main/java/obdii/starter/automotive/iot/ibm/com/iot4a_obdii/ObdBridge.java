@@ -192,7 +192,6 @@ public class ObdBridge {
     private void runObdCommand(final BluetoothSocket socket, final ObdCommand cmd) throws IOException, InterruptedException {
         final InputStream ins = socket.getInputStream();
         final OutputStream outs = socket.getOutputStream();
-        //cmd.setResponseTimeDelay((long)10);
         cmd.run(ins, outs);
     }
 
@@ -235,14 +234,11 @@ public class ObdBridge {
         return event;
     }
 
-
-    public synchronized void startObdScanThread(final boolean simulation) {
-        this.simulation = simulation;
-
+    public void startObdScanThread(final boolean simulation) {
         bluetoothScanExecutor.schedule(new PeriodicExecutor.Task() {
             @Override
             public void initialize() {
-
+                ObdBridge.this.simulation = simulation;
                 Log.i("Obd Scan Thread", "STARTED");
                 System.out.println("Obd Scan Thread: STARTED");
             }
