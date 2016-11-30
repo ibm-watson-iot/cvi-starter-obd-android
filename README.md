@@ -17,7 +17,7 @@ Once you want to stop the application from recording your data, simply press "En
 You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
-The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the car-sharing server component, see [Watson-IoT/iota-starter-server-fleetmanagement](https://github.ibm.com/Watson-IoT/iota-starter-server-fleetmanagement).
+The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [Watson-IoT/iota-starter-server-fleetmanagement](https://github.ibm.com/Watson-IoT/iota-starter-server-fleetmanagement).
 
 
 ## Prerequisites
@@ -47,7 +47,7 @@ To try the Android application using Android Emulator, complete the following st
  
     ![Gradle Plugin Update Dialog](GradlePluginUpdate.jpg)    
 
-3. Edit the **iota-starter-carsharing-android/app/java/obdii.starter.automotive.iot.ibm.com.iot4a_obdii/API.java** file, and set the `orgId` variable to your Organization's ID on Bluemix, the `apiKey` and `apiToken` variables to your API key and Auth Token from your instance of the IoT Platform.
+3. Edit the **iota-starter-obd-android/app/java/obdii.starter.automotive.iot.ibm.com.iot4a_obdii/API.java** file, and set the `orgId` variable to your Organization's ID, and the `apiKey` and `apiToken` variables to your API key and Auth Token from your instance of the IoT Platform.
 
 4. In Android Studio, run the application by pressing **Run 'app'**.
 
