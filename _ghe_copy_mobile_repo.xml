@@ -195,7 +195,7 @@
 			</fileset>
 		</replaceregexp>
 		<replaceregexp flags="m"
-			match="static\s+final\s+String\s+apikey\s*=.*$"
+			match="static\s+final\s+String\s+apiKey\s*=.*$"
 			replace="static final String apiKey = &quot;${iotp.apikey}&quot;;"
 			byline="true">
 			<fileset refid="fileset.API.java"></fileset>
