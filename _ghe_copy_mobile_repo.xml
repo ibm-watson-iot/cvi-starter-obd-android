@@ -172,11 +172,6 @@
 				<exclude name="**/.DS_Store"/>
 			</fileset>
 		</copy>
-		<copy todir="${dest.clone}/app/src/debug/res/values" overwrite="true" includeEmptyDirs="false">
-			<fileset dir="${src.clone}/app/src/release/res/values">
-				<include name="google_maps_api.xml"/>
-			</fileset>
-		</copy>
 		<!-- copy license file to assets dir -->
 		<copy todir="${dest.clone}/app/src/main/assets" overwrite="true" includeEmptyDirs="false">
 			<fileset dir="${src.clone}">
@@ -189,13 +184,8 @@
 				<include name="**/.gitignore"/>
 			</fileset>
 		</copy>
-		<copy todir="${dest.clone}/app/src/debug/res/values" overwrite="true" includeEmptyDirs="false">
-			<fileset dir="${src.clone}/app/src/release/res/values" defaultexcludes="false">
-				<include name="*.xml"/>
-			</fileset>
-		</copy>
 		
-		<!-- replace -dev server url w/ common server's -->
+		<!-- replace IoT Platform credentials -->
 		<replaceregexp flags="m"
 			match="static\s+final\s+String\s+orgId\s*=.*$"
 			replace="static final String orgId = &quot;${iotp.orgid}&quot;;"
