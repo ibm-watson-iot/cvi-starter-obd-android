@@ -17,7 +17,7 @@ Once you want to stop the application from recording your data, simply press "En
 You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
-The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [Watson-IoT/iota-starter-server-fleetmanagement](https://github.ibm.com/Watson-IoT/iota-starter-server-fleetmanagement).
+The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Bluemix and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [ibm-watson-iot/iota-starter-server-fm](https://github.com/ibm-watson-iot/iota-starter-server-fm).
 
 
 ## Prerequisites
