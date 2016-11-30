@@ -59,7 +59,7 @@ abstract public class ObdParameter {
         } else {
             String value = "";
             if (socket == null) {
-                value = "No Bluetooth Connection";
+                value = "No BT Connection";
             } else {
                 try {
                     final InputStream in = socket.getInputStream();
@@ -70,18 +70,22 @@ abstract public class ObdParameter {
                     Log.d(label, value);
                 } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
                     // reach here when OBD device is not connected
-                    value = "Bluetooth Connection Error";
+                    value = "BT Connection Error";
                 } catch (com.github.pires.obd.exceptions.NoDataException e) {
                     // reach here when this OBD parameter is not supported
-                    value = "No OBD2 Data";
+                    value = "No Data";
+                    //e.printStackTrace();
+                } catch (com.github.pires.obd.exceptions.MisunderstoodCommandException e) {
+                    value = "Not Supported";
+                    System.err.println("OBD Library Error: " + e.getMessage());
+                    //e.printStackTrace();
                 } catch (Exception e) {
-                    value = "No Bluetooth Connection";
+                    value = "No Connection";
                     e.printStackTrace();
                 }
             }
             showText(value);
         }
-
     }
 
     private void showText(final String text) {

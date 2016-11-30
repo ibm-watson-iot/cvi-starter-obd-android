@@ -192,7 +192,7 @@ public class ObdParameters {
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
                     if (--fuelLevel < 5) {
-                        fuelLevel = 50;
+                        fuelLevel = 60;
                     }
                     valueText = Math.round(fuelLevel) + "%";
                 } else {

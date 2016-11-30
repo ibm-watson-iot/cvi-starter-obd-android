@@ -76,9 +76,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     private static final int GPS_INTENT = 000;
     private static final int SETTINGS_INTENT = 001;
 
-    private static final int BLUETOOTH_CONNECTION_RETRY_COUNT = 10;
-    private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL = 6000;
-
     private LocationManager locationManager;
     private String provider;
     static Location location = null;
@@ -92,14 +89,21 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
-    private Thread bluetoothConnectionThread = null;
-
     private final ObdBridge obdBridge = new ObdBridge();
     private final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
 
+    public static final int MIN_FREQUENCY_SEC = 5;
+    public static final int MAX_FREQUENCY_SEC = 60;
+    public static final int DEFAULT_FREQUENCY_SEC = 10;
+
+    private static final int BLUETOOTH_CONNECTION_RETRY_DELAY = 100;
+    private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
+    private final PeriodicExecutor bluetoothConnectionExecutor = new PeriodicExecutor(BLUETOOTH_CONNECTION_RETRY_DELAY, BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS);
+    private static final int MAX_RETRY = 10;
+    private int retryCount = 0;
+
     @Override
     protected void finalize() throws Throwable {
-        stopBluetoothConnection();
         iotpDevice.disconnectDevice();
         super.finalize();
     }
@@ -292,7 +296,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         iotpDevice.stopPublishing();
         iotpDevice.disconnectDevice();
         obdBridge.stopObdScanThread();
-        stopBluetoothConnection();
         super.onDestroy();
     }
 
@@ -377,7 +380,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                startBluetoothConnection(deviceAddresses.get(position), deviceNames.get(position));
+                                tryBluetoothConnection(deviceAddresses.get(position), deviceNames.get(position));
                             }
                         })
                         .show();
@@ -387,55 +390,41 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private synchronized void startBluetoothConnection(final String userDeviceAddress, final String userDeviceName) {
-        stopBluetoothConnection();
+    private synchronized void tryBluetoothConnection(final String userDeviceAddress, final String userDeviceName) {
+        obdBridge.closeBluetoothSocket();
 
-        bluetoothConnectionThread = new Thread() {
+        retryCount = 0;
+        bluetoothConnectionExecutor.schedule(new PeriodicExecutor.Task() {
             @Override
-            public void run() {
-                boolean connected = false;
-                int retryCount = 0;
-                try {
-                    Log.i("BT Connection Thread", "STARTED");
-                    System.out.println("BT Connection Thread: STARTED");
-                    showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-                    while (!isInterrupted()) {
-                        if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
-                            connected = true;
-                            break;
-                        } else if (++retryCount < BLUETOOTH_CONNECTION_RETRY_COUNT) {
-                            showStatus("Retry Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-                            Thread.sleep(BLUETOOTH_CONNECTION_RETRY_INTERVAL);
-                        } else {
-                            connected = false;
-                            break;
-                        }
-                    }
-                } catch (InterruptedException e) {
+            public void initialize() {
+                Log.i("BT Connection Task", "STARTED");
+                System.out.println("BT Connection Task: STARTED");
+                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+            }
 
-                } finally {
-                    if (connected) {
-                        showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
-                        checkDeviceRegistry(false);
-                    } else {
-                        showToastText("Unable to connect to the device, please make sure to choose the right network");
-                        showStatus("Connection Failed", View.GONE);
-                    }
-                    Log.i("BT Connection Thread", "ENDED");
-                    System.out.println("BT Connection Thread: ENDED");
+            @Override
+            public boolean run() {
+                boolean completed = true;
+                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
+                    showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
+                    checkDeviceRegistry(false);
+                    return false;
+                } else if (++retryCount >= MAX_RETRY) {
+                    showToastText("Unable to connect to the device, please make sure to choose the right network");
+                    showStatus("Connection Failed", View.GONE);
+                    return false;
+                } else {
+                    showStatus("Retry Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+                    return true;
                 }
             }
-        };
-        bluetoothConnectionThread.start();
-    }
 
-
-    private synchronized void stopBluetoothConnection() {
-        if (bluetoothConnectionThread != null) {
-            bluetoothConnectionThread.interrupt();
-            bluetoothConnectionThread = null;
-        }
-        obdBridge.closeBluetoothSocket();
+            @Override
+            public void finalize() {
+                Log.i("BT Connection Task", "ENDED");
+                System.out.println("BT Connection Task: ENDED");
+            }
+        });
     }
 
     private void checkDeviceRegistry(final boolean simulation) {
@@ -669,9 +658,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
         final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
-        numberPicker.setMinValue(5);
-        numberPicker.setMaxValue(60);
-        numberPicker.setValue(15);
+        numberPicker.setMinValue(MIN_FREQUENCY_SEC);
+        numberPicker.setMaxValue(MAX_FREQUENCY_SEC);
+        numberPicker.setValue(DEFAULT_FREQUENCY_SEC);
 
         alertDialog.setView(changeFrequencyAlert);
         alertDialog
@@ -693,12 +682,14 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void changeNetwork(View view) {
+        bluetoothConnectionExecutor.cancel();
         permissionsGranted();
     }
 
     public void endSession(View view) {
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
-        stopBluetoothConnection();
+        bluetoothConnectionExecutor.cancel();
+        obdBridge.closeBluetoothSocket();
         Home.this.finishAffinity();
     }
 
