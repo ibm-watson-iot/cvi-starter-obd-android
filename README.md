@@ -35,7 +35,7 @@ To try the Android application using Android Emulator, complete the following st
 
 1. Clone the source code repository for the mobile app by using the following git command:    
 
-    ```$ git clone https://github.com/ibm-watson-iot/iota-obdii-fleetmanagement-android```  
+    ```$ git clone https://github.com/ibm-watson-iot/iota-starter-obd-android```  
 
 2. Open the project in Android Studio.
 
