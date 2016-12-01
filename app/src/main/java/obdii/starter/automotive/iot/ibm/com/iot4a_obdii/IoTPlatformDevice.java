@@ -17,8 +17,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONObject;
 
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /*
  IoT Platform Device Client
@@ -26,7 +28,22 @@ import java.util.TimerTask;
 
 public class IoTPlatformDevice {
 
-    static interface ProbeDatatGenerator {
+    public static final String MQTT_FREQENCY = "mqtt-freqency";
+    public static final int MIN_FREQUENCY_SEC = 5;
+    public static final int MAX_FREQUENCY_SEC = 60;
+    public static final int DEFAULT_FREQUENCY_SEC = 10;
+    public static final int DEFAULT_UPLOAD_DELAY_SEC = 5;
+
+    public static int getMqttFrequencySec() {
+        final String freq_str = API.getStoredData(MQTT_FREQENCY);
+        return API.DOESNOTEXIST.equals(freq_str) ? DEFAULT_FREQUENCY_SEC : Integer.parseInt(freq_str);
+    }
+
+    public static void setMqttFrequencySec(int sec) {
+        API.storeData(MQTT_FREQENCY, "" + sec);
+    }
+
+    static interface ProbeDataGenerator {
         public JsonObject generateData();
 
         public void notifyPostResult(boolean success, JsonObject event);
@@ -35,10 +52,17 @@ public class IoTPlatformDevice {
     private DeviceClient deviceClient = null;
     private JSONObject currentDevice;
 
-    private int uploadTimerDelay = 5000;
-    private int uploadTimerPeriod = 15000;
-    private Timer uploadTimer;
+    private int uploadDelay = DEFAULT_UPLOAD_DELAY_SEC * 1000;
+    private int uploadInterval = DEFAULT_FREQUENCY_SEC * 1000;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> uploadHandler = null;
 
+    @Override
+    protected void finalize() throws Throwable {
+        stopPublishing();
+        scheduler.shutdown();
+        super.finalize();
+    }
 
     public void setDeviceDefinition(JSONObject deviceDefinition) {
         currentDevice = deviceDefinition;
@@ -81,7 +105,7 @@ public class IoTPlatformDevice {
         options.setProperty("auth-token", token);
 
         deviceClient = new DeviceClient(options);
-        System.out.println("IOTP DEVICE CLIENT CREATED: "+options.toString());
+        System.out.println("IOTP DEVICE CLIENT CREATED: " + options.toString());
         return deviceClient;
     }
 
@@ -100,20 +124,19 @@ public class IoTPlatformDevice {
 
 
     public int getUploadTimerPeriod() {
-        return uploadTimerPeriod;
+        return uploadInterval;
     }
 
     public void setUploadTimerPeriod(final int value) {
-        uploadTimerPeriod = value;
+        uploadInterval = value;
     }
 
-    public synchronized void startPublishing(final ProbeDatatGenerator eventGenerator) {
-        // stop existing uploadTimer
+    public synchronized void startPublishing(final ProbeDataGenerator eventGenerator) {
         stopPublishing();
 
-        // start new uploadTimer
-        uploadTimer = new Timer();
-        uploadTimer.scheduleAtFixedRate(new TimerTask() {
+        uploadDelay = DEFAULT_UPLOAD_DELAY_SEC * 1000;
+        uploadInterval = getMqttFrequencySec() * 1000;
+        uploadHandler = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -127,13 +150,13 @@ public class IoTPlatformDevice {
                     e.printStackTrace();
                 }
             }
-        }, uploadTimerDelay, uploadTimerPeriod);
+        }, uploadDelay, uploadInterval, TimeUnit.MILLISECONDS);
     }
 
     public synchronized void stopPublishing() {
-        if (uploadTimer != null) {
-            uploadTimer.cancel();
-            uploadTimer = null;
+        if (uploadHandler != null) {
+            uploadHandler.cancel(true);
+            uploadHandler = null;
         }
     }
 

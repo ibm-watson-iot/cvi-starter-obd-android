@@ -75,6 +75,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class Home extends AppCompatActivity implements LocationListener {
 
@@ -98,15 +102,15 @@ public class Home extends AppCompatActivity implements LocationListener {
     private final ObdBridge obdBridge = new ObdBridge();
     private final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
 
-    public static final int MIN_FREQUENCY_SEC = 5;
-    public static final int MAX_FREQUENCY_SEC = 60;
-    public static final int DEFAULT_FREQUENCY_SEC = 10;
+    private int frequency_sec = IoTPlatformDevice.DEFAULT_FREQUENCY_SEC;
 
-    private static final int BLUETOOTH_CONNECTION_RETRY_DELAY = 100;
+    private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
     private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
-    private final PeriodicExecutor bluetoothConnectionExecutor = new PeriodicExecutor(BLUETOOTH_CONNECTION_RETRY_DELAY, BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    private ScheduledFuture<?> bluetoothConnectorHandle = null;
     private static final int MAX_RETRY = 10;
     private int retryCount = 0;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -115,7 +119,8 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     protected void finalize() throws Throwable {
-        iotpDevice.disconnectDevice();
+        stopConnectingBluetoothDevice();
+        scheduler.shutdown();
         super.finalize();
     }
 
@@ -309,7 +314,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     protected void onDestroy() {
         iotpDevice.stopPublishing();
         iotpDevice.disconnectDevice();
-        obdBridge.stopObdScanThread();
+        obdBridge.stopObdScan();
         super.onDestroy();
     }
 
@@ -394,7 +399,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                tryBluetoothConnection(deviceAddresses.get(position), deviceNames.get(position));
+                                startConnectingBluetoothDevice(deviceAddresses.get(position), deviceNames.get(position));
                             }
                         })
                         .show();
@@ -404,40 +409,38 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private synchronized void tryBluetoothConnection(final String userDeviceAddress, final String userDeviceName) {
-        obdBridge.closeBluetoothSocket();
+    private synchronized void startConnectingBluetoothDevice(final String userDeviceAddress, final String userDeviceName) {
+        stopConnectingBluetoothDevice();
 
         retryCount = 0;
-        bluetoothConnectionExecutor.schedule(new PeriodicExecutor.Task() {
+        Log.i("BT Connection Task", "STARTED");
+        System.out.println("BT Connection Task: STARTED");
+        showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+        bluetoothConnectorHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
-            public void initialize() {
-                Log.i("BT Connection Task", "STARTED");
-                System.out.println("BT Connection Task: STARTED");
-                showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-            }
-
-            @Override
-            public boolean run() {
+            public void run() {
                 if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
-                    return false;
+                    stopConnectingBluetoothDevice();
                 } else if (++retryCount >= MAX_RETRY) {
                     showToastText("Unable to connect to the device, please make sure to choose the right network");
                     showStatus("Connection Failed", View.GONE);
-                    return false;
+                    stopConnectingBluetoothDevice();
                 } else {
                     showStatus("Retry Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
-                    return true;
                 }
             }
+        }, BLUETOOTH_CONNECTION_RETRY_DELAY_MS, BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS, TimeUnit.MILLISECONDS);
+    }
 
-            @Override
-            public void finalize() {
-                Log.i("BT Connection Task", "ENDED");
-                System.out.println("BT Connection Task: ENDED");
-            }
-        });
+    private synchronized void stopConnectingBluetoothDevice() {
+        if (bluetoothConnectorHandle != null) {
+            bluetoothConnectorHandle.cancel(true);
+            bluetoothConnectorHandle = null;
+            Log.i("BT Connection Task", "ENDED");
+            System.out.println("BT Connection Task: ENDED");
+        }
     }
 
     private void checkDeviceRegistry(final boolean simulation) {
@@ -624,7 +627,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             if (iotpDevice.createDeviceClient() != null) {
                 iotpDevice.connectDevice();
 
-                obdBridge.startObdScanThread(simulation);
+                obdBridge.startObdScan(simulation);
                 startPublishingProbeData();
             }
         } catch (MqttException e) {
@@ -642,7 +645,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void startPublishingProbeData() {
-        iotpDevice.startPublishing(new IoTPlatformDevice.ProbeDatatGenerator() {
+        iotpDevice.startPublishing(new IoTPlatformDevice.ProbeDataGenerator() {
             @Override
             public JsonObject generateData() {
                 if (location != null) {
@@ -671,9 +674,10 @@ public class Home extends AppCompatActivity implements LocationListener {
         final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
         final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
-        numberPicker.setMinValue(MIN_FREQUENCY_SEC);
-        numberPicker.setMaxValue(MAX_FREQUENCY_SEC);
-        numberPicker.setValue(DEFAULT_FREQUENCY_SEC);
+        numberPicker.setMinValue(IoTPlatformDevice.MIN_FREQUENCY_SEC);
+        numberPicker.setMaxValue(IoTPlatformDevice.MAX_FREQUENCY_SEC);
+        frequency_sec = IoTPlatformDevice.getMqttFrequencySec();
+        numberPicker.setValue(frequency_sec);
 
         alertDialog.setView(changeFrequencyAlert);
         alertDialog
@@ -682,10 +686,11 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        final int newFrequency = numberPicker.getValue() * 1000;
-
-                        if (newFrequency != iotpDevice.getUploadTimerPeriod()) {
-                            iotpDevice.setUploadTimerPeriod(newFrequency);
+                        frequency_sec = numberPicker.getValue();
+                        IoTPlatformDevice.setMqttFrequencySec(frequency_sec);
+                        final int frequency_ms = frequency_sec * 1000;
+                        if (frequency_ms != iotpDevice.getUploadTimerPeriod()) {
+                            iotpDevice.setUploadTimerPeriod(frequency_ms);
                             startPublishingProbeData();
                         }
                     }
@@ -708,14 +713,15 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void resetBluetoothConnection() {
-        bluetoothConnectionExecutor.cancel();
         // do the following async as it may take time
-        new Thread(new Runnable() {
+        scheduler.schedule(new Runnable() {
             @Override
             public void run() {
+                obdBridge.stopObdScan();
                 obdBridge.closeBluetoothSocket();
+                stopConnectingBluetoothDevice();
             }
-        }).start();
+        }, 0, TimeUnit.MILLISECONDS);
     }
 
     @Override

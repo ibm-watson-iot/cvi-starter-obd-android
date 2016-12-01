@@ -28,7 +28,6 @@ import com.github.pires.obd.commands.protocol.ObdRawCommand;
 import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.ObdWarmstartCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
-import com.github.pires.obd.commands.protocol.SpacesOffCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.google.gson.JsonObject;
@@ -36,10 +35,13 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
 
@@ -61,12 +63,14 @@ public class ObdBridge {
 
     private static final int BLUETOOTH_SCAN_DELAY = 500;
     private static final int BLUETOOTH_SCAN_INTERVAL_MS = 1000;
-    private final PeriodicExecutor bluetoothScanExecutor = new PeriodicExecutor(BLUETOOTH_SCAN_DELAY, BLUETOOTH_SCAN_INTERVAL_MS);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> obdScannerHandle = null;
 
     @Override
     protected void finalize() throws Throwable {
-        stopObdScanThread();
+        stopObdScan();
         closeBluetoothSocket();
+        scheduler.shutdown();
         super.finalize();
     }
 
@@ -117,6 +121,9 @@ public class ObdBridge {
 
 
     public synchronized boolean connectBluetoothSocket(final String userDeviceAddress) {
+        if (this.userDeviceAddress == userDeviceAddress && socket != null && socket.isConnected()) {
+            return true;
+        }
         closeBluetoothSocket();
         this.userDeviceAddress = userDeviceAddress;
 
@@ -198,7 +205,9 @@ public class ObdBridge {
     public synchronized void closeBluetoothSocket() {
         if (socket != null) {
             try {
-                socket.close();
+                if (socket.isConnected()) {
+                    socket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -234,34 +243,30 @@ public class ObdBridge {
         return event;
     }
 
-    public void startObdScanThread(final boolean simulation) {
-        bluetoothScanExecutor.schedule(new PeriodicExecutor.Task() {
-            @Override
-            public void initialize() {
-                ObdBridge.this.simulation = simulation;
-                Log.i("Obd Scan Thread", "STARTED");
-                System.out.println("Obd Scan Thread: STARTED");
-            }
+    public synchronized void startObdScan(final boolean simulation) {
+        stopObdScan();
 
+        ObdBridge.this.simulation = simulation;
+        Log.i("Obd Scan Thread", "STARTED");
+        System.out.println("Obd Scan Thread: STARTED");
+        obdScannerHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
-            public boolean run() {
+            public void run() {
                 if (simulation || socketConnected) {
                     for (ObdParameter obdParam : obdParameterList) {
                         obdParam.showScannedValue(socket, simulation);
                     }
                 }
-                return true;
             }
-
-            @Override
-            public void finalize() {
-                Log.i("Obd Scan Thread", "ENDED");
-                System.out.println("Obd Scan Thread: ENDED");
-            }
-        });
+        }, BLUETOOTH_SCAN_DELAY, BLUETOOTH_SCAN_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
-    public void stopObdScanThread() {
-        bluetoothScanExecutor.cancel();
+    public synchronized void stopObdScan() {
+        if (obdScannerHandle != null) {
+            obdScannerHandle.cancel(true);
+            obdScannerHandle = null;
+            Log.i("Obd Scan Thread", "ENDED");
+            System.out.println("Obd Scan Thread: ENDED");
+        }
     }
 }
