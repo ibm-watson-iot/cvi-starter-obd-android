@@ -55,7 +55,6 @@ public class ObdBridge {
 
     private BluetoothAdapter bluetoothAdapter = null;
     private BluetoothSocket socket = null;
-    private boolean socketConnected = false;
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
 
@@ -138,7 +137,7 @@ public class ObdBridge {
         }
         try {
             socket.connect();
-            socketConnected(socket);
+            socketConnected();
             return true;
 
         } catch (IOException e) {
@@ -147,7 +146,7 @@ public class ObdBridge {
                 Log.i("Bluetooth Connection", "Using fallback method");
                 socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
                 socket.connect();
-                socketConnected(socket);
+                socketConnected();
                 return true;
             } catch (IOException e2) {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");
@@ -168,10 +167,9 @@ public class ObdBridge {
         }
     }
 
-    private void socketConnected(BluetoothSocket socket) throws IOException, InterruptedException {
-        Log.i("Bluetooth Connection", "CONNECTED - " + this.socket.isConnected());
-        initializeOBD2Device(this.socket);
-        socketConnected = true;
+    private void socketConnected() throws IOException, InterruptedException {
+        Log.i("Bluetooth Connection", "CONNECTED - " + socket.isConnected());
+        initializeOBD2Device(socket);
     }
 
     private void initializeOBD2Device(final BluetoothSocket socket) throws IOException, InterruptedException {
@@ -252,7 +250,7 @@ public class ObdBridge {
         obdScannerHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (simulation || socketConnected) {
+                if (simulation || (socket != null && socket.isConnected())) {
                     for (ObdParameter obdParam : obdParameterList) {
                         obdParam.showScannedValue(socket, simulation);
                     }

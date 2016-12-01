@@ -700,26 +700,27 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void changeNetwork(View view) {
-        resetBluetoothConnection();
+        resetSession();
 
         permissionsGranted();
     }
 
     public void endSession(View view) {
-        resetBluetoothConnection();
+        resetSession();
 
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
         Home.this.finishAffinity();
     }
 
-    private void resetBluetoothConnection() {
+    private void resetSession() {
         // do the following async as it may take time
         scheduler.schedule(new Runnable() {
             @Override
             public void run() {
+                stopConnectingBluetoothDevice();
+                iotpDevice.stopPublishing();
                 obdBridge.stopObdScan();
                 obdBridge.closeBluetoothSocket();
-                stopConnectingBluetoothDevice();
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
