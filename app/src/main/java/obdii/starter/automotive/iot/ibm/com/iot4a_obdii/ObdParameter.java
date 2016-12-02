@@ -16,7 +16,6 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.github.pires.obd.commands.ObdCommand;
-import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.google.gson.JsonObject;
 
 import java.io.InputStream;

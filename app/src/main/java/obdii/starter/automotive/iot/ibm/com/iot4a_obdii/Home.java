@@ -13,14 +13,12 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,18 +28,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-
 import android.util.Log;
-
 import android.view.View;
-
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,7 +50,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.JsonObject;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
