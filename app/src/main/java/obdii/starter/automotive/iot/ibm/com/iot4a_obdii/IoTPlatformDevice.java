@@ -93,7 +93,7 @@ public class IoTPlatformDevice {
             return deviceClient;
         }
         if (currentDevice == null) {
-            throw new NoDeviceDefinition();
+            throw new NoDeviceDefinitionException();
         }
         final Properties options = new Properties();
         options.setProperty("org", API.orgId);
