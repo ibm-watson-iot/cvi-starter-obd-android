@@ -59,6 +59,7 @@ public class ObdBridge {
     private List<ObdParameter> obdParameterList = null;
 
     private String userDeviceAddress = null;
+    private String userDeviceName = null;
 
     private static final int BLUETOOTH_SCAN_DELAY = 500;
     private static final int BLUETOOTH_SCAN_INTERVAL_MS = 1000;
@@ -116,12 +117,13 @@ public class ObdBridge {
     }
 
 
-    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress) {
+    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress, final String userDeviceName) {
         if (this.userDeviceAddress == userDeviceAddress && socket != null && socket.isConnected()) {
             return true;
         }
         closeBluetoothSocket();
         this.userDeviceAddress = userDeviceAddress;
+        this.userDeviceName = userDeviceName;
 
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
@@ -263,5 +265,13 @@ public class ObdBridge {
             Log.i("Obd Scan Thread", "ENDED");
             System.out.println("Obd Scan Thread: ENDED");
         }
+    }
+
+    public String getUserDeviceAddress() {
+        return userDeviceAddress;
+    }
+
+    public String getUserDeviceName() {
+        return userDeviceName;
     }
 }

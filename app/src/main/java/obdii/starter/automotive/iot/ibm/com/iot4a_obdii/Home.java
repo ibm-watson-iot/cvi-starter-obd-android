@@ -167,25 +167,19 @@ public class Home extends AppCompatActivity implements LocationListener {
                     switch (choice) {
                         case DialogInterface.BUTTON_POSITIVE:
                             API.disclaimerShown(true);
-
                             startApp();
-
                             break;
-
                         case DialogInterface.BUTTON_NEGATIVE:
                             Toast toast = Toast.makeText(Home.this, "Cannot use this application without agreeing to the disclaimer", Toast.LENGTH_SHORT);
                             toast.show();
-
                             Home.this.finishAffinity();
-
                             break;
                     }
                 }
             };
-
             final InputStream is = getResources().getAssets().open("LICENSE");
             String line;
-            StringBuffer message = new StringBuffer();
+            final StringBuffer message = new StringBuffer();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             try {
                 br = new BufferedReader(new InputStreamReader(is));
@@ -198,13 +192,14 @@ public class Home extends AppCompatActivity implements LocationListener {
                 if (br != null) br.close();
             }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
             builder
                     .setTitle("Disclaimer")
                     .setMessage(message)
                     .setNegativeButton("Disagree", dialogClickListener)
                     .setPositiveButton("Agree", dialogClickListener)
                     .show();
+
         } else {
             startApp();
         }
@@ -475,7 +470,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         bluetoothConnectorHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (obdBridge.connectBluetoothSocket(userDeviceAddress)) {
+                if (obdBridge.connectBluetoothSocket(userDeviceAddress, userDeviceName)) {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
                     completeConnectingBluetoothDevice();

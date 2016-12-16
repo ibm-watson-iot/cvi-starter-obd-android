@@ -24,6 +24,8 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String API_TOKEN = "api_token";
     public static final String DEVICE_ID = "device_id";
     public static final String DEVICE_TOKEN = "device_token";
+    public static final String BLUETOOTH_DEVICE_NAME = "bt_device_name";
+    public static final String BLUETOOTH_DEVICE_ADDRESS = "bt_device_address";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -45,6 +47,8 @@ public class SettingsFragment extends PreferenceFragment {
 
         String device_id = "";
         String device_token = "";
+        String bt_device_address = "";
+        String bt_device_name = "";
         if (Home.home != null) {
             final ObdBridge obdBridge = Home.home.obdBridge;
             final IoTPlatformDevice iotpDevice = Home.home.iotpDevice;
@@ -53,9 +57,14 @@ public class SettingsFragment extends PreferenceFragment {
             } catch (DeviceNotConnectedException e) {
             }
             device_token = iotpDevice.getDeviceToken(device_id);
+            bt_device_address = Home.home.obdBridge.getUserDeviceAddress();
+            bt_device_name = Home.home.obdBridge.getUserDeviceName();
         }
         setEditTextPreference(DEVICE_ID, device_id, false);
         setEditTextPreference(DEVICE_TOKEN, device_token, true);
+
+        setEditTextPreference(BLUETOOTH_DEVICE_NAME, bt_device_name, false);
+        setEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, bt_device_address, false);
     }
 
     private void prepareEditTextPreference(final String prefKey, final String defaultValue, final boolean enabled) {
