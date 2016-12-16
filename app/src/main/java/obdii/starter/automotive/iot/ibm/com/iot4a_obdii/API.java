@@ -1,10 +1,10 @@
 /**
  * Copyright 2016 IBM Corp. All Rights Reserved.
- *
+ * <p>
  * Licensed under the IBM License, a copy of which may be obtained at:
- *
+ * <p>
  * http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?li_formnum=L-DDIN-AEGGZJ&popup=y&title=IBM%20IoT%20for%20Automotive%20Sample%20Starter%20Apps%20%28Android-Mobile%20and%20Server-all%29
- *
+ * <p>
  * You may not use this file except in compliance with the license.
  */
 
@@ -32,26 +32,20 @@ import java.net.URL;
 import java.util.UUID;
 
 public class API {
-    // Platform API URLs
-    protected static final String orgId = "kibb33";
-    protected static final String platformAPI = "https://" + orgId + ".internetofthings.ibmcloud.com/api/v0002";
-
-    protected static final String apiKey = "a-kibb33-rkhexfo7ml";
-    protected static final String apiToken = "lDfjTThkWv*@Ea_!4d";
-    protected static final String credentials = API.apiKey + ":" + API.apiToken;
-    protected static final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
-
-    protected static final String typeId = "OBDII";
 
     protected static final String DOESNOTEXIST = "doesNotExist";
 
-    // Endpoints
-    protected static final String addDevices = platformAPI + "/bulk/devices/add";
-
     public static Context context;
+
     public static SharedPreferences sharedpreferences;
 
-    public API(Context context){
+    public static String getCredentialsBase64(final String apiKey, final String apiToken) {
+        final String credentials = apiKey + ":" + apiToken;
+        final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
+        return credentialsBase64;
+    }
+
+    public API(Context context) {
         this.context = context;
     }
 
@@ -195,7 +189,7 @@ public class API {
 
                     try {
                         inputStream = urlConnection.getInputStream();
-                    } catch(IOException exception) {
+                    } catch (IOException exception) {
                         inputStream = urlConnection.getErrorStream();
                     }
 
@@ -279,7 +273,7 @@ public class API {
         protected void onPostExecute(JSONArray result) {
             super.onPostExecute(result);
 
-            if(this.taskListener != null) {
+            if (this.taskListener != null) {
                 try {
                     this.taskListener.postExecute(result);
                 } catch (JSONException e) {

@@ -65,12 +65,10 @@ public class ObdBridge {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> obdScannerHandle = null;
 
-    @Override
-    protected void finalize() throws Throwable {
+    void clean() {
         stopObdScan();
         closeBluetoothSocket();
         scheduler.shutdown();
-        super.finalize();
     }
 
     public String getDeviceId(final boolean simulation) throws DeviceNotConnectedException {
@@ -99,7 +97,6 @@ public class ObdBridge {
         }
         return device_id;
     }
-
 
     public boolean setupBluetooth() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
