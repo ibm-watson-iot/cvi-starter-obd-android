@@ -447,7 +447,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     deviceNames.add(device.getName());
                     deviceAddresses.add(device.getAddress());
                 }
-                final String preferredName = getPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, "obd");
+                final String preferredName = getPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, "obd").toLowerCase();
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                 final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
                 int selectedDevice = -1;
