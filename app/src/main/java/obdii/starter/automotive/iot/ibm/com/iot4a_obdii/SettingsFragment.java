@@ -11,6 +11,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -26,6 +27,7 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String DEVICE_TOKEN = "device_token";
     public static final String BLUETOOTH_DEVICE_NAME = "bt_device_name";
     public static final String BLUETOOTH_DEVICE_ADDRESS = "bt_device_address";
+    public static final String UPLOAD_FREQUENCY = "upload_frequency";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -41,17 +43,22 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     public void initializeSettings() {
-        prepareEditTextPreference(ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId, true);
-        prepareEditTextPreference(API_KEY, IoTPlatformDevice.defaultApiKey, true);
-        prepareEditTextPreference(API_TOKEN, IoTPlatformDevice.defaultApiToken, true);
-
+        String organization_id = null;
+        String api_key = null;
+        String api_token = null;
         String device_id = "";
         String device_token = "";
         String bt_device_address = "";
         String bt_device_name = "";
+        String frequency = "";
+
         if (Home.home != null) {
             final ObdBridge obdBridge = Home.home.obdBridge;
             final IoTPlatformDevice iotpDevice = Home.home.iotpDevice;
+            organization_id = iotpDevice.getOrganizationId();
+            api_key = iotpDevice.getApiKey();
+            api_token = iotpDevice.getApiToken();
+
             try {
                 device_id = obdBridge.getDeviceId(obdBridge.isSimulation());
             } catch (DeviceNotConnectedException e) {
@@ -59,23 +66,32 @@ public class SettingsFragment extends PreferenceFragment {
             device_token = iotpDevice.getDeviceToken(device_id);
             bt_device_address = Home.home.obdBridge.getUserDeviceAddress();
             bt_device_name = Home.home.obdBridge.getUserDeviceName();
-        }
-        setEditTextPreference(DEVICE_ID, device_id, false);
-        setEditTextPreference(DEVICE_TOKEN, device_token, true);
 
-        setEditTextPreference(BLUETOOTH_DEVICE_NAME, bt_device_name, false);
-        setEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, bt_device_address, false);
+            frequency = "" + Home.home.getUploadFrequencySec();
+        }
+        prepareEditTextPreference(ORGANIZATION_ID, organization_id, IoTPlatformDevice.defaultOrganizationId, true);
+        prepareEditTextPreference(API_KEY, api_key, IoTPlatformDevice.defaultApiKey, true);
+        prepareEditTextPreference(API_TOKEN, api_token, IoTPlatformDevice.defaultApiToken, true);
+
+        prepareEditTextPreference(DEVICE_ID, device_id, "", false);
+        prepareEditTextPreference(DEVICE_TOKEN, device_token, "", true);
+
+        prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, bt_device_name, "", false);
+        prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, bt_device_address, "", false);
+
+        prepareEditTextPreference(UPLOAD_FREQUENCY, frequency, "" + Home.DEFAULT_FREQUENCY_SEC, false);
     }
 
-    private void prepareEditTextPreference(final String prefKey, final String defaultValue, final boolean enabled) {
+    private void prepareEditTextPreference(final String prefKey, final String currentValue, final String defaultValue, final boolean enabled) {
         final Preference preference = findPreference(prefKey);
         if (preference instanceof EditTextPreference) {
             final EditTextPreference editTextPref = (EditTextPreference) preference;
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            final String storedValue = preferences.getString(prefKey, defaultValue);
+            final String valueToSet = currentValue != null ? currentValue : storedValue;
+            editTextPref.setText(valueToSet);
             editTextPref.setEnabled(enabled);
-            if (editTextPref.getText() == null) {
-                PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(prefKey, defaultValue);
-                editTextPref.setText(defaultValue);
-            }
+
             editTextPref.setSummary(editTextPref.getText());
             editTextPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -104,24 +120,29 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    private String getEditTextPreferenceValue(final String prefKey) {
+    void setPreferenceValue(final String prefKey, final String value) {
         final Preference preference = findPreference(prefKey);
         if (preference instanceof EditTextPreference) {
-            final EditTextPreference editTextPref = (EditTextPreference) preference;
-            final String value = editTextPref.getText();
-            return value;
+            ((EditTextPreference) preference).setText(value);
+        }
+    }
+
+    String getPreferenceValue(final String prefKey) {
+        final Preference preference = findPreference(prefKey);
+        if (preference instanceof EditTextPreference) {
+            return ((EditTextPreference) preference).getText();
         } else {
             return null;
         }
     }
 
-    public void completeSettings() {
-        final String orgId = getEditTextPreferenceValue(ORGANIZATION_ID);
-        final String apiKey = getEditTextPreferenceValue(API_KEY);
-        final String apiToken = getEditTextPreferenceValue(API_TOKEN);
+    void completeSettings() {
+        final String orgId = getPreferenceValue(ORGANIZATION_ID);
+        final String apiKey = getPreferenceValue(API_KEY);
+        final String apiToken = getPreferenceValue(API_TOKEN);
         //String device_id = getEditTextPreferenceValue(DEVICE_ID);
 
-        if (!Home.home.iotpDevice.compareCurrentOrganization(orgId)) {
+        if (!Home.home.iotpDevice.isCurrentOrganizationSameAs(orgId)) {
             Home.home.restartApp(orgId, apiKey, apiToken);
         }
     }

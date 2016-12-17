@@ -30,6 +30,11 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Device Token" />
+        <EditTextPreference
+            android:key="upload_frequency"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Upload/OBD2 Scan Frequency" />
     </PreferenceCategory>
 
     <PreferenceCategory

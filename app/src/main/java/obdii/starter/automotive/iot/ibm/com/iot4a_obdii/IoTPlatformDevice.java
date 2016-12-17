@@ -40,12 +40,6 @@ public class IoTPlatformDevice {
     static final String defaultApiKey = "a-kibb33-rkhexfo7ml";
     static final String defaultApiToken = "lDfjTThkWv*@Ea_!4d";
 
-    static final String MQTT_FREQENCY = "mqtt-freqency";
-    static final int MIN_FREQUENCY_SEC = 5;
-    static final int MAX_FREQUENCY_SEC = 60;
-    static final int DEFAULT_FREQUENCY_SEC = 10;
-    static final int DEFAULT_UPLOAD_DELAY_SEC = 5;
-
     private static final String typeId = "OBDII";
 
     @NonNull
@@ -62,16 +56,6 @@ public class IoTPlatformDevice {
     private static String getIoTPGetDeviceEndpoint(final String organizationId, final String device_id) {
         return getIoTPAPIURL(organizationId) + "/device/types/" + typeId + "/devices/" + device_id;
     }
-
-    public static int getMqttFrequencySec() {
-        final String freq_str = API.getStoredData(MQTT_FREQENCY);
-        return API.DOESNOTEXIST.equals(freq_str) ? DEFAULT_FREQUENCY_SEC : Integer.parseInt(freq_str);
-    }
-
-    public static void setMqttFrequencySec(int sec) {
-        API.storeData(MQTT_FREQENCY, "" + sec);
-    }
-
 
     static interface ProbeDataGenerator {
         public JsonObject generateData();
@@ -99,8 +83,7 @@ public class IoTPlatformDevice {
     private DeviceClient deviceClient = null;
     private JSONObject currentDevice;
 
-    private int uploadDelay = DEFAULT_UPLOAD_DELAY_SEC * 1000;
-    private int uploadInterval = DEFAULT_FREQUENCY_SEC * 1000;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> uploadHandler = null;
 
@@ -113,7 +96,7 @@ public class IoTPlatformDevice {
     public String getDeviceToken(final String deviceId) {
         final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
         final String deviceToken = API.getStoredData(sharedPrefsKey);
-        return API.DOESNOTEXIST.equals(deviceToken)?"":deviceToken;
+        return API.DOESNOTEXIST.equals(deviceToken) ? "" : deviceToken;
     }
 
     public boolean hasDeviceToken(final String deviceId) {
@@ -131,6 +114,10 @@ public class IoTPlatformDevice {
         return API.getCredentialsBase64(apiKey, apiToken);
     }
 
+    public boolean hasValidOrganization() {
+        return organizationId != null && !"".equals(organizationId);
+    }
+
     public synchronized boolean createDeviceClient(final JSONObject deviceDefinition) throws Exception {
         if (deviceDefinition != null) {
             if (deviceClient != null) {
@@ -144,7 +131,7 @@ public class IoTPlatformDevice {
         if (currentDevice == null) {
             throw new NoDeviceDefinitionException();
         }
-        if (organizationId == null) {
+        if (!hasValidOrganization()) {
             throw new NoIoTPOrganizationException();
         }
 
@@ -164,7 +151,7 @@ public class IoTPlatformDevice {
 
 
     public void checkDeviceRegistration(final ResponseListener listener, final String device_id) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
-        if (organizationId == null) {
+        if (!hasValidOrganization()) {
             throw new NoIoTPOrganizationException();
         }
         final API.doRequest task = new API.doRequest(listener);
@@ -176,7 +163,7 @@ public class IoTPlatformDevice {
 
 
     public void requestDeviceRegistration(final ResponseListener listener, final String device_id) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
-        if (organizationId == null) {
+        if (!hasValidOrganization()) {
             throw new NoIoTPOrganizationException();
         }
         final API.doRequest task = new API.doRequest(listener);
@@ -213,20 +200,9 @@ public class IoTPlatformDevice {
         deviceClient = null;
     }
 
-
-    public int getUploadTimerPeriod() {
-        return uploadInterval;
-    }
-
-    public void setUploadTimerPeriod(final int value) {
-        uploadInterval = value;
-    }
-
-    public synchronized void startPublishing(final ProbeDataGenerator eventGenerator) {
+    public synchronized void startPublishing(final ProbeDataGenerator eventGenerator, final int uploadDelayMS, final int uploadIntervalMS) {
         stopPublishing();
 
-        uploadDelay = DEFAULT_UPLOAD_DELAY_SEC * 1000;
-        uploadInterval = getMqttFrequencySec() * 1000;
         uploadHandler = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -241,7 +217,7 @@ public class IoTPlatformDevice {
                     e.printStackTrace();
                 }
             }
-        }, uploadDelay, uploadInterval, TimeUnit.MILLISECONDS);
+        }, uploadDelayMS, uploadIntervalMS, TimeUnit.MILLISECONDS);
     }
 
     public synchronized void stopPublishing() {
@@ -263,12 +239,12 @@ public class IoTPlatformDevice {
         }
     }
 
-    public final boolean compareCurrentOrganization(final String newId) {
+    public final boolean isCurrentOrganizationSameAs(final String newId) {
         return organizationId != null && organizationId.equals(newId);
     }
 
     public void changeOrganization(final String newOrdId, final String newApiKey, final String newApiToken) {
-        if (compareCurrentOrganization(newOrdId)) {
+        if (isCurrentOrganizationSameAs(newOrdId)) {
             return;
         }
         stopPublishing();
@@ -281,5 +257,13 @@ public class IoTPlatformDevice {
 
     public String getOrganizationId() {
         return organizationId;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public String getApiToken() {
+        return apiToken;
     }
 }

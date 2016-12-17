@@ -61,8 +61,6 @@ public class ObdBridge {
     private String userDeviceAddress = null;
     private String userDeviceName = null;
 
-    private static final int BLUETOOTH_SCAN_DELAY = 500;
-    private static final int BLUETOOTH_SCAN_INTERVAL_MS = 1000;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> obdScannerHandle = null;
 
@@ -240,7 +238,7 @@ public class ObdBridge {
         return event;
     }
 
-    public synchronized void startObdScan(final boolean simulation) {
+    public synchronized void startObdScan(final boolean simulation, final int scanDelayMS, final int scanIntervalMS) {
         stopObdScan();
 
         ObdBridge.this.simulation = simulation;
@@ -255,7 +253,7 @@ public class ObdBridge {
                     }
                 }
             }
-        }, BLUETOOTH_SCAN_DELAY, BLUETOOTH_SCAN_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        }, scanDelayMS, scanIntervalMS, TimeUnit.MILLISECONDS);
     }
 
     public synchronized void stopObdScan() {

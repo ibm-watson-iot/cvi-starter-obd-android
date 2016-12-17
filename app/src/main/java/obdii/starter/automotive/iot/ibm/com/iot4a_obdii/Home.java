@@ -18,6 +18,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -98,14 +99,19 @@ public class Home extends AppCompatActivity implements LocationListener {
     final ObdBridge obdBridge = new ObdBridge();
     final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
 
-    private int frequency_sec = IoTPlatformDevice.DEFAULT_FREQUENCY_SEC;
-
     private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
     private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
     private static final int MAX_RETRY = 10;
     private int retryCount = 0;
+
+    private static final int MIN_FREQUENCY_SEC = 5;
+    private static final int MAX_FREQUENCY_SEC = 60;
+    static final int DEFAULT_FREQUENCY_SEC = 10;
+
+    private static final int BLUETOOTH_SCAN_DELAY_MS = 200;
+    private static final int UPLOAD_DELAY_MS = 500;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -205,20 +211,28 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
+    private void startApp() {
+        final String orgId = getPreference(SettingsFragment.ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId);
+        final String apiKey = getPreference(SettingsFragment.API_KEY, IoTPlatformDevice.defaultApiKey);
+        final String apiToken = getPreference(SettingsFragment.API_TOKEN, IoTPlatformDevice.defaultApiToken);
+        iotpDevice.changeOrganization(orgId, apiKey, apiToken);
+        startApp2();
+    }
+
     void restartApp(final String orgId, final String apiKey, final String apiToken) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (iotpDevice.getOrganizationId() != orgId) {
                     iotpDevice.changeOrganization(orgId, apiKey, apiToken);
-                    startApp();
+                    startApp2();
                 }
             }
         });
     }
 
-    private void startApp() {
-        if (iotpDevice.getOrganizationId() == null) {
+    private void startApp2() {
+        if (!iotpDevice.hasValidOrganization()) {
             // go settings
             final Intent intent1 = new android.content.Intent(this, AppSettingsActivity.class);
             startActivity(intent1);
@@ -433,11 +447,12 @@ public class Home extends AppCompatActivity implements LocationListener {
                     deviceNames.add(device.getName());
                     deviceAddresses.add(device.getAddress());
                 }
+                final String preferredName = getPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, "obd");
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                 final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
                 int selectedDevice = -1;
                 for (int i = 0; i < deviceNames.size(); i++) {
-                    if (deviceNames.get(i).toLowerCase().contains("obd")) {
+                    if (deviceNames.get(i).toLowerCase().contains(preferredName)) {
                         selectedDevice = i;
                     }
                 }
@@ -450,7 +465,10 @@ public class Home extends AppCompatActivity implements LocationListener {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                startConnectingBluetoothDevice(deviceAddresses.get(position), deviceNames.get(position));
+                                final String deviceAddress = deviceAddresses.get(position);
+                                final String deviceName = deviceNames.get(position);
+                                startConnectingBluetoothDevice(deviceAddress, deviceName);
+                                setPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, deviceName);
                             }
                         })
                         .show();
@@ -690,7 +708,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         try {
             iotpDevice.createDeviceClient(deviceDefinition);
             iotpDevice.connectDevice();
-            obdBridge.startObdScan(simulation);
+            startObdScan(simulation);
             startPublishingProbeData();
         } catch (MqttException e) {
             e.printStackTrace();
@@ -707,6 +725,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void startPublishingProbeData() {
+        final int uploadIntervalMS = getUploadFrequencySec() * 1000;
         iotpDevice.startPublishing(new IoTPlatformDevice.ProbeDataGenerator() {
             @Override
             public JsonObject generateData() {
@@ -728,7 +747,16 @@ public class Home extends AppCompatActivity implements LocationListener {
                     showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);
                 }
             }
-        });
+        }, UPLOAD_DELAY_MS, uploadIntervalMS);
+    }
+
+    private void startObdScan() {
+        startObdScan(obdBridge.isSimulation());
+    }
+
+    private void startObdScan(final boolean simulation) {
+        final int scanIntervalMS = getUploadFrequencySec() * 1000;
+        obdBridge.startObdScan(simulation, BLUETOOTH_SCAN_DELAY_MS, scanIntervalMS);
     }
 
     public void changeFrequency(View view) {
@@ -736,9 +764,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
         final NumberPicker numberPicker = (NumberPicker) changeFrequencyAlert.findViewById(R.id.numberPicker);
-        numberPicker.setMinValue(IoTPlatformDevice.MIN_FREQUENCY_SEC);
-        numberPicker.setMaxValue(IoTPlatformDevice.MAX_FREQUENCY_SEC);
-        frequency_sec = IoTPlatformDevice.getMqttFrequencySec();
+        final int frequency_sec = getUploadFrequencySec();
+        numberPicker.setMinValue(MIN_FREQUENCY_SEC);
+        numberPicker.setMaxValue(MAX_FREQUENCY_SEC);
         numberPicker.setValue(frequency_sec);
 
         alertDialog.setView(changeFrequencyAlert);
@@ -748,11 +776,10 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        frequency_sec = numberPicker.getValue();
-                        IoTPlatformDevice.setMqttFrequencySec(frequency_sec);
-                        final int frequency_ms = frequency_sec * 1000;
-                        if (frequency_ms != iotpDevice.getUploadTimerPeriod()) {
-                            iotpDevice.setUploadTimerPeriod(frequency_ms);
+                        final int value = numberPicker.getValue();
+                        if (value != frequency_sec) {
+                            setUploadFrequencySec(value);
+                            startObdScan();
                             startPublishingProbeData();
                         }
                     }
@@ -784,6 +811,53 @@ public class Home extends AppCompatActivity implements LocationListener {
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
         Home.this.finishAffinity();
     }
+
+    private int getPreferenceInt(final String prefKey, final int defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return Integer.parseInt(preferences.getString(prefKey, "" + defaultValue));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    private String getPreference(final String prefKey, final String defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return preferences.getString(prefKey, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    private void setPreferenceInt(final String prefKey, final int value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putString(prefKey, "" + value).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setPreference(final String prefKey, final String value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putString(prefKey, "" + value).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setUploadFrequencySec(final int sec) {
+        setPreferenceInt(SettingsFragment.UPLOAD_FREQUENCY, sec);
+    }
+
+    public int getUploadFrequencySec() {
+        return getPreferenceInt(SettingsFragment.UPLOAD_FREQUENCY, DEFAULT_FREQUENCY_SEC);
+    }
+
 
     @Override
     public void onStart() {
