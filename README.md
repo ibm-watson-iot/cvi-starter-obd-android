@@ -47,7 +47,7 @@ To try the Android application using Android Emulator, complete the following st
  
     ![Gradle Plugin Update Dialog](GradlePluginUpdate.jpg)    
 
-3. Edit the **iota-starter-obd-android/app/java/obdii.starter.automotive.iot.ibm.com.iot4a_obdii/API.java** file, and set the `orgId` variable to your Organization's ID, and the `apiKey` and `apiToken` variables to your API key and Auth Token from your instance of the IoT Platform.
+3. Edit the **iota-starter-obd-android/app/java/obdii.starter.automotive.iot.ibm.com.iot4a_obdii/IoTPlatformDevice.java** file, and set the `defaultOrganizationId` variable to your Organization's ID, and the `defaultApiKey` and `defaultApiToken` variables to your API key and Auth Token, respectively, from your instance of the IoT Platform.
 
 4. In Android Studio, run the application by pressing **Run 'app'**.
 
