@@ -200,6 +200,10 @@ public class IoTPlatformDevice {
         deviceClient = null;
     }
 
+    public synchronized boolean isConnected() {
+        return deviceClient != null && deviceClient.isConnected();
+    }
+
     public synchronized void startPublishing(final ProbeDataGenerator eventGenerator, final int uploadDelayMS, final int uploadIntervalMS) {
         stopPublishing();
 

@@ -142,7 +142,7 @@ public class SettingsFragment extends PreferenceFragment {
         final String apiToken = getPreferenceValue(API_TOKEN);
         //String device_id = getEditTextPreferenceValue(DEVICE_ID);
 
-        if (!Home.home.iotpDevice.isCurrentOrganizationSameAs(orgId)) {
+        if (!Home.home.iotpDevice.isCurrentOrganizationSameAs(orgId) || !Home.home.iotpDevice.isConnected()) {
             Home.home.restartApp(orgId, apiKey, apiToken);
         }
     }
