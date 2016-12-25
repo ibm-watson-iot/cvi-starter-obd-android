@@ -62,6 +62,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +78,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class Home extends AppCompatActivity implements LocationListener {
+public class Home extends AppCompatActivity implements LocationListener, Serializable {
 
     private static final int INITIAL_PERMISSIONS = 000;
     private static final int GPS_INTENT = 000;
@@ -119,8 +120,6 @@ public class Home extends AppCompatActivity implements LocationListener {
      */
     private GoogleApiClient client;
 
-    static Home home;
-
     void clean() {
         completeConnectingBluetoothDevice();
         scheduler.shutdown();
@@ -161,8 +160,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-        home = this;
     }
 
     public void checkForDisclaimer() throws IOException {
@@ -233,9 +230,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startApp2() {
         if (!iotpDevice.hasValidOrganization()) {
-            // go settings
-            final Intent intent1 = new android.content.Intent(this, AppSettingsActivity.class);
-            startActivity(intent1);
+            startSettingsActivity();
             return;
         }
 
@@ -303,6 +298,36 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
+    private void startSettingsActivity() {
+        final Intent intent = new Intent(this, AppSettingsActivity.class);
+        intent.putExtra(SettingsFragment.ORGANIZATION_ID, iotpDevice.getOrganizationId());
+        intent.putExtra(SettingsFragment.API_KEY, iotpDevice.getApiKey());
+        intent.putExtra(SettingsFragment.API_TOKEN, iotpDevice.getApiToken());
+        String device_id = "";
+        try {
+            device_id = obdBridge.getDeviceId(obdBridge.isSimulation());
+        } catch (DeviceNotConnectedException e) {
+            device_id = "";
+        }
+        intent.putExtra(SettingsFragment.DEVICE_ID, device_id);
+        intent.putExtra(SettingsFragment.DEVICE_TOKEN, iotpDevice.getDeviceToken(device_id));
+        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ADDRESS, obdBridge.getUserDeviceAddress());
+        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_NAME, obdBridge.getUserDeviceName());
+        intent.putExtra(SettingsFragment.UPLOAD_FREQUENCY, "" + getUploadFrequencySec());
+
+        startActivity(intent);
+    }
+
+    private void checkSettingsOnResume() {
+        final String orgId = getPreference(SettingsFragment.ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId);
+        final String apiKey = getPreference(SettingsFragment.API_KEY, IoTPlatformDevice.defaultApiKey);
+        final String apiToken = getPreference(SettingsFragment.API_TOKEN, IoTPlatformDevice.defaultApiToken);
+
+        if (!iotpDevice.isCurrentOrganizationSameAs(orgId) || !iotpDevice.isConnected()) {
+            restartApp(orgId, apiKey, apiToken);
+        }
+    }
+
     private void showStatus(final String msg) {
         if (supportActionBar == null) {
             return;
@@ -366,8 +391,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.optionsMenu_1:
-                final Intent intent1 = new android.content.Intent(this, AppSettingsActivity.class);
-                startActivity(intent1);
+                startSettingsActivity();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -597,8 +621,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             public void onClick(DialogInterface dialogInterface, int which) {
                                 showStatus("Failed to connect to IBM IoT Platform");
                                 // go settings
-                                final Intent intent1 = new android.content.Intent(Home.this, AppSettingsActivity.class);
-                                startActivity(intent1);
+                                startSettingsActivity();
                             }
                         })
                         .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -877,6 +900,8 @@ public class Home extends AppCompatActivity implements LocationListener {
             return;
         }
         locationManager.requestLocationUpdates(provider, 500, 1, this);
+
+        checkSettingsOnResume();
     }
 
     @Override

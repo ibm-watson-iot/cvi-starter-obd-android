@@ -44,9 +44,6 @@ public class AppSettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (fragment != null) {
-            fragment.completeSettings();
-        }
         super.onBackPressed();
     }
 }

@@ -11,6 +11,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -43,43 +44,15 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     public void initializeSettings() {
-        String organization_id = null;
-        String api_key = null;
-        String api_token = null;
-        String device_id = "";
-        String device_token = "";
-        String bt_device_address = "";
-        String bt_device_name = "";
-        String frequency = "";
-
-        if (Home.home != null) {
-            final ObdBridge obdBridge = Home.home.obdBridge;
-            final IoTPlatformDevice iotpDevice = Home.home.iotpDevice;
-            organization_id = iotpDevice.getOrganizationId();
-            api_key = iotpDevice.getApiKey();
-            api_token = iotpDevice.getApiToken();
-
-            try {
-                device_id = obdBridge.getDeviceId(obdBridge.isSimulation());
-            } catch (DeviceNotConnectedException e) {
-            }
-            device_token = iotpDevice.getDeviceToken(device_id);
-            bt_device_address = Home.home.obdBridge.getUserDeviceAddress();
-            bt_device_name = Home.home.obdBridge.getUserDeviceName();
-
-            frequency = "" + Home.home.getUploadFrequencySec();
-        }
-        prepareEditTextPreference(ORGANIZATION_ID, organization_id, IoTPlatformDevice.defaultOrganizationId, true);
-        prepareEditTextPreference(API_KEY, api_key, IoTPlatformDevice.defaultApiKey, true);
-        prepareEditTextPreference(API_TOKEN, api_token, IoTPlatformDevice.defaultApiToken, true);
-
-        prepareEditTextPreference(DEVICE_ID, device_id, "", false);
-        prepareEditTextPreference(DEVICE_TOKEN, device_token, "", true);
-
-        prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, bt_device_name, "", false);
-        prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, bt_device_address, "", false);
-
-        prepareEditTextPreference(UPLOAD_FREQUENCY, frequency, "" + Home.DEFAULT_FREQUENCY_SEC, false);
+        final Intent intent = getActivity().getIntent();
+        prepareEditTextPreference(ORGANIZATION_ID, intent.getStringExtra(ORGANIZATION_ID), IoTPlatformDevice.defaultOrganizationId, true);
+        prepareEditTextPreference(API_KEY, intent.getStringExtra(API_KEY), IoTPlatformDevice.defaultApiKey, true);
+        prepareEditTextPreference(API_TOKEN, intent.getStringExtra(API_TOKEN), IoTPlatformDevice.defaultApiToken, true);
+        prepareEditTextPreference(DEVICE_ID, intent.getStringExtra(DEVICE_ID), "", false);
+        prepareEditTextPreference(DEVICE_TOKEN, intent.getStringExtra(DEVICE_TOKEN), "", true);
+        prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, intent.getStringExtra(BLUETOOTH_DEVICE_NAME), "", false);
+        prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, intent.getStringExtra(BLUETOOTH_DEVICE_ADDRESS), "", false);
+        prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + Home.DEFAULT_FREQUENCY_SEC, false);
     }
 
     private void prepareEditTextPreference(final String prefKey, final String currentValue, final String defaultValue, final boolean enabled) {
@@ -133,17 +106,6 @@ public class SettingsFragment extends PreferenceFragment {
             return ((EditTextPreference) preference).getText();
         } else {
             return null;
-        }
-    }
-
-    void completeSettings() {
-        final String orgId = getPreferenceValue(ORGANIZATION_ID);
-        final String apiKey = getPreferenceValue(API_KEY);
-        final String apiToken = getPreferenceValue(API_TOKEN);
-        //String device_id = getEditTextPreferenceValue(DEVICE_ID);
-
-        if (!Home.home.iotpDevice.isCurrentOrganizationSameAs(orgId) || !Home.home.iotpDevice.isConnected()) {
-            Home.home.restartApp(orgId, apiKey, apiToken);
         }
     }
 }
