@@ -16,7 +16,6 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.github.pires.obd.commands.ObdCommand;
@@ -43,7 +42,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API.DOESNOTEXIST;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST;
 
 /*
  * OBD Bridge
@@ -64,24 +63,20 @@ public class ObdBridge {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> obdScannerHandle = null;
 
+    private final Home home;
+
+    ObdBridge(final Home home) {
+        this.home = home;
+    }
+
     void clean() {
         stopObdScan();
         closeBluetoothSocket();
         scheduler.shutdown();
     }
 
-    public String getDeviceId(final boolean simulation) throws DeviceNotConnectedException {
-        return simulation ? getSimulatedDeviceId() : getRealDeviceId();
-    }
-
-    private String getSimulatedDeviceId() {
-        final String key = "simulated-device-id";
-        String device_id = API.getStoredData(key);
-        if (device_id == null || DOESNOTEXIST.equals(device_id)) {
-            device_id = API.getUUID();
-            API.storeData(key, device_id);
-        }
-        return device_id;
+    public String getDeviceId(final boolean simulation, final String uuid) throws DeviceNotConnectedException {
+        return simulation ? uuid : getRealDeviceId();
     }
 
     private String getRealDeviceId() throws DeviceNotConnectedException {
@@ -89,10 +84,10 @@ public class ObdBridge {
             throw new DeviceNotConnectedException();
         }
         final String key = "device-id-" + userDeviceAddress.replaceAll(":", "-");
-        String device_id = API.getStoredData(key);
+        String device_id = home.getPreference(key, DOESNOTEXIST);
         if (device_id == null || DOESNOTEXIST.equals(device_id)) {
             device_id = UUID.randomUUID().toString();
-            API.storeData(key, device_id);
+            home.setPreference(key, device_id);
         }
         return device_id;
     }

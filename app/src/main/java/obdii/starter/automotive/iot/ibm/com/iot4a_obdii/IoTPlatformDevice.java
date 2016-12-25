@@ -11,6 +11,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -86,32 +87,34 @@ public class IoTPlatformDevice {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> uploadHandler = null;
+    private final Home home;
+
+    IoTPlatformDevice(final Home home) {
+        this.home = home;
+    }
 
     void clean() {
         stopPublishing();
         scheduler.shutdown();
     }
 
-
-    public String getDeviceToken(final String deviceId) {
-        final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
-        final String deviceToken = API.getStoredData(sharedPrefsKey);
-        return API.DOESNOTEXIST.equals(deviceToken) ? "" : deviceToken;
-    }
-
     public boolean hasDeviceToken(final String deviceId) {
         return !"".equals(getDeviceToken(deviceId));
     }
 
-    public void setDeviceToken(final String deviceId, final String authToken) {
+    public String getDeviceToken(final String deviceId) {
         final String sharedPrefsKey = "iota-obdii-auth-" + deviceId;
-        if (!API.getStoredData(sharedPrefsKey).equals(authToken)) {
-            API.storeData(sharedPrefsKey, authToken);
-        }
+        return home.getPreference(sharedPrefsKey, "");
+    }
+
+    public void setDeviceToken(final String deviceId, final String authToken) {
+        home.setPreference("iota-obdii-auth-" + deviceId, authToken);
     }
 
     private String getCredentialsBase64() {
-        return API.getCredentialsBase64(apiKey, apiToken);
+        final String credentials = apiKey + ":" + apiToken;
+        final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
+        return credentialsBase64;
     }
 
     public boolean hasValidOrganization() {
@@ -150,11 +153,11 @@ public class IoTPlatformDevice {
     }
 
 
-    public void checkDeviceRegistration(final ResponseListener listener, final String device_id) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
+    public void checkDeviceRegistration(final ResponseListener listener, final String device_id, final String uuid) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
         if (!hasValidOrganization()) {
             throw new NoIoTPOrganizationException();
         }
-        final API.doRequest task = new API.doRequest(listener);
+        final API.doRequest task = new API.doRequest(listener, uuid);
         final String url = getIoTPGetDeviceEndpoint(organizationId, device_id);
         task.execute(url, "GET", null, null, getCredentialsBase64()).get();
         System.out.println("CHECKING DEVICE REGISTRATION SUCCESSFULLY DONE......");
@@ -162,11 +165,11 @@ public class IoTPlatformDevice {
     }
 
 
-    public void requestDeviceRegistration(final ResponseListener listener, final String device_id) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
+    public void requestDeviceRegistration(final ResponseListener listener, final String device_id, final String uuid) throws InterruptedException, ExecutionException, NoIoTPOrganizationException {
         if (!hasValidOrganization()) {
             throw new NoIoTPOrganizationException();
         }
-        final API.doRequest task = new API.doRequest(listener);
+        final API.doRequest task = new API.doRequest(listener, uuid);
         try {
             final String url = getIoTPAddDevicesEndPoint(organizationId);
             final JSONArray bodyArray = new JSONArray();

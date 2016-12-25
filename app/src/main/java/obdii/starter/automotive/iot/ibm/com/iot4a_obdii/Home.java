@@ -62,7 +62,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +78,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Home extends AppCompatActivity implements LocationListener {
+
+    public static final String DOESNOTEXIST = "doesNotExist";
 
     private static final int INITIAL_PERMISSIONS = 000;
     private static final int GPS_INTENT = 000;
@@ -108,13 +109,15 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
-    final ObdBridge obdBridge = new ObdBridge();
+    final ObdBridge obdBridge = new ObdBridge(this);
 
-    final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
+    final IoTPlatformDevice iotpDevice = new IoTPlatformDevice(this);
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
     private int retryCount = 0;
+
+    private boolean initialized = false;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -152,8 +155,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         obdBridge.initializeObdParameterList(this);
 
-        new API(getApplicationContext());
-
         try {
             checkForDisclaimer();
         } catch (IOException e) {
@@ -165,13 +166,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void checkForDisclaimer() throws IOException {
-        if (!API.disclaimerShown(false)) {
-            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        if (!wasDisclaimerShown(false)) {
+            final DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int choice) {
                     switch (choice) {
                         case DialogInterface.BUTTON_POSITIVE:
-                            API.disclaimerShown(true);
+                            wasDisclaimerShown(true);
                             startApp();
                             break;
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -210,7 +211,10 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
+
     private void startApp() {
+        initialized = true;
+
         final String orgId = getPreference(SettingsFragment.ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId);
         final String apiKey = getPreference(SettingsFragment.API_KEY, IoTPlatformDevice.defaultApiKey);
         final String apiToken = getPreference(SettingsFragment.API_TOKEN, IoTPlatformDevice.defaultApiToken);
@@ -284,7 +288,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     permissionsGranted();
                 }
             } else {
-                if (!API.warningShown()) {
+                if (!wasWarningShown()) {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder
                             .setTitle("Warning")
@@ -307,7 +311,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         intent.putExtra(SettingsFragment.API_TOKEN, iotpDevice.getApiToken());
         String device_id = "";
         try {
-            device_id = obdBridge.getDeviceId(obdBridge.isSimulation());
+            device_id = obdBridge.getDeviceId(obdBridge.isSimulation(), getUUID());
         } catch (DeviceNotConnectedException e) {
             device_id = "";
         }
@@ -544,7 +548,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         try {
             showStatus("Checking Device Registration", View.VISIBLE);
 
-            final String device_id = obdBridge.getDeviceId(simulation);
+            final String uuid = getUUID();
+            final String device_id = obdBridge.getDeviceId(simulation, uuid);
             iotpDevice.checkDeviceRegistration(new IoTPlatformDevice.ResponseListener() {
                 @Override
                 protected void response(final int statusCode, final JSONArray result) {
@@ -559,7 +564,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                         e.printStackTrace();
                     }
                 }
-            }, device_id);
+            }, device_id, uuid);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -643,7 +648,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         try {
             showStatus("Registering Your Device", View.VISIBLE);
 
-            final String device_id = obdBridge.getDeviceId(simulation);
+            final String uuid = getUUID();
+            final String device_id = obdBridge.getDeviceId(simulation, uuid);
             iotpDevice.requestDeviceRegistration(new IoTPlatformDevice.ResponseListener() {
 
                 @Override
@@ -659,7 +665,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                         e.printStackTrace();
                     }
                 }
-            }, device_id);
+            }, device_id, uuid);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -837,17 +843,28 @@ public class Home extends AppCompatActivity implements LocationListener {
         Home.this.finishAffinity();
     }
 
-    private int getPreferenceInt(final String prefKey, final int defaultValue) {
+
+    int getPreferenceInt(final String prefKey, final int defaultValue) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            return Integer.parseInt(preferences.getString(prefKey, "" + defaultValue));
+            return preferences.getInt(prefKey, defaultValue);
         } catch (Exception e) {
             e.printStackTrace();
             return defaultValue;
         }
     }
 
-    private String getPreference(final String prefKey, final String defaultValue) {
+    boolean getPreferenceBoolean(final String prefKey, final boolean defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return preferences.getBoolean(prefKey, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    String getPreference(final String prefKey, final String defaultValue) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             return preferences.getString(prefKey, defaultValue);
@@ -857,32 +874,72 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private void setPreferenceInt(final String prefKey, final int value) {
+    void setPreferenceInt(final String prefKey, final int value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putString(prefKey, "" + value).commit();
+            preferences.edit().putInt(prefKey, value).apply();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void setPreference(final String prefKey, final String value) {
+    void setPreferenceBoolean(final String prefKey, final boolean value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putString(prefKey, "" + value).commit();
+            preferences.edit().putBoolean(prefKey, value).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void setPreference(final String prefKey, final String value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putString(prefKey, "" + value).apply();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void setUploadFrequencySec(final int sec) {
-        setPreferenceInt(SettingsFragment.UPLOAD_FREQUENCY, sec);
+        setPreference(SettingsFragment.UPLOAD_FREQUENCY, "" + sec);
     }
 
     public int getUploadFrequencySec() {
-        return getPreferenceInt(SettingsFragment.UPLOAD_FREQUENCY, DEFAULT_FREQUENCY_SEC);
+        String value = getPreference(SettingsFragment.UPLOAD_FREQUENCY, "" + DEFAULT_FREQUENCY_SEC);
+        return Integer.parseInt(value);
     }
 
+    private boolean wasDisclaimerShown(boolean agreed) {
+        final boolean disclaimerShownAndAgreed = getPreferenceBoolean("iota-starter-obdii-disclaimer", false);
+        if (disclaimerShownAndAgreed) {
+            return disclaimerShownAndAgreed;
+        } else if (!disclaimerShownAndAgreed && agreed) {
+            setPreferenceBoolean("iota-starter-obdii-disclaimer", true);
+        }
+        return false;
+    }
+
+    private boolean wasWarningShown() {
+        final boolean warningShown = getPreferenceBoolean("iota-starter-obdii-warning-message", false);
+        if (warningShown) {
+            return warningShown;
+        } else {
+            setPreferenceBoolean("iota-starter-obdii-warning-message", true);
+            return false;
+        }
+    }
+
+    private String getUUID() {
+        String uuidString = getPreference("iota-starter-obdii-uuid", DOESNOTEXIST);
+        if (!DOESNOTEXIST.equals(uuidString)) {
+            return uuidString;
+        } else {
+            uuidString = UUID.randomUUID().toString();
+            setPreference("iota-starter-obdii-uuid", uuidString);
+            return uuidString;
+        }
+    }
 
     @Override
     public void onStart() {
@@ -903,7 +960,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
         locationManager.requestLocationUpdates(provider, 500, 1, this);
 
-        checkSettingsOnResume();
+        if (initialized) {
+            checkSettingsOnResume();
+        }
     }
 
     @Override

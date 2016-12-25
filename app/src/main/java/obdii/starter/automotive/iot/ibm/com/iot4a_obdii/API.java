@@ -33,76 +33,6 @@ import java.util.UUID;
 
 public class API {
 
-    protected static final String DOESNOTEXIST = "doesNotExist";
-
-    public static Context context;
-
-    public static SharedPreferences sharedpreferences;
-
-    public static String getCredentialsBase64(final String apiKey, final String apiToken) {
-        final String credentials = apiKey + ":" + apiToken;
-        final String credentialsBase64 = Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT).replace("\n", "");
-        return credentialsBase64;
-    }
-
-    public API(Context context) {
-        this.context = context;
-    }
-
-    public static String getUUID() {
-        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
-
-        String uuidString = sharedpreferences.getString("iota-starter-obdii-uuid", DOESNOTEXIST);
-
-        if (uuidString != DOESNOTEXIST) {
-            return uuidString;
-        } else {
-            uuidString = UUID.randomUUID().toString();
-
-            sharedpreferences.edit().putString("iota-starter-obdii-uuid", uuidString).apply();
-
-            return uuidString;
-        }
-    }
-
-    public static boolean disclaimerShown(boolean agreed) {
-        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
-
-        boolean disclaimerShownAndAgreed = sharedpreferences.getBoolean("iota-starter-obdii-disclaimer", false);
-
-        if (disclaimerShownAndAgreed) {
-            return disclaimerShownAndAgreed;
-        } else if (!disclaimerShownAndAgreed && agreed) {
-            sharedpreferences.edit().putBoolean("iota-starter-obdii-disclaimer", true).apply();
-        }
-
-        return false;
-    }
-
-    public static void storeData(String key, String value) {
-        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
-        sharedpreferences.edit().putString(key, value).apply();
-    }
-
-    public static String getStoredData(String key) {
-        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
-        return sharedpreferences.getString(key, DOESNOTEXIST);
-    }
-
-    public static boolean warningShown() {
-        sharedpreferences = context.getSharedPreferences("obdii.starter.automotive.iot.ibm.com.API", Context.MODE_PRIVATE);
-
-        boolean warningShown = sharedpreferences.getBoolean("iota-starter-obdii-warning-message", false);
-
-        if (warningShown) {
-            return warningShown;
-        } else {
-            sharedpreferences.edit().putBoolean("iota-starter-obdii-warning-message", true).apply();
-
-            return false;
-        }
-    }
-
     public static class doRequest extends AsyncTask<String, Void, JSONArray> {
 
         public interface TaskListener {
@@ -110,9 +40,11 @@ public class API {
         }
 
         private final TaskListener taskListener;
+        private final String uuid;
 
-        public doRequest(TaskListener listener) {
+        public doRequest(final TaskListener listener, final String uuid) {
             this.taskListener = listener;
+            this.uuid = uuid;
         }
 
         @Override
@@ -133,8 +65,8 @@ public class API {
 
                 Log.i(requestType + " Request", params[0]);
 
-                urlConnection.setRequestProperty("iota-starter-uuid", getUUID());
-                Log.i("Using UUID", getUUID());
+                urlConnection.setRequestProperty("iota-starter-uuid", uuid);
+                Log.i("Using UUID", uuid);
 
                 urlConnection.setRequestMethod(requestType);
 
