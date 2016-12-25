@@ -187,24 +187,24 @@
 		
 		<!-- replace IoT Platform credentials -->
 		<replaceregexp flags="m"
-			match="static\s+final\s+String\s+orgId\s*=.*$"
-			replace="static final String orgId = &quot;${iotp.orgid}&quot;;"
+			match="static\s+final\s+String\s+defaultOrganizationId\s*=.*$"
+			replace="static final String defaultOrganizationId = &quot;${iotp.orgid}&quot;;"
 			byline="true">
-			<fileset id="fileset.API.java" dir="${dest.clone}/app/src/main">
-				<include name="**/iot4a_obdii/API.java"/>
+			<fileset id="fileset.IoTPlatformDevice.java" dir="${dest.clone}/app/src/main">
+				<include name="**/iot4a_obdii/IoTPlatformDevice.java"/>
 			</fileset>
 		</replaceregexp>
 		<replaceregexp flags="m"
-			match="static\s+final\s+String\s+apiKey\s*=.*$"
-			replace="static final String apiKey = &quot;${iotp.apikey}&quot;;"
+			match="static\s+final\s+String\s+defaultApiKey\s*=.*$"
+			replace="static final String defaultApiKey = &quot;${iotp.apikey}&quot;;"
 			byline="true">
-			<fileset refid="fileset.API.java"></fileset>
+			<fileset refid="fileset.IoTPlatformDevice.java"></fileset>
 		</replaceregexp>
 		<replaceregexp flags="m"
-			match="static\s+final\s+String\s+apiToken\s*=.*$"
-			replace="static final String apiToken = &quot;${iotp.apitoken}&quot;;"
+			match="static\s+final\s+String\s+defaultApiToken\s*=.*$"
+			replace="static final String defaultApiToken = &quot;${iotp.apitoken}&quot;;"
 			byline="true">
-			<fileset refid="fileset.API.java"></fileset>
+			<fileset refid="fileset.IoTPlatformDevice.java"></fileset>
 		</replaceregexp>
 		
 		<!-- Bundle ID should be com.ibm.cio.be.iphone.iot.automotive.obd2.android -->
