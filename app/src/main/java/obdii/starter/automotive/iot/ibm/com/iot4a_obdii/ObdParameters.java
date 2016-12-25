@@ -10,6 +10,7 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -44,7 +45,7 @@ public class ObdParameters {
     }
 
     @NonNull
-    static public List<ObdParameter> getObdParameterList(final AppCompatActivity activity) {
+    static public List<ObdParameter> getObdParameterList(final Home activity) {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
 
         final ObdParameter engineRPM = new ObdParameter((TextView) activity.findViewById(R.id.engineRPMValue), activity, "Engine RPM", new RPMCommand()) {
@@ -219,8 +220,9 @@ public class ObdParameters {
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
-                if (Home.location != null) {
-                    longitudeValue = Home.location.getLongitude();
+                final Location location = activity.getLocation();
+                if (location != null) {
+                    longitudeValue = location.getLongitude();
                 }
                 valueText = String.format("%1$.7f", longitudeValue);
             }
@@ -248,8 +250,9 @@ public class ObdParameters {
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
-                if (Home.location != null) {
-                    latitude = Home.location.getLatitude();
+                final Location location = activity.getLocation();
+                if (location != null) {
+                    latitude = location.getLatitude();
                 }
                 valueText = valueText = String.format("%1$.7f", latitude);
             }
@@ -273,5 +276,4 @@ public class ObdParameters {
 
         return obdParameters;
     }
-
 }

@@ -78,15 +78,26 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class Home extends AppCompatActivity implements LocationListener, Serializable {
+public class Home extends AppCompatActivity implements LocationListener {
 
     private static final int INITIAL_PERMISSIONS = 000;
     private static final int GPS_INTENT = 000;
     private static final int SETTINGS_INTENT = 001;
 
+    private static final int MIN_FREQUENCY_SEC = 5;
+    private static final int MAX_FREQUENCY_SEC = 60;
+    static final int DEFAULT_FREQUENCY_SEC = 10;
+
+    private static final int BLUETOOTH_SCAN_DELAY_MS = 200;
+    private static final int UPLOAD_DELAY_MS = 500;
+
+    private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
+    private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
+    private static final int MAX_RETRY = 10;
+
     private LocationManager locationManager;
     private String provider;
-    static Location location = null;
+    private Location location = null;
 
     private boolean networkIntentNeeded = false;
 
@@ -98,21 +109,12 @@ public class Home extends AppCompatActivity implements LocationListener, Seriali
     private Button changeFrequency;
 
     final ObdBridge obdBridge = new ObdBridge();
+
     final IoTPlatformDevice iotpDevice = new IoTPlatformDevice();
 
-    private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
-    private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
-    private static final int MAX_RETRY = 10;
     private int retryCount = 0;
-
-    private static final int MIN_FREQUENCY_SEC = 5;
-    private static final int MAX_FREQUENCY_SEC = 60;
-    static final int DEFAULT_FREQUENCY_SEC = 10;
-
-    private static final int BLUETOOTH_SCAN_DELAY_MS = 200;
-    private static final int UPLOAD_DELAY_MS = 500;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -989,6 +991,10 @@ public class Home extends AppCompatActivity implements LocationListener, Seriali
                 }
             }
         }
+    }
+
+    public Location getLocation() {
+        return location;
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
