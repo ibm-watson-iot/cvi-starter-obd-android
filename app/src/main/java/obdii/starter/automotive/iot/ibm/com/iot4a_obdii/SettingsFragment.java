@@ -10,7 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;

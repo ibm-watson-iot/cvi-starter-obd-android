@@ -11,7 +11,6 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import android.widget.TextView;
 

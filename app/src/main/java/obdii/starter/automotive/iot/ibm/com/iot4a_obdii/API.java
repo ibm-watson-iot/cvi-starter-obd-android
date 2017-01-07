@@ -10,10 +10,7 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -29,7 +26,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.UUID;
 
 public class API {
 
