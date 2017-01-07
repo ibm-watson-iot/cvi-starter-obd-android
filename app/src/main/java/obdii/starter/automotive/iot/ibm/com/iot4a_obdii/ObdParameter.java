@@ -47,7 +47,7 @@ abstract public class ObdParameter {
         return obdCommand;
     }
 
-    public synchronized void showScannedValue(final BluetoothSocket socket, final boolean simulation) {
+    public synchronized void showScannedValue(final InputStream in, final OutputStream out, final boolean simulation) {
         if (simulation) {
             fetchValue(null, simulation);
             showText(getValueText());
@@ -57,12 +57,10 @@ abstract public class ObdParameter {
             showText(getValueText());
         } else {
             String value = "";
-            if (socket == null) {
+            if (in == null || out == null) {
                 value = "No BT Connection";
             } else {
                 try {
-                    final InputStream in = socket.getInputStream();
-                    final OutputStream out = socket.getOutputStream();
                     obdCommand.run(in, out);
                     fetchValue(obdCommand, simulation);
                     value = getValueText();

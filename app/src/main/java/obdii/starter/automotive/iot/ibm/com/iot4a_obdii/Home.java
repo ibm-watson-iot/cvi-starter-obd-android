@@ -84,12 +84,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     private static final int INITIAL_PERMISSIONS = 000;
     private static final int GPS_INTENT = 000;
     private static final int SETTINGS_INTENT = 001;
+    private static final int BLUETOOTH_REQUEST = 002;
 
     private static final int MIN_FREQUENCY_SEC = 5;
     private static final int MAX_FREQUENCY_SEC = 60;
     static final int DEFAULT_FREQUENCY_SEC = 10;
 
-    private static final int BLUETOOTH_SCAN_DELAY_MS = 200;
+    private static final int OBD_SCAN_DELAY_MS = 200;
     private static final int UPLOAD_DELAY_MS = 500;
 
     private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
@@ -109,7 +110,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
-    final ObdBridge obdBridge = new ObdBridge(this);
+    final ObdBridgeBluetooth obdBridge = new ObdBridgeBluetooth(this);
 
     final IoTPlatformDevice iotpDevice = new IoTPlatformDevice(this);
 
@@ -211,7 +212,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-
     private void startApp() {
         initialized = true;
 
@@ -223,6 +223,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     void restartApp(final String orgId, final String apiKey, final String apiToken) {
+        // this may be called from a non UI thread
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -235,58 +236,42 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void startApp2() {
+        // this has to be called in the UI thread
+
+        if (setLocationInformation() == false) {
+            // GPS and/or Network is disabled
+            return;
+        }
         if (!iotpDevice.hasValidOrganization()) {
+            // IoT Platform setting is missing
             startSettingsActivity();
             return;
         }
-
         if (!obdBridge.setupBluetooth()) {
-            Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth! Will be running on Simulation Mode", Toast.LENGTH_LONG).show();
-
-            final boolean doNotRunSimulationWithoutBluetooth = false;
+            // when bluetooth is not available (e.g. Android Studio simulator)
+            final boolean doNotRunSimulationWithoutBluetooth = false; // testing purpose
             if (doNotRunSimulationWithoutBluetooth) {
                 // terminate the app
+                Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
                 setChangeNetworkEnabled(false);
                 setChangeFrequencyEnabled(false);
                 showStatus("Bluetooth Failed");
             } else {
                 // force to run in simulation mode for testing purpose
+                Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth! Will be running in Simulation Mode", Toast.LENGTH_LONG).show();
                 runSimulatedObdScan();
                 showStatus("Simulated OBD Scan");
             }
 
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                final Map<String, String> permissions = new HashMap<>();
-                final ArrayList<String> permissionNeeded = new ArrayList<>();
-
-                if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("internet", Manifest.permission.INTERNET);
-
-                if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("networkState", Manifest.permission.ACCESS_NETWORK_STATE);
-
-                if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("coarseLocation", Manifest.permission.ACCESS_COARSE_LOCATION);
-
-                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("fineLocation", Manifest.permission.ACCESS_FINE_LOCATION);
-
-                if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
-                    permissions.put("bluetooth", Manifest.permission.BLUETOOTH_ADMIN);
-
-                for (Map.Entry<String, String> entry : permissions.entrySet()) {
-                    permissionNeeded.add(entry.getValue());
-                }
-                if (permissionNeeded.size() > 0) {
-                    Object[] tempObjectArray = permissionNeeded.toArray();
-                    String[] permissionsArray = Arrays.copyOf(tempObjectArray, tempObjectArray.length, String[].class);
-
+                final String[] permissionsArray = getPermissionsNeeded();
+                if (permissionsArray != null) {
                     requestPermissions(permissionsArray, INITIAL_PERMISSIONS);
-
                 } else {
                     permissionsGranted();
                 }
+
             } else {
                 if (!wasWarningShown()) {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -301,6 +286,43 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
                 permissionsGranted();
             }
+        }
+    }
+
+    private String[] getPermissionsNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final Map<String, String> permissions = new HashMap<>();
+            final ArrayList<String> permissionNeeded = new ArrayList<>();
+
+            if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
+                permissions.put("internet", Manifest.permission.INTERNET);
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED)
+                permissions.put("networkState", Manifest.permission.ACCESS_NETWORK_STATE);
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                permissions.put("coarseLocation", Manifest.permission.ACCESS_COARSE_LOCATION);
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                permissions.put("fineLocation", Manifest.permission.ACCESS_FINE_LOCATION);
+
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
+                permissions.put("bluetooth", Manifest.permission.BLUETOOTH_ADMIN);
+
+            for (Map.Entry<String, String> entry : permissions.entrySet()) {
+                permissionNeeded.add(entry.getValue());
+            }
+            if (permissionNeeded.size() > 0) {
+                Object[] tempObjectArray = permissionNeeded.toArray();
+                String[] permissionsArray = Arrays.copyOf(tempObjectArray, tempObjectArray.length, String[].class);
+
+                return permissionsArray;
+
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 
@@ -377,7 +399,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         });
     }
 
-
     private void showToastText(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -429,11 +450,11 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void permissionsGranted() {
         System.out.println("PERMISSIONS GRANTED");
-
         showObdScanModeDialog();
     }
 
     private void showObdScanModeDialog() {
+        // allows the user to select real OBD Scan mode or Simulation mode
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
         alertDialog
                 .setCancelable(false)
@@ -455,7 +476,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .show();
     }
 
-
     private void runSimulatedObdScan() {
         setChangeNetworkEnabled(false);
         checkDeviceRegistry(true);
@@ -464,47 +484,47 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void runRealObdScan() {
         if (!obdBridge.isBluetoothEnabled()) {
-            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, 1);
-        } else {
-            final Set<BluetoothDevice> pairedDevicesSet = obdBridge.getPairedDeviceSet();
+            final Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBluetooth, BLUETOOTH_REQUEST);
+            return;
+        }
+        final Set<BluetoothDevice> pairedDevicesSet = obdBridge.getPairedDeviceSet();
 
-            // In case user clicks on Change Network, need to repopulate the devices list
-            final ArrayList<String> deviceNames = new ArrayList<>();
-            final ArrayList<String> deviceAddresses = new ArrayList<>();
-            if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
-                for (BluetoothDevice device : pairedDevicesSet) {
-                    deviceNames.add(device.getName());
-                    deviceAddresses.add(device.getAddress());
-                }
-                final String preferredName = getPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, "obd").toLowerCase();
-                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
-                final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
-                int selectedDevice = -1;
-                for (int i = 0; i < deviceNames.size(); i++) {
-                    if (deviceNames.get(i).toLowerCase().contains(preferredName)) {
-                        selectedDevice = i;
-                    }
-                }
-                alertDialog
-                        .setCancelable(false)
-                        .setSingleChoiceItems(adapter, selectedDevice, null)
-                        .setTitle("Please Choose the OBDII Bluetooth Device")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                                final String deviceAddress = deviceAddresses.get(position);
-                                final String deviceName = deviceNames.get(position);
-                                startConnectingBluetoothDevice(deviceAddress, deviceName);
-                                setPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, deviceName);
-                            }
-                        })
-                        .show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
+        // In case user clicks on Change Network, need to repopulate the devices list
+        final ArrayList<String> deviceNames = new ArrayList<>();
+        final ArrayList<String> deviceAddresses = new ArrayList<>();
+        if (pairedDevicesSet != null && pairedDevicesSet.size() > 0) {
+            for (BluetoothDevice device : pairedDevicesSet) {
+                deviceNames.add(device.getName());
+                deviceAddresses.add(device.getAddress());
             }
+            final String preferredName = getPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, "obd").toLowerCase();
+            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+            final ArrayAdapter adapter = new ArrayAdapter(Home.this, android.R.layout.select_dialog_singlechoice, deviceNames.toArray(new String[deviceNames.size()]));
+            int selectedDevice = -1;
+            for (int i = 0; i < deviceNames.size(); i++) {
+                if (deviceNames.get(i).toLowerCase().contains(preferredName)) {
+                    selectedDevice = i;
+                }
+            }
+            alertDialog
+                    .setCancelable(false)
+                    .setSingleChoiceItems(adapter, selectedDevice, null)
+                    .setTitle("Please Choose the OBDII Bluetooth Device")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                            final String deviceAddress = deviceAddresses.get(position);
+                            final String deviceName = deviceNames.get(position);
+                            startConnectingBluetoothDevice(deviceAddress, deviceName);
+                            setPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, deviceName);
+                        }
+                    })
+                    .show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Please pair with your OBDII device and restart the application!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -543,7 +563,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void checkDeviceRegistry(final boolean simulation) {
-        getAccurateLocation();
+        setLocationInformation();
 
         try {
             showStatus("Checking Device Registration", View.VISIBLE);
@@ -577,8 +597,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    // run in UI thread
     private void onDeviceRegistrationChecked(final int statusCode, final JSONObject deviceDefinition, final boolean simulation) {
+        // run in UI thread
         switch (statusCode) {
             case 200: {
                 Log.d("Check Device Registry", "***Already Registered***");
@@ -686,8 +706,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         return PreferenceManager.getDefaultSharedPreferences(this).getString(prefKey, defaultValue);
     }
 
-    // run in UI thread
     private void onDeviceRegistration(int statusCode, final JSONObject deviceDefinition, final boolean simulation) throws JSONException {
+        // run in UI thread
         switch (statusCode) {
             case 201:
             case 202:
@@ -734,13 +754,15 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void deviceRegistered(final JSONObject deviceDefinition, final boolean simulation) {
-        trip_id = createTripId();
+        // starts OBD scan and data transmission process here
 
+        trip_id = createTripId();
         try {
             iotpDevice.createDeviceClient(deviceDefinition);
             iotpDevice.connectDevice();
             startObdScan(simulation);
             startPublishingProbeData();
+
         } catch (MqttException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -787,10 +809,11 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startObdScan(final boolean simulation) {
         final int scanIntervalMS = getUploadFrequencySec() * 1000;
-        obdBridge.startObdScan(simulation, BLUETOOTH_SCAN_DELAY_MS, scanIntervalMS);
+        obdBridge.startObdScan(simulation, OBD_SCAN_DELAY_MS, scanIntervalMS);
     }
 
     public void changeFrequency(View view) {
+        // called from UI panel
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
         final View changeFrequencyAlert = getLayoutInflater().inflate(R.layout.activity_home_changefrequency, null, false);
 
@@ -820,6 +843,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public void changeNetwork(View view) {
+        // called from UI panel
         // do the following async as it may take time
         scheduler.schedule(new Runnable() {
             @Override
@@ -827,6 +851,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 obdBridge.stopObdScan();
             }
         }, 0, TimeUnit.MILLISECONDS);
+
         permissionsGranted();
     }
 
@@ -841,64 +866,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         Toast.makeText(Home.this, "Session Ended, application will close now!", Toast.LENGTH_LONG).show();
         Home.this.finishAffinity();
-    }
-
-
-    int getPreferenceInt(final String prefKey, final int defaultValue) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            return preferences.getInt(prefKey, defaultValue);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return defaultValue;
-        }
-    }
-
-    boolean getPreferenceBoolean(final String prefKey, final boolean defaultValue) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            return preferences.getBoolean(prefKey, defaultValue);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return defaultValue;
-        }
-    }
-
-    String getPreference(final String prefKey, final String defaultValue) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            return preferences.getString(prefKey, defaultValue);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return defaultValue;
-        }
-    }
-
-    void setPreferenceInt(final String prefKey, final int value) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putInt(prefKey, value).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void setPreferenceBoolean(final String prefKey, final boolean value) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putBoolean(prefKey, value).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void setPreference(final String prefKey, final String value) {
-        try {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putString(prefKey, "" + value).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void setUploadFrequencySec(final int sec) {
@@ -976,7 +943,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        getAccurateLocation();
+        setLocationInformation();
     }
 
     @Override
@@ -994,14 +961,29 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     }
 
-    private void getAccurateLocation() {
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    private boolean setLocationInformation() {
+        // returns false if GPS and Network settings are needed
         final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && (networkInfo != null && networkInfo.isConnected())) {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
+                return true;
             }
 
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -1012,7 +994,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             for (String provider : providers) {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
+                    return true;
                 }
 
                 final Location lastKnown = locationManager.getLastKnownLocation(provider);
@@ -1031,6 +1013,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                 Log.d("Location Data", finalLocation.getLatitude() + " " + finalLocation.getLongitude() + "");
                 location = finalLocation;
             }
+
+            return true;
         } else {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Toast.makeText(getApplicationContext(), "Please turn on your GPS", Toast.LENGTH_LONG).show();
@@ -1041,35 +1025,40 @@ public class Home extends AppCompatActivity implements LocationListener {
                 if (networkInfo == null) {
                     networkIntentNeeded = true;
                 }
+                return false;
             } else {
                 if (networkInfo == null) {
                     Toast.makeText(getApplicationContext(), "Please turn on Mobile Data or WIFI", Toast.LENGTH_LONG).show();
 
                     final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
                     startActivityForResult(settingsIntent, SETTINGS_INTENT);
+                    return false;
+                } else {
+                    return true;
                 }
             }
         }
     }
 
-    public Location getLocation() {
-        return location;
-    }
-
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GPS_INTENT) {
             if (networkIntentNeeded) {
                 Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
-
                 final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
                 startActivityForResult(settingsIntent, SETTINGS_INTENT);
+
             } else {
-                getAccurateLocation();
+                setLocationInformation();
+                startApp2();
             }
         } else if (requestCode == SETTINGS_INTENT) {
             networkIntentNeeded = false;
+            setLocationInformation();
+            startApp2();
 
-            getAccurateLocation();
+        } else if (requestCode == BLUETOOTH_REQUEST) {
+            startApp2();
         }
     }
 
@@ -1089,13 +1078,60 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .build();
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    int getPreferenceInt(final String prefKey, final int defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return preferences.getInt(prefKey, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
+    boolean getPreferenceBoolean(final String prefKey, final boolean defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return preferences.getBoolean(prefKey, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    String getPreference(final String prefKey, final String defaultValue) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            return preferences.getString(prefKey, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    void setPreferenceInt(final String prefKey, final int value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putInt(prefKey, value).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void setPreferenceBoolean(final String prefKey, final boolean value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putBoolean(prefKey, value).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void setPreference(final String prefKey, final String value) {
+        try {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putString(prefKey, "" + value).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

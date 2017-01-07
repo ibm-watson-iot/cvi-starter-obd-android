@@ -10,10 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothSocket;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -35,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,33 +40,23 @@ import java.util.concurrent.TimeUnit;
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST;
 
 /*
- * OBD Bridge
+ * abstract obd2 bridge for ELM 327 devices (common part for bluetooth, wifi, or usb type)
  */
-public class ObdBridge {
+public abstract class ObdBridge {
 
-    private static final UUID SPPUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private static final String TAG = BluetoothManager.class.getName();
-
-    private BluetoothAdapter bluetoothAdapter = null;
-    private BluetoothSocket socket = null;
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
-
-    private String userDeviceAddress = null;
-    private String userDeviceName = null;
-
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> obdScannerHandle = null;
 
-    private final Home home;
+    protected final Home home;
 
-    ObdBridge(final Home home) {
+    protected ObdBridge(Home home) {
         this.home = home;
     }
 
-    void clean() {
+    public void clean() {
         stopObdScan();
-        closeBluetoothSocket();
         scheduler.shutdown();
     }
 
@@ -80,10 +65,10 @@ public class ObdBridge {
     }
 
     private String getRealDeviceId() throws DeviceNotConnectedException {
-        if (userDeviceAddress == null) {
+        if (getDeviceUniqueKey() == null) {
             throw new DeviceNotConnectedException();
         }
-        final String key = "device-id-" + userDeviceAddress.replaceAll(":", "-");
+        final String key = "device-id-" + getDeviceUniqueKey().replaceAll(":", "-").replaceAll(".", "-");
         String device_id = home.getPreference(key, DOESNOTEXIST);
         if (device_id == null || DOESNOTEXIST.equals(device_id)) {
             device_id = UUID.randomUUID().toString();
@@ -92,117 +77,60 @@ public class ObdBridge {
         return device_id;
     }
 
-    public boolean setupBluetooth() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        return bluetoothAdapter != null;
-    }
+    public synchronized void startObdScan(final boolean simulation, final int scanDelayMS, final int scanIntervalMS) {
+        stopObdScan();
 
-    public boolean isBluetoothEnabled() {
-        return bluetoothAdapter != null && bluetoothAdapter.isEnabled();
-    }
-
-    public Set<BluetoothDevice> getPairedDeviceSet() {
-        if (bluetoothAdapter != null) {
-            return bluetoothAdapter.getBondedDevices();
-        } else {
-            return null;
-        }
-    }
-
-
-    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress, final String userDeviceName) {
-        if (this.userDeviceAddress == userDeviceAddress && socket != null && socket.isConnected()) {
-            return true;
-        }
-        closeBluetoothSocket();
-        this.userDeviceAddress = userDeviceAddress;
-        this.userDeviceName = userDeviceName;
-
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        final BluetoothDevice device = btAdapter.getRemoteDevice(userDeviceAddress);
-        Log.d(TAG, "Starting Bluetooth connection..");
-        try {
-            socket = device.createRfcommSocketToServiceRecord(ObdBridge.SPPUUID);
-        } catch (Exception e) {
-            Log.e("Bluetooth Connection", "Socket couldn't be created");
-            e.printStackTrace();
-        }
-        try {
-            socket.connect();
-            socketConnected();
-            return true;
-
-        } catch (IOException e) {
-            Log.e("Bluetooth Connection", e.getMessage());
-            try {
-                Log.i("Bluetooth Connection", "Using fallback method");
-                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
-                socket.connect();
-                socketConnected();
-                return true;
-            } catch (IOException e2) {
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-                return false;
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-                return false;
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.e("BT Connection Error: ", e.getMessage());
-            return false;
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            Log.e("BT Connection Error: ", e.getMessage());
-            return false;
-        }
-    }
-
-    private void socketConnected() throws IOException, InterruptedException {
-        Log.i("Bluetooth Connection", "CONNECTED - " + socket.isConnected());
-        initializeOBD2Device(socket);
-    }
-
-    private void initializeOBD2Device(final BluetoothSocket socket) throws IOException, InterruptedException {
-        runObdCommandIgnoreException(socket, new ObdRawCommand("ATD")); // Set all to defaults
-        runObdCommandIgnoreException(socket, new ObdWarmstartCommand()); // reset
-        runObdCommandIgnoreException(socket, new ObdResetCommand());
-        runObdCommandIgnoreException(socket, new EchoOffCommand());
-        runObdCommandIgnoreException(socket, new LineFeedOffCommand());
-        runObdCommandIgnoreException(socket, new HeadersOffCommand());
-        runObdCommandIgnoreException(socket, new TimeoutCommand(125));
-        runObdCommandIgnoreException(socket, new AdaptiveTimingCommand(1));
-        runObdCommandIgnoreException(socket, new SelectProtocolCommand(ObdProtocols.AUTO));
-    }
-
-    private void runObdCommandIgnoreException(final BluetoothSocket socket, final ObdCommand cmd) {
-        try {
-            runObdCommand(socket, cmd);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void runObdCommand(final BluetoothSocket socket, final ObdCommand cmd) throws IOException, InterruptedException {
-        final InputStream ins = socket.getInputStream();
-        final OutputStream outs = socket.getOutputStream();
-        cmd.run(ins, outs);
-    }
-
-    public synchronized void closeBluetoothSocket() {
-        if (socket != null) {
-            try {
-                if (socket.isConnected()) {
-                    socket.close();
+        this.simulation = simulation;
+        Log.i("Obd Scan Thread", "STARTED");
+        System.out.println("Obd Scan Thread: STARTED");
+        obdScannerHandle = scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (simulation || isConnected()) {
+                    for (ObdParameter obdParam : obdParameterList) {
+                        obdParam.showScannedValue(getInputStream(), getOutputStream(), simulation);
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            socket = null;
-            this.userDeviceAddress = null;
+        }, scanDelayMS, scanIntervalMS, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void stopObdScan() {
+        if (obdScannerHandle != null) {
+            obdScannerHandle.cancel(true);
+            obdScannerHandle = null;
+            Log.i("Obd Scan Thread", "ENDED");
+            System.out.println("Obd Scan Thread: ENDED");
+        }
+    }
+
+    protected void socketConnected() throws InterruptedException {
+        Log.i("OBD2 Device Connection", "CONNECTED - " + isConnected());
+        initializeOBD2Device();
+    }
+
+    private void initializeOBD2Device() throws InterruptedException {
+        final InputStream ins = getInputStream();
+        final OutputStream outs = getOutputStream();
+        runObdCommandIgnoreException(ins, outs, new ObdRawCommand("ATD")); // Set all to defaults
+        runObdCommandIgnoreException(ins, outs, new ObdWarmstartCommand()); // reset
+        runObdCommandIgnoreException(ins, outs, new ObdResetCommand());
+        runObdCommandIgnoreException(ins, outs, new EchoOffCommand());
+        runObdCommandIgnoreException(ins, outs, new LineFeedOffCommand());
+        runObdCommandIgnoreException(ins, outs, new HeadersOffCommand());
+        runObdCommandIgnoreException(ins, outs, new TimeoutCommand(125));
+        runObdCommandIgnoreException(ins, outs, new AdaptiveTimingCommand(1));
+        runObdCommandIgnoreException(ins, outs, new SelectProtocolCommand(ObdProtocols.AUTO));
+    }
+
+    private void runObdCommandIgnoreException(final InputStream ins, final OutputStream outs, final ObdCommand cmd) throws InterruptedException {
+        if (ins == null || outs == null) {
+            return;
+        }
+        try {
+            cmd.run(ins, outs);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -233,38 +161,11 @@ public class ObdBridge {
         return event;
     }
 
-    public synchronized void startObdScan(final boolean simulation, final int scanDelayMS, final int scanIntervalMS) {
-        stopObdScan();
+    protected abstract String getDeviceUniqueKey();
 
-        ObdBridge.this.simulation = simulation;
-        Log.i("Obd Scan Thread", "STARTED");
-        System.out.println("Obd Scan Thread: STARTED");
-        obdScannerHandle = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                if (simulation || (socket != null && socket.isConnected())) {
-                    for (ObdParameter obdParam : obdParameterList) {
-                        obdParam.showScannedValue(socket, simulation);
-                    }
-                }
-            }
-        }, scanDelayMS, scanIntervalMS, TimeUnit.MILLISECONDS);
-    }
+    public abstract boolean isConnected();
 
-    public synchronized void stopObdScan() {
-        if (obdScannerHandle != null) {
-            obdScannerHandle.cancel(true);
-            obdScannerHandle = null;
-            Log.i("Obd Scan Thread", "ENDED");
-            System.out.println("Obd Scan Thread: ENDED");
-        }
-    }
+    protected abstract OutputStream getOutputStream();
 
-    public String getUserDeviceAddress() {
-        return userDeviceAddress;
-    }
-
-    public String getUserDeviceName() {
-        return userDeviceName;
-    }
+    protected abstract InputStream getInputStream();
 }
