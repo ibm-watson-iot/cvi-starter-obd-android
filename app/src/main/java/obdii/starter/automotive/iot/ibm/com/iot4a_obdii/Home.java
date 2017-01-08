@@ -100,7 +100,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
     private String provider;
     private Location location = null;
-
     private boolean networkIntentNeeded = false;
 
     private String trip_id;
@@ -110,7 +109,14 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
-    final ObdBridgeBluetooth obdBridge = new ObdBridgeBluetooth(this);
+    /**
+     * ATTENTION: support for ELM 327 WiFi dongle is experimental. With Android, it seems not possible to
+     * have a WiFi connection to the dongle and an internet connection simultaneously.
+     */
+    private final boolean bluetooth_mode = true;
+    private final ObdBridgeBluetooth obdBridgeBluetooth = new ObdBridgeBluetooth(this);
+    private final ObdBridgeWifi obdBridgeWifi = new ObdBridgeWifi(this); // experimental
+    private final ObdBridge obdBridge = bluetooth_mode ? obdBridgeBluetooth : obdBridgeWifi;
 
     final IoTPlatformDevice iotpDevice = new IoTPlatformDevice(this);
 
@@ -247,7 +253,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             startSettingsActivity();
             return;
         }
-        if (!obdBridge.setupBluetooth()) {
+        if (!obdBridgeBluetooth.setupBluetooth()) {
             // when bluetooth is not available (e.g. Android Studio simulator)
             final boolean doNotRunSimulationWithoutBluetooth = false; // testing purpose
             if (doNotRunSimulationWithoutBluetooth) {
@@ -339,8 +345,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
         intent.putExtra(SettingsFragment.DEVICE_ID, device_id);
         intent.putExtra(SettingsFragment.DEVICE_TOKEN, iotpDevice.getDeviceToken(device_id));
-        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ADDRESS, obdBridge.getUserDeviceAddress());
-        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_NAME, obdBridge.getUserDeviceName());
+        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ADDRESS, obdBridgeBluetooth.getUserDeviceAddress());
+        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_NAME, obdBridgeBluetooth.getUserDeviceName());
         intent.putExtra(SettingsFragment.UPLOAD_FREQUENCY, "" + getUploadFrequencySec());
 
         startActivity(intent);
@@ -483,12 +489,34 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void runRealObdScan() {
-        if (!obdBridge.isBluetoothEnabled()) {
+        if (obdBridge instanceof ObdBridgeBluetooth) {
+            runRealObdBluetoothScan();
+        } else if (obdBridge instanceof ObdBridgeWifi) {
+            runRealObdWifiScan();
+        }
+    }
+
+    private void runRealObdWifiScan() {
+        final String address = "192.168.0.10";
+        final int port = 35000;
+        final boolean connected = obdBridgeWifi.connectSocket(address, port);
+        System.out.println("WI-FI CONNECTED " + connected);
+        if (connected) {
+            showStatus("Connected to " + address + ":" + port, View.GONE);
+            startObdScan(false);
+            //checkDeviceRegistry(false);
+        } else {
+            showStatus("Connection Failed for " + address + ":" + port, View.GONE);
+        }
+    }
+
+    private void runRealObdBluetoothScan() {
+        if (!obdBridgeBluetooth.isBluetoothEnabled()) {
             final Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, BLUETOOTH_REQUEST);
             return;
         }
-        final Set<BluetoothDevice> pairedDevicesSet = obdBridge.getPairedDeviceSet();
+        final Set<BluetoothDevice> pairedDevicesSet = obdBridgeBluetooth.getPairedDeviceSet();
 
         // In case user clicks on Change Network, need to repopulate the devices list
         final ArrayList<String> deviceNames = new ArrayList<>();
@@ -538,7 +566,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         bluetoothConnectorHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (obdBridge.connectBluetoothSocket(userDeviceAddress, userDeviceName)) {
+                if (obdBridgeBluetooth.connectBluetoothSocket(userDeviceAddress, userDeviceName)) {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
                     completeConnectingBluetoothDevice();
