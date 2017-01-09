@@ -124,12 +124,15 @@ public abstract class ObdBridge {
     }
 
     private void runObdCommandIgnoreException(final InputStream ins, final OutputStream outs, final ObdCommand cmd) throws InterruptedException {
+        // ignoring exceptions would be risky, but it may make the initialization going as much as possible
         if (ins == null || outs == null) {
             return;
         }
         try {
             cmd.run(ins, outs);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
