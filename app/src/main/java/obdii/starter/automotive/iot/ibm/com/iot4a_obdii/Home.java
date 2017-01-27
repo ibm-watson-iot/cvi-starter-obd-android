@@ -675,8 +675,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
                                 showStatus("Failed to connect to IBM IoT Platform");
-                                // go settings
-                                startSettingsActivity();
+                                deviceNotRegistered(simulation);
                             }
                         })
                         .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -793,6 +792,20 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         } catch (MqttException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deviceNotRegistered(final boolean simulation) {
+        // starts OBD scan without data transmission
+        try {
+            // go settings for correct server connection
+            // startSettingsActivity();
+
+            // obd2 scan without registration
+            startObdScan(simulation);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
