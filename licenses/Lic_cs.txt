@@ -2,19 +2,13 @@ LICENÈNÍ INFORMACE
 
 Níže uvedené Programy jsou licencovány na základì následujících podmínek uvedených v dokumentu Licenèní informace, které doplòují licenèní podmínky pro Program, s nimiž døíve Zákazník a IBM vyjádøili souhlas Pokud Zákazník døíve nevyjádøil souhlas s úèinnými licenèními podmínkami pro Program, uplatní se licence Mezinárodní licenèní smlouva pro programy bez záruky (Z125-5589-05).
 
-Název Programu: IBM IoT for Automotive-Mobility Starter Application (Android)
-Èíslo Programu: TOOL
+Název Programu (Èíslo Programu):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Název Programu: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Èíslo Programu: TOOL
-
-Název Programu: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Èíslo Programu: TOOL
-
-Název Programu: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Èíslo Programu: TOOL
-
-Podmínky specifické pro Program
+Kromì výše uvedeného se na použití Programu Držitelem licence vztahují následující podmínky.
 
 Vylouèení odpovìdnosti ve vztahu k ochranì údajù
 
@@ -32,6 +26,8 @@ IBM neponese jakoukoli odpovìdnost ohlednì souladu Programu nebo výsledné aplika
 
 Tak jako v pøípadì jakéhokoli procesu vývoje nese Držitel licence odpovìdnost za vývoj, dostateèné testování a odstranìní vad produktù aplikací Držitele licence. Držitel licence nese výhradní odpovìdnost za veškeré pøedvídané èi nepøedvídané dùsledky nebo selhání produktù a aplikací Držitele licence.
 
+Držitel licence je odpovìdný za zajištìní toho, že každé zaøízení nebo hardware použitý s tímto Programem splòuje pøíslušné právní a regulaèní požadavky, a za závazky vzniklé v souvislosti s nesplnìním tìchto požadavkù èi s nepøesností èi poruchou Programu tímto zpùsobenou nebo jinak zpùsobenou kvùli poruše libovolného zaøízení èi hardwaru plnì odpovídá Držitel licence.
+
 REDISTRIBUOVATELNÉ POLOŽKY
 
 Jestliže Program obsahuje komponenty, které jsou Redistribuovatelnými položkami, budou identifikovány v souboru REDIST, který je pøipojen k Programu. Kromì licenèních práv udìlených v této Smlouvì smí Držitel licence distribuovat Redistribuovatelné položky v souladu s níže uvedenými podmínkami:
@@ -47,15 +43,13 @@ Jestliže Program obsahuje komponenty, které jsou Redistribuovatelnými položkami,
 9) IBM, její dodavatelé a distributoøi poskytují tyto Redistribuovatelné položky a související dokumentaci bez závazku podpory a "JAK JSOU", BEZ ZÁRUKY JAKÉHOKOLIV DRUHU, VYJÁDØENÉ VÝSLOVNÌ ÈI VYPLÝVAJÍCÍ Z OKOLNOSTÍ, VÈETNÌ ZÁRUKY VLASTNICKÉHO NÁROKU, NEPORUŠENÍ PRÁV TØETÍCH OSOB A VYPLÝVAJÍCÍCH ZÁRUK A PODMÍNEK PRODEJNOSTI A VHODNOSTI PRO URÈITÝ ÚÈEL.
 10) Držitel licence odpovídá za veškerou technickou asistenci pro své Aplikace a jakékoliv zmìny Redistribuovatelných položek; a
 11) Licenèní smlouva, kterou uzavøel Držitel licence s koncovým uživatelem Aplikace Držitele licence, musí informovat koncového uživatele o tom, že Redistribuovatelné položky nebo jejich zmìny nesmí být a) užívány k jiným úèelùm než k aktivaci Aplikace Držitele licence, ii) kopírovány (s výjimkou zálohování), iii) dále distribuovány nebo pøevádìny bez Aplikace Držitele licence nebo iv) zpìtnì získány, zpìtnì kompilovány nebo jiným zpùsobem pøekládány, pokud zákon výslovnì nepovoluje výjimky, a bez možnosti smluvního vzdání se práv. Kromì toho musí licenèní smlouva Držitele licence poskytovat IBM pøinejmenším stejnou ochranu jako podmínky této Smlouvy.
-
 Zpìtná vazba k licenci
 
 V pøípadì, že Držitel licence poskytne IBM zpìtnou vazbu ohlednì Programu, zavazuje se Držitel licence, že postoupí IBM veškerá práva, právní nároky a podíly (vèetnì vlastnictví autorských práv) na veškerá data, návrhy nebo písemné materiály, 1) které se vztahují k Programu a 2) které Držitel licence poskytne IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Mezinárodní licenèní smlouva pro programy bez záruky

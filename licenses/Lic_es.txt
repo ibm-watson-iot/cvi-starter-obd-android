@@ -2,19 +2,13 @@ INFORMACIÓN SOBRE LICENCIA
 
 Los Programas que se enumeran a continuación se licencian bajo los siguientes términos y condiciones de Licencia, además de los términos de licencia del Programa acordados previamente entre el Cliente e IBM. Si el Cliente no ha aceptado con anterioridad los términos de la licencia aplicables al Programa, se aplicará Acuerdo Internacional de Licencia para Programas sin Garantía (Z125-5589-05).
 
-Nombre de Programa: IBM IoT for Automotive-Mobility Starter Application (Android)
-Número de Programa: TOOL
+Nombre de Programa (Número de Programa):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nombre de Programa: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Número de Programa: TOOL
-
-Nombre de Programa: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Número de Programa: TOOL
-
-Nombre de Programa: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Número de Programa: TOOL
-
-Términos Exclusivos del Programa
+Además de lo indicado, los términos siguientes se aplican al uso por parte del Licenciatario del Programa.
 
 Aviso legal sobre privacidad de datos
 
@@ -31,6 +25,8 @@ El Programa y las aplicaciones resultantes no han sido diseñados para diseñar, c
 IBM no asume ninguna responsabilidad en relación con el cumplimiento de las leyes y normativas del Programa o de las aplicaciones resultantes aplicables a la empresa o al contenido del Licenciatario. El Licenciatario es responsable del uso del Programa y de las aplicaciones resultantes.
 
 Tal como sucede con los procesos de desarrollo, el Licenciatario es responsable del desarrollo, de la realización de pruebas suficientes y de la corrección de los productos y aplicaciones del Licenciatario y es el único responsable de las consecuencias intencionadas o inesperadas o de los fallos de los productos o aplicaciones del Licenciatario.
+
+El Licenciatario debe asegurarse de que los dispositivos o el hardware utilizado con este Programa cumpla los requisitos legales y normativos aplicables; el Licenciatario es el único responsable de toda responsabilidad derivada del no cumplimiento de los dispositivos o el hardware o de la imprecisión o el mal funcionamiento del Programa como resultado del mal funcionamiento de los dispositivos o el hardware.
 
 REDISTRIBUIBLES
 
@@ -52,10 +48,9 @@ Licencia de comentarios
 
 Si el Licenciatario envía comentarios a IBM en referencia al Programa, el Licenciatario cede a IBM todos los derechos, títulos e intereses (incluida la propiedad de derechos de autor (copyright)) respecto a todos los datos, sugerencias o materiales escritos que 1) estén relacionados con el Programa y que 2) el Licenciatario proporcione a IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Acuerdo Internacional de Licencia para Programas sin Garantía

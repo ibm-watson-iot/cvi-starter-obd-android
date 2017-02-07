@@ -2,19 +2,13 @@ LIZENZINFORMATION
 
 Für die Lizenzierung der nachstehend aufgelisteten Programme gelten zusätzlich zu den bereits zwischen dem Kunden und IBM vereinbarten Programmlizenzbedingungen die Bedingungen der folgenden Lizenzinformation. Falls der Kunde den für das Programm geltenden Lizenzbedingungen nicht bereits zugestimmt hat, kommt Internationale Nutzungsbedingungen für Programme ohne Gewährleistung (Z125-5589-05) zur Anwendung.
 
-Programmname: IBM IoT for Automotive-Mobility Starter Application (Android)
-Programmnummer: TOOL
+Programmname (Programmnummer):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Programmname: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Programmnummer: TOOL
-
-Programmname: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Programmnummer: TOOL
-
-Programmname: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Programmnummer: TOOL
-
-Programmspezifische Bedingungen
+Zusätzlich zu den obigen Bestimmungen gelten die folgenden Bedingungen für die Programmnutzung durch den Lizenznehmer.
 
 Datenschutz, Haftungsausschluss
 
@@ -31,6 +25,8 @@ Das Programm und alle daraus resultierenden Anwendungen sind nicht für den Entwu
 IBM übernimmt in Bezug auf das Programm oder die resultierende Anwendung keine Verantwortung für die Einhaltung von Gesetzen und Verordnungen, die für die geschäftliche Tätigkeit und die Inhalte des Kunden zur Anwendung kommen. Der Lizenznehmer ist für die Verwendung des Programms und alle resultierenden Anwendungen selbst verantwortlich.
 
 Wie bei allen Entwicklungsprozessen ist der Lizenznehmer für die Entwicklung seiner Produkte und Anwendung, ausreichende Tests und die Fehlerbeseitigung selbst verantwortlich und trägt die alleinige Verantwortung für alle vorhersehbaren und nicht vorhersehbaren Auswirkungen oder Fehler seiner Produkte oder Anwendungen.
+
+Der Lizenznehmer muss sicherstellen, dass sämtliche Geräte oder Hardwareeinheiten, die mit dem Programm verwendet werden, alle gesetzlichen und regulatorischen Vorschriften erfüllen, und trägt die alleinige Verantwortung für jegliche Verbindlichkeiten, die durch die Nichteinhaltung von gesetzlichen und regulatorischen Vorschriften durch ein Gerät oder eine Hardwareeinheit oder die dadurch verursachte Ungenauigkeit oder Fehlfunktion des Programms oder anderweitig durch eine Fehlfunktion eines Geräts oder einer Hardwareeinheit entstehen.
 
 WEITERVERTEILBARE KOMPONENTEN
 
@@ -52,10 +48,9 @@ Nutzungsrecht für Feedback
 
 Falls der Lizenznehmer IBM Feedback in Bezug auf das Programm gibt, willigt er ein, IBM sämtliche Rechte, Eigentumsrechte und Rechtsansprüche (inklusive des Nutzungsrechts an allen urheberrechtlich geschützten Werken) an allen Daten, Vorschlägen und schriftlichen Materialien, die sich 1) auf das Programm beziehen und 2) die der Lizenznehmer IBM zur Verfügung stellt, zu überlassen.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Internationale Nutzungsbedingungen für Programme ohne Gewährleistung

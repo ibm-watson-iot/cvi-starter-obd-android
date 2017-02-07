@@ -2,19 +2,13 @@
 
 下面列出的这些程序按照以下许可信息条款和条件以及获得客户与 IBM 事先同意的程序许可条款授予许可。如果客户事先未同意对本程序生效的许可条款，那么 无保证程序的国际许可协议 (Z125-5589-05) 适用。
 
-程序名称：IBM IoT for Automotive-Mobility Starter Application (Android)
-程序号：TOOL
+程序名称 (程序号)：
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-程序名称：IBM IoT for Automotive-Fleet Management Starter Application (Android)
-程序号：TOOL
-
-程序名称：IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-程序号：TOOL
-
-程序名称：IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-程序号：TOOL
-
-程序特别条款
+除上述内容之外，以下条款适用于被许可方对本程序的使用。
 
 数据隐私免责声明
 
@@ -31,6 +25,8 @@
 对于本程序或者由此产生的应用程序是否遵循适用于被许可方的业务和内容的法律与法规，IBM 不应承担任何责任。被许可方负责本程序以及任何由此产生的应用程序的使用。
 
 对于任何开发流程，被许可方承担被许可方的产品和应用程序的开发、重大测试和补救责任，被许可方的产品或应用程序的任何可预见或不可预见的结果或故障的责任均由被许可方单独承担。
+
+被许可方负责确保使用本程序的任何设备或硬件符合适用的法律和法规要求，与任何不合规设备或硬件相关任何责任，或者由此造成本程序错误或故障或归因于任何设备或硬件故障的任何责任均由被许可方单独承担。
 
 可再分发文件
 
@@ -52,10 +48,9 @@
 
 如果被许可方向 IBM 提供有关本程序的反馈，那么被许可方同意将 1) 与本程序相关的并且 2) 由被许可方提供给 IBM 的任何数据、建议或书面材料的所有权利、所有权和权益（包括版权）转让给 IBM。
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 无保证程序的国际许可协议

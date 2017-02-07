@@ -2,19 +2,13 @@ INFORMAZIONI RELATIVE ALLA LICENZA
 
 I Programmi elencati di seguito sono concessi in licenza in base alle seguenti clausole e condizioni License Information in aggiunta alle clausole della licenza del Programma precedentemente accettate dal Cliente e IBM. Se il Cliente non ha accettato precedentemente le clausole della licenza in vigore per il Programma, si applica Accordo Internazionale di Licenza per Programmi senza Garanzia (Z125-5589-05).
 
-Nome Programma: IBM IoT for Automotive-Mobility Starter Application (Android)
-Numero Programma: TOOL
+Nome Programma (Numero Programma):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nome Programma: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Numero Programma: TOOL
-
-Nome Programma: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Numero Programma: TOOL
-
-Nome Programma: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Numero Programma: TOOL
-
-Disposizioni specifiche al Programma
+Inoltre, le seguenti clausole si applicano all'utilizzo del Programma da parte del licenziatario.
 
 Rinuncia alla riservatezza dei dati
 
@@ -22,15 +16,17 @@ Questo programma è stato sviluppato solo a scopo dimostrativo per illustrare le 
 
 I componenti inclusi in questo Programma possono comportare l'elaborazione di informazioni personali (ad esempio, tracciamento della posizione e analitica comportamentale). Quando implementata in utilizzi pratici, tale elaborazione può essere soggetta a requisiti legali e normativi specifici imposti da leggi sulla protezione dei dati e sulla riservatezza specifiche dei vari paesi. In questo Programma, eventuali requisiti di questo tipo non vengono affrontati.
 
-Il Licenziatario si assume la responsabilità di garantire che l'utilizzo da parte del Licenziatario di questo Programma e di eventuali soluzioni distribuite soddisfino i requisiti legali e normativi applicabili. Ciò può richiedere l'implementazione di funzioni e caratteristiche aggiuntive non incluse nel Programma. 
+Il licenziatario si assume la responsabilità di garantire che l'utilizzo da parte del licenziatario di questo Programma e di eventuali soluzioni distribuite soddisfino i requisiti legali e normativi applicabili. Ciò può richiedere l'implementazione di funzioni e caratteristiche aggiuntive non incluse nel Programma. 
 
 Avvertenze e Declinazione di responsabilità
 
 Il Programma e le eventuali applicazioni risultanti non sono progettate per la progettazione, la creazione, il controllo o la gestione di sistemi di controllo automobilistici, nei quali gli errori nel codice di esempio o nelle applicazioni risultanti potrebbero risultare in rischi di morte o di gravi infortuni personali. 
 
-IBM non si assume alcuna responsabilità riguardo alla conformità del Programma o delle applicazioni risultanti rispetto alle leggi o normative applicabili al business e al contenuto del Licenziatario. Il Licenziatario è responsabile dell'utilizzo del Programma e di eventuali applicazioni risultanti.
+IBM non si assume alcuna responsabilità riguardo alla conformità del Programma o delle applicazioni risultanti rispetto alle leggi o normative applicabili al business e al contenuto del licenziatario. Il licenziatario è responsabile dell'utilizzo del Programma e di eventuali applicazioni risultanti.
 
-Come con qualsiasi processo di sviluppo, il Licenziatario ha la responsabilità di sviluppare, sottoporre a test sufficienti e risolvere i problemi dei propri prodotti e applicazioni ed è l'unico responsabile di eventuali conseguenze o problemi prevedibili o imprevedibili dei propri prodotti o applicazioni.
+Come con qualsiasi processo di sviluppo, il licenziatario ha la responsabilità di sviluppare, sottoporre a test sufficienti e risolvere i problemi dei propri prodotti e applicazioni ed è l'unico responsabile di eventuali conseguenze o problemi prevedibili o imprevedibili dei propri prodotti o applicazioni.
+
+Il licenziatario si assume la responsabilità di garantire che l'utilizzo di ogni dispositivo o hardware con questo Programma, soddisfi i requisiti legali e normativi applicabili e il licenziatario sarà l'unico responsabile per eventuali passività derivanti da qualsiasi inadempienza di ciascun dispositivo o hardware, oppure a seguito di eventuali inesattezze o malfunzionamenti del Programma, oppure ancora a causa di un malfunzionamento dei dispositivi o hardware.
 
 RIDISTRIBUIBILI
 
@@ -42,21 +38,20 @@ Se il Programma include componenti che sono Ridistribuibili, saranno identificat
 4) Se i Ridistribuibili includono un Java Runtime Environment, il licenziatario deve anche includere altri Ridistribuibili non-Java con l'Applicazione del licenziatario, a meno che l'Applicazione non sia progettata per funzionare solo su dispositivi di computer classici (es., laptop, desktop e server) e non su dispositivi palmari o pervasivi (cioè, dispositivi che contengono un microprocessore ma non hanno computing come scopo primario);
 5) Il licenziatario non può eliminare le istruzioni relative al copyright o agli avvisi contenute nei Ridistribuibili;
 6) Il licenziatario accetta di proteggere IBM, i suoi fornitori o distributori da e contro richieste derivanti dall'uso o distribuzione dell'Applicazione del licenziatario;
-7) Il Licenziatario non può utilizzare lo stesso nome di percorso utilizzato per i file/moduli Ridistribuibili originali;
-8) Il Licenziatario non può utilizzare nomi o marchi di IBM, dei suoi fornitori o distributori relativamente alla commercializzazione delle proprie applicazioni senza previa approvazione di IBM, di quei fornitori o distributori;
+7) Il licenziatario non può utilizzare lo stesso nome di percorso utilizzato per i file/moduli Ridistribuibili originali;
+8) Il licenziatario non può utilizzare nomi o marchi di IBM, dei suoi fornitori o distributori relativamente alla commercializzazione delle proprie applicazioni senza previa approvazione di IBM, di quei fornitori o distributori;
 9) Fatti salvi i limiti inderogabili di legge, IBM, i suoi fornitori o distributori forniscono i Ridistribuibili e la documentazione correlata senza obbligo di supporto e "NELLO STATO IN CUI SI TROVANO," SENZA GARANZIE, ESPRESSE O IMPLICITE, INCLUSE GARANZIE DI TITOLARITÀ', FUNZIONAMENTO ININTERROTTO O INTERFERENZA E LE GARANZIE E LE CONDIZIONI IMPLICITE DI COMMERCIABILITÀ' E IDONEITÀ' PER UNO SCOPO PARTICOLARE.;
 10) Il licenziatario è responsabile di tutta l'assistenza tecnica per la propria applicazione e qualsiasi modifica ai Ridistribuibili; e
 11) L'accordo di licenza stipulato con l'utente finale dell'Applicazione del licenziatario, il licenziatario avviserà l'utente finale che i Ridistribuibili o le loro modifiche non possono essere i) utilizzati per scopi diversi da quello di attivazione dell'Applicazione, ii) copiati (salvo che per scopi di backup), iii) ulteriormente distribuiti o trasferiti senza l'Applicazione del licenziatario, o iv) soggetti ad assemblaggio a ritroso, compilazione a ritroso, o altrimenti tradotti salvo laddove specificamente consentito dalla legge e senza possibilità di deroga contrattuale. Inoltre, l'accordo di licenza del licenziatario deve proteggere IBM almeno quanto le clausole del presente Accordo.
 
 Licenza per il feedback
 
-Qualora il Licenziatario fornisca del feedback a IBM riguardo al programma, accetta di assegnare ad IBM ogni diritto, titolarità ed interesse (inclusa la proprietà del copyright) relativo a dati, suggerimenti e materiale cartaceo che 1) è relativo al Programma e 2) fornito ad IBM.
+Qualora il licenziatario fornisca del feedback a IBM riguardo al programma, accetta di assegnare ad IBM ogni diritto, titolarità ed interesse (inclusa la proprietà del copyright) relativo a dati, suggerimenti e materiale cartaceo che 1) è relativo al Programma e 2) fornito ad IBM.
 
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Accordo Internazionale di Licenza per Programmi senza Garanzia

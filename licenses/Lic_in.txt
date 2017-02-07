@@ -2,19 +2,13 @@ INFORMASI LISENSI
 
 Program-program yang tercantum di bawah ini dilisensikan dengan syarat dan ketentuan Informasi Lisensi berikut ini selain syarat lisensi Program yang sebelumnya telah disetujui oleh Klien dan IBM. Apabila Klien sebelumnya tidak menyetujui syarat lisensi yang berlaku untuk Program, Perjanjian Lisensi Internasional untuk Program Tanpa Garansi (Z125-5589-05) akan berlaku.
 
-Nama Program: IBM IoT for Automotive-Mobility Starter Application (Android)
-Nomor Program: TOOL
+Nama Program (Nomor Program):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nama Program: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Nomor Program: TOOL
-
-Nama Program: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Nomor Program: TOOL
-
-Nama Program: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Nomor Program: TOOL
-
-Syarat-syarat unik Program
+Selain hal-hal di atas, syarat-syarat berikut ini berlaku untuk penggunaan Program oleh Pemegang Lisensi.
 
 Sanggahan Kerahasiaan Data
 
@@ -24,13 +18,15 @@ Komponen yang disertakan dalam Program dapat melibatkan pemrosesan informasi pri
 
 Pemegang Lisensi bertanggung jawab untuk memastikan penggunaan Pemegang Lisensi atas Program ini dan setiap solusi yang disebarkan sesuai dengan persyaratan hukum dan peraturan yang berlaku. Hal ini mungkin memerlukan implementasi fungsi dan fitur tambahan yang tidak disertakan dalam Program. 
 
-Warning and Disclaimer
+Peringatan dan Sanggahan
 
 Program dan setiap aplikasi yang dihasilkan tidak dimaksudkan untuk rancangan, konstruksi, kontrol, atau pemeliharaan sistem kontrol otomotif di mana kegagalan kode contoh atau aplikasi yang dihasilkan tersebut dapat meningkatkan ancaman fisik terhadap kematian atau cedera pribadi yang serius. 
 
 IBM tidak akan bertanggung jawab terkait kepatuhan aplikasi yang dihasilkan dan Program dengan peraturan perundang-undangan dan regulasi yang berlaku untuk bisnis dan konten Pemegang Lisensi. Pemegang Lisensi bertanggung jawab atas penggunaan Program dan setiap aplikasi yang dihasilkan.
 
 Seperti halnya proses pengembangan, Pemegang Lisensi bertanggung jawab untuk mengembangkan, menguji dan memulihkan produk dan aplikasi Pemegang Lisensi secara memadai serta Pemegang Lisensi hanya bertanggung jawab atas setiap konsekuensi yang dapat diprediksi atau tidak terduga atau kegagalan dari produk atau aplikasi Pemegang Lisensi.
+
+Pemegang lisensi bertanggung jawab untuk memastikan bahwa setiap perangkat atau perangkat keras yang digunakan dengan Program ini telah memenuhi persyaratan hukum dan peraturan yang berlaku, serta Pemegang Lisensi hanya bertanggung jawab untuk setiap kewajiban yang timbul sehubungan dengan setiap ketidakpatuhan perangkat atau perangkat keras apa pun, atau dengan setiap ketidakakuratan maupun kegagalan fungsi Program sebagai akibat darinya atau sebaliknya dikarenakan kegagalan fungsi dari perangkat atau perangkat keras apa pun.
 
 DAPAT DIDISTRIBUSIKAN KEMBALI
 
@@ -52,10 +48,9 @@ Lisensi Umpan Balik
 
 Apabila Pemegang Lisensi memberikan umpan balik kepada IBM mengenai Program, Pemegang Lisensi setuju untuk meyerahkan semua hak, hak milik, dan hal-hal penting (termasuk kepemilikan hak cipta) kepada IBM dalam data, saran, atau materi tertulis apa pun yang 1) berkaitan dengan Program dan 2) Pemegang Lisensi berikan kepada IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Perjanjian Lisensi Internasional untuk Program Tanpa Garansi

@@ -2,19 +2,13 @@ INFORMACJE LICENCYJNE
 
 Programy wymienione poni¿ej s¹ licencjonowane na podstawie przedstawionych poni¿ej warunków Informacji licencyjnych, które stanowi¹ uzupe³nienie warunków licencji na Program uzgodnionych uprzednio miêdzy Klientem a IBM. Jeœli Klient nie dysponuje warunkami licencji uzgodnionymi uprzednio z IBM w odniesieniu do Programu, zastosowanie maj¹ warunki licencji Miêdzynarodowa Umowa Licencyjna na Programy nieobjête Gwarancj¹ (Z125-5589-05).
 
-Nazwa Programu: IBM IoT for Automotive-Mobility Starter Application (Android)
-Numer Programu: TOOL
+Nazwa Programu (Numer Programu):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nazwa Programu: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Numer Programu: TOOL
-
-Nazwa Programu: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Numer Programu: TOOL
-
-Nazwa Programu: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Numer Programu: TOOL
-
-Warunki specyficzne dla Programów
+Ponadto u¿ywanie Programu przez Licencjobiorcê podlega nastêpuj¹cym warunkom.
 
 Zastrze¿enie dotycz¹ce ochrony danych
 
@@ -31,6 +25,8 @@ Program ani ka¿da aplikacja utworzona za jego pomoc¹ nie zosta³y zaprojektowane 
 IBM nie ponosi odpowiedzialnoœci za zgodnoœæ Programu lub aplikacji utworzonej za jego pomoc¹ z przepisami prawa maj¹cymi zastosowanie do dzia³alnoœci i zawartoœci Licencjobiorcy. Licencjobiorca jest odpowiedzialny za u¿ywanie Programu i utworzonej za jego pomoc¹ aplikacji.
 
 Podobnie jak w przypadku ka¿dego innego procesu programistycznego Licencjobiorca jest odpowiedzialny za tworzenie i odpowiednie testowanie produktów i aplikacji Licencjobiorcy oraz rozwi¹zywanie problemów z nimi zwi¹zanych. Ponadto Licencjobiorca ponosi wy³¹czn¹ odpowiedzialnoœæ za daj¹ce i niedaj¹ce siê przewidzieæ konsekwencje i awarie produktów i aplikacji Licencjobiorcy.
+
+Licencjobiorca jest odpowiedzialny za zapewnienie zgodnoœci ka¿dego urz¹dzenia i sprzêtu u¿ywanego w po³¹czeniu z niniejszym Programem ze stosownymi wymaganiami prawnymi. Ponadto Licencjobiorca jest wy³¹cznie odpowiedzialny za zobowi¹zania wynikaj¹ce z niezgodnoœci urz¹dzenia lub sprzêtu z takimi wymaganiami prawnymi oraz za niedok³adne lub wadliwe dzia³anie Programu spowodowane tak¹ niezgodnoœci¹.
 
 ELEMENTY PODLEGAJ¥CE REDYSTRYBUCJI
 
@@ -52,10 +48,9 @@ Licencja dotycz¹ca opinii
 
 W przypadku gdy Licencjobiorca przeka¿e IBM swoj¹ opiniê na temat Programu, Licencjobiorca zgadza siê przenieœæ na IBM wszelkie posiadane uprawnienia i prawa (w tym prawa autorskie) do wszelkich danych, sugestii oraz materia³ów drukowanych, 1) które odnosz¹ siê do Programu oraz 2) które Licencjobiorca dostarcza IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Miêdzynarodowa Umowa Licencyjna na Programy nieobjête Gwarancj¹

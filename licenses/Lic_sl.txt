@@ -2,19 +2,13 @@ PODATKI O LICENCIRANJU
 
 Spodaj navedeni programi so licencirani na podlagi naslednjih doloèb in pogojev licenène informacije, ki veljajo poleg pogojev licence za program, s katerimi naroènik in IBM predhodno soglašata. Èe naroènik predhodno ne soglaša s pogoji, ki veljajo za program, velja Mednarodna licenèna pogodba za programe brez garancije (Z125-5589-05).
 
-Ime programa: IBM IoT for Automotive-Mobility Starter Application (Android)
-Številka programa: TOOL
+Ime programa (Številka programa):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Ime programa: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Številka programa: TOOL
-
-Ime programa: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Številka programa: TOOL
-
-Ime programa: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Številka programa: TOOL
-
-Pogoji, specifièni za program
+Za uporabo programa s strani imetnike licence poleg zgoraj navedenih pogojev veljajo tudi naslednji pogoji.
 
 Izkljuèitev odgovornosti za varovanje osebnih podatkov
 
@@ -28,9 +22,11 @@ Opozorilo in izkljuèitev odgovornosti
 
 Ta program in z njim ustvarjene aplikacije niso namenjeni oblikovanju, izdelavi, upravljanju ali vzdrževanju avtomatiziranih nadzornih sistemov, kjer bi lahko napaka take vzorène kode ali z njo ustvarjene aplikacije privedla do dejanske smrtne nevarnosti ali resne poškodbe posameznika. 
 
-IBM ni odgovoren za skladnost programa ali z njim ustvarjene aplikacije z zakoni in predpisi, ki veljajo za poslovanje imetnika licence in njegovo vsebino. Imetnik licence je odgovoren za uporabo programa in z njim ustvarjenih aplikacij.
+IBM ni odgovoren za skladnost programa ali z njim ustvarjene aplikacije z zakoni in predpisi, ki veljajo za poslovanje imetnika licence in s tem povezane vsebine. Imetnik licence je odgovoren za uporabo programa in z njim ustvarjenih aplikacij.
 
 Kot pri vsakem razvojnem procesu je imetnik licence odgovoren za razvijanje, zadostno preizkušanje in izboljševanje svojih produktov in aplikacij ter je sam odgovoren za kakršnekoli predvidene ali nepredvidene posledice ali napake svojih produktov ali aplikacij.
+
+Imetnik licence mora zagotoviti, da je vsaka naprava ali strojna oprema, ki se uporablja s tem programom, skladna z veljavnimi zakonskimi zahtevami in predpisi, pri èemer je imetnik licence izkljuèno odgovoren za morebitno odškodnino, ki bi lahko izhajala iz morebitne neskladnosti katerekoli naprave ali strojne opreme, ali iz katerokoli netoènosti ali okvare programa, ki je posledica takšne neskladnosti, oziroma je kako drugaèe povezana z okvaro katerekoli naprave ali strojne opreme.
 
 ENOTE, KI JIH JE MOGOÈE REDISTRIBUIRATI
 
@@ -52,10 +48,9 @@ Licenca za uporabo povratnih informacij
 
 Èe imetnik licence IBM-u zagotovi povratne informacije o programu, soglaša, da IBM-u podeli vse pravice, pravni naslov in interes (vkljuèno z imetništvom avtorskih pravic) nad vsemi podatki, predlogi in pisnim gradivom, ki 1) so povezani s programom in 2) jih imetnik licence zagotovi IBM-u.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Mednarodna licenèna pogodba za programe brez garancije

@@ -2,19 +2,13 @@
 
 以下の「プログラム」は、お客様と IBM とが事前に合意した「プログラム」の使用許諾条件に加えて、次のライセンス情報の使用条件に基づいて使用許諾されます。 お客様が「プログラム」の有効な使用許諾条件に事前に合意していない場合、 プログラムのご使用条件 (保証適用外プログラム用) (Z125-5589-05) が適用されます。
 
-プログラム名: IBM IoT for Automotive-Mobility Starter Application (Android)
-プログラム番号: TOOL
+プログラム名 (プログラム番号):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-プログラム名: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-プログラム番号: TOOL
-
-プログラム名: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-プログラム番号: TOOL
-
-プログラム名: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-プログラム番号: TOOL
-
-特記事項
+さらに、以下の使用条件がライセンシーの「プログラム」の使用に適用されます。
 
 データ・プライバシー特記事項
 
@@ -31,6 +25,8 @@
 「プログラム」およびこれに起因するアプリケーションの、ライセンシーのビジネスおよびコンテンツに適用される法令および規制の遵守について、IBM は責任を負わないものとします。 ライセンシーは、「プログラム」とこれに起因するアプリケーションの使用に責任を負うものとします。
 
 開発プロセスと同様、ライセンシーはライセンシーの製品およびアプリケーションの開発、十分なテスト、修正に責任を負うものとします。ライセンシーの製品あるいはアプリケーションの想定あるいは想定外の結果または障害に対して、ライセンシーはすべての責任を負うものとします。
+
+ライセンシーは、本「プログラム」とともに使用するすべてのデバイスまたはハードウェアが、適用される法的要件および規制要件を必ず満たすようにする責任を負うものとします。また、ライセンシーは かかるデバイスもしくはハードウェアが当該法的要件もしくは規制要件を遵守していないこと、または、デバイスもしくはハードウェアの誤動作を起因とする「プログラム」の不正確性もしくは誤動作に関連して生じるいかなる責任を負うものとします。
 
 再配布可能物
 
@@ -52,10 +48,9 @@
 
 ライセンシーが「プログラム」に関してフィードバックを IBM に提供する際、ライセンシーは、1) 本件プログラムの使用に関連し、2) ライセンシーが IBM に提供した、データ、提案または資料についての権利、権原および権益 (日本国著作権法第 27 条および第 28 条の権利を含むすべての支分権を併せた著作権を含みます。) のすべてを IBM に譲渡するものとします。
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 プログラムのご使用条件 (保証適用外プログラム用)

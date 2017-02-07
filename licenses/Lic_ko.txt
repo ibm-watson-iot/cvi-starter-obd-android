@@ -2,19 +2,13 @@
 
 아래 나열된 프로그램은 이전에 고객과 IBM이 합의한 프로그램 라이센스 조건에 추가하여 다음 라이센스 정보 이용 약관에 의거하여 라이센스가 부여됩니다. 이전에 고객이 해당 프로그램에 적용되는 라이센스 조항에 동의하지 않은 경우 무보증 프로그램에 관한 국제 라이센스 계약(Z125-5589-05)이(가) 적용됩니다.
 
-프로그램 이름: IBM IoT for Automotive-Mobility Starter Application (Android)
-프로그램 번호: TOOL
+프로그램 이름 (프로그램 번호:
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-프로그램 이름: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-프로그램 번호: TOOL
-
-프로그램 이름: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-프로그램 번호: TOOL
-
-프로그램 이름: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-프로그램 번호: TOOL
-
-프로그램 고유 조항
+위의 내용에 추가하여, 라이센스 사용자가 본 프로그램을 사용하는 경우 다음 조항이 적용됩니다.
 
 데이터 보호 면책사항(Data Privacy Disclaimer)
 
@@ -31,6 +25,8 @@
 IBM은 라이센스 사용자의 비즈니스 및 컨텐츠에 적용되는 법률 및 규정에 대한 본 프로그램 또는 결과물 애플리케이션의 준수 여부와 관련하여 책임을 지지 않습니다. 본 프로그램 및 결과물 애플리케이션의 사용에 대한 책임은 라이센스 사용자가 부담합니다.
 
 개발 프로세스에 있어서, 라이센스 사용자는 라이센스 사용자의 제품 및 애플리케이션 개발, 충분한 테스트 및 문제 해결에 대한 책임을 지며 라이센스 사용자의 제품 또는 애플리케이션에 대해 예측하거나 예측하지 못한 결과나 장애에 대해 전적으로 책임을 집니다.
+
+라이센스 사용자는 본 프로그램과 함께 사용된 디바이스나 하드웨어가 해당되는 법적 및 규제 요구사항을 충족해야 할 책임이 있으며, 라이센스 사용자는 디바이스나 하드웨어의 그러한 비준수 또는 그로 인한 본 프로그램의 부정확성이나 오작동과 관련하여 발생하는 책임사항 또는 달리 디바이스나 하드웨어의 오작동으로 인한 모든 책임사항에 대해 단독으로 책임을 져야 합니다.
 
 재배포 가능 구성요소(REDISTRIBUTABLES)
 
@@ -52,10 +48,9 @@ IBM은 라이센스 사용자의 비즈니스 및 컨텐츠에 적용되는 법률 및 규정에 대한 본 프�
 
 라이센스 사용자가 본 프로그램에 대한 피드백을 IBM에 제공하는 경우, 라이센스 사용자는 1) 본 프로그램과 관련이 있고 2) 라이센스 사용자가 IBM에 제공하는 데이터, 제안사항 또는 서면 자료에 있는 모든 권리, 소유권 및 이익(저작권의 소유권 포함)을 IBM에게 양도한다는 데 동의합니다.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 무보증 프로그램에 관한 국제 라이센스 계약

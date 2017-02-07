@@ -2,19 +2,13 @@ LICENSE INFORMATION
 
 The Programs listed below are licensed under the following License Information terms and conditions in addition to the Program license terms previously agreed to by Client and IBM. If Client does not have previously agreed to license terms in effect for the Program, the International License Agreement for Non-Warranted Programs (Z125-5589-05) applies.
 
-Program Name: IBM IoT for Automotive-Mobility Starter Application (Android)
-Program Number: TOOL
+Program Name (Program Number):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Program Name: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Program Number: TOOL
-
-Program Name: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Program Number: TOOL
-
-Program Name: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Program Number: TOOL
-
-Program-unique Terms
+In addition to the above, the following terms apply to Licensee's use of the Program.
 
 Data Privacy Disclaimer
 
@@ -31,6 +25,8 @@ The Program and any resulting application is not intended for design, constructi
 IBM shall have no responsibility regarding the Program's or resulting application's compliance with laws and regulations applicable to Licensee's business and content. Licensee is responsible for use of the Program and any resulting application.
 
 As with any development process, Licensee is responsible for developing, sufficiently testing and remediating Licensee's products and applications and Licensee is solely responsible for any foreseen or unforeseen consequences or failures of Licensee's products or applications.
+
+Licensee is responsible for ensuring that any device or hardware used with this Program meets applicable legal and regulatory requirements, and Licensee shall be solely responsible for any liability arising in connection with any such non-compliance of any device or hardware, or with any inaccuracy or malfunction of the Program as a result thereof or otherwise due to a malfunction of any device or hardware.
 
 REDISTRIBUTABLES
 
@@ -52,10 +48,9 @@ Feedback License
 
 In the event Licensee provides feedback to IBM regarding the Program, Licensee agrees to assign to IBM all right, title, and interest (including ownership of copyright) in any data, suggestions, or written materials that 1) are related to the Program and 2) that Licensee provides to IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 International License Agreement for Non-Warranted Programs
