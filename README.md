@@ -60,6 +60,9 @@ To try the Android application using Android Emulator, complete the following st
 ## Reporting defects
 To report a defect with the IoT for Automotive - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-obd-android/issues) section.
 
+## Questions, comments or suggestions
+For your questions, comments or suggestions to us, visit [Watson IoT for Automotive Application community ](https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
+
 ## Privacy notice
 The "IoT for Automotive - OBDII Fleet Management App for Android" on Bluemix stores all of the driving data that is obtained while you use the mobile app.
 
