@@ -2,19 +2,13 @@ INFORMATIONS SUR LA LICENCE
 
 Les Logiciels spécifiés ci-dessous sont concédés sous licence conformément aux dispositions des Informations sur la Licence suivantes qui s'ajoutent à celles des dispositions de la licence du Logiciel précédemment acceptée par le Client et IBM. Si le Client n'a pas précédemment accepté les dispositions de la licence en vigueur pour le Logiciel, le Conditions Internationales d'Utilisation des Logiciels non garantis (Z125-5589-05) s'applique.
 
-Nom du Logiciel : IBM IoT for Automotive-Mobility Starter Application (Android)
-Référence du Logiciel : TOOL
+Nom du Logiciel (Référence du Logiciel) : 
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nom du Logiciel : IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Référence du Logiciel : TOOL
-
-Nom du Logiciel : IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Référence du Logiciel : TOOL
-
-Nom du Logiciel : IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Référence du Logiciel : TOOL
-
-Dispositions particulières au Logiciel
+Inoltre, le seguenti clausole si applicano all'utilizzo del Programma da parte del licenziatario.
 
 Clause de confidentialité des données
 
@@ -31,6 +25,8 @@ Le Logiciel et toute application résultante ne sont pas destinés à la conception
 IBM n'a aucune responsabilité quant à la conformité du Logiciel ou de l'application résultante avec les lois et règlements applicables à l'entreprise et au contenu du Détenteur de la Licence. Le Détenteur de la Licence est responsable de l'utilisation du Logiciel et de toute application résultante.
 
 Comme dans tout processus de développement, le Détenteur de la Licence est responsable du développement, du test et de la réhabilitation suffisant(e) de ses produits et de ses applications et le Détenteur de la Licence est l'unique responsable des conséquences ou des défaillances prévues ou imprévues des produits ou des applications du Détenteur de la Licence.
+
+Le Détenteur de la Licence est responsable de garantir que tout périphérique ou matériel utilisé avec le Logiciel respecte les exigences légales et réglementaires applicables, et que le Détenteur de la Licence doit être uniquement responsable de toute obligation découlant d'un lien avec une telle non-conformité d'un périphérique ou d'un matériel, ou de toute inexactitude ou dysfonctionnement du Logiciel découlant du dysfonctionnement d'un périphérique ou d'un matériel.
 
 REDISTRIBUABLES
 
@@ -52,10 +48,9 @@ Licence de commentaires en retour
 
 Dans le cas où le Détenteur de la Licence fournit des commentaires en retour à IBM concernant le Logiciel, le Détenteur de la Licence accepte d'affecter à IBM tous ses droits de propriété et intérêts (y compris les droits d'auteur) sur les données, suggestions et éléments écrits 1) relatifs au Logiciel et 2) qu'il communique à IBM.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Conditions Internationales d'Utilisation des Logiciels non garantis

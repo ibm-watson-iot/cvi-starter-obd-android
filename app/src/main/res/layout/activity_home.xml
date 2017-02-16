@@ -315,7 +315,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:text="Version: 1.0.0 Build: 20170119"
+                android:text="Version: 1.0.0 Build: 20170207"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
     </LinearLayout>

@@ -2,19 +2,13 @@
 
 下列本程式之授權除係依客戶與 IBM 先前同意之授權條款外，並依下述授權手冊條款授權。若客戶先前就本程式未同意生效任何授權條款，則本程式適用 國際授權合約 - 無保證程式 (Z125-5589-05)。
 
-程式名稱：IBM IoT for Automotive-Mobility Starter Application (Android)
-程式編號：TOOL
+程式名稱 (程式編號)：
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-程式名稱：IBM IoT for Automotive-Fleet Management Starter Application (Android)
-程式編號：TOOL
-
-程式名稱：IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-程式編號：TOOL
-
-程式名稱：IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-程式編號：TOOL
-
-程式特別條款
+除前揭條款外，下列條款亦適用於被授權人對本程式之使用。
 
 資料隱私權免責聲明
 
@@ -31,6 +25,8 @@
 IBM 就本程式或所生應用程式是否遵循被授權人業務與內容所適用之法律規章，概不負責。本程式及所生應用程式之使用，被授權人應自行負責。
 
 對於開發處理程序，被授權人應負責開發、充分測試及補強其產品及應用程式，被授權人產品或應用程式之預期或非預期結果或故障，概由被授權人負完全責任。
+
+被授權人應負責確認，搭配本程式一併使用之裝置或硬體符合適用法律及法規之規定，因該等裝置或硬體未符合該等規定或因該等裝置或硬體故障所致本程式之不正確性或故障所生賠償責任，應由被授權人自行負責。
 
 可再散布者
 
@@ -52,10 +48,9 @@ IBM 就本程式或所生應用程式是否遵循被授權人業務與內容所適用之法律規章，概不負責。
 
 倘若被授權人有提供 IBM 本程式相關意見者，被授權人同意將 1) 與本程式相關及 2) 被授權人所提供予 IBM 之任何資料、建議或書面著作物之一切權利、所有權及利益（包括著作權之所有權）轉讓予 IBM。
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 國際授權合約 - 無保證程式

@@ -2,19 +2,13 @@ LÝSANS BÝLGÝLERÝ
 
 Aþaðýda listelenen programlar, daha önce Müþteri ve IBM tarafýndan kabul edilen Program lisansý koþullarýna ek olarak aþaðýdaki Lisans Bilgilerinin kayýt ve koþullarý kapsamýnda lisanslanýr. Müþteri, Programa iliþkin yürürlükte olan lisans koþullarýný daha önce kabul etmemiþse, Garanti Verilmeyen Programlar Ýçin Uluslararasý Lisans Sözleþmesi (Z125-5589-05) geçerli olur.
 
-Program Adý: IBM IoT for Automotive-Mobility Starter Application (Android)
-Program Numarasý: TOOL
+Program Adý (Program Numarasý):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Program Adý: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Program Numarasý: TOOL
-
-Program Adý: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Program Numarasý: TOOL
-
-Program Adý: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Program Numarasý: TOOL
-
-Programa Özgü Koþullar
+Yukarýdakilere ek olarak, aþaðýdaki koþullar Lisans Alan Tarafýn bu Programý kullanýmý için geçerlidir.
 
 Veri Gizliliði Ýçin Sorumluluðun Reddi
 
@@ -28,34 +22,35 @@ Uyarý ve Sorumluluðun Reddi
 
 Program ve bunun sonucunda ortaya çýkan herhangi bir uygulama, söz konusu örnek kodda veya sonuçta ortaya çýkan uygulamada hata olmasý  durumunda, ciddi seviyede ölüm tehdidine veya ciddi kiþisel yaralanmaya yol açabileceði otomotiv kontrol sistemlerinin tasarýmý, yapýmý, denetimi veya bakýmý için kullanýlmak üzere tasarlanmamýþtýr. 
 
-IBM, Programýn veya sonuçta ortaya çýkan uygulamanýn Lisans Alan Tarafýn iþ ve içerik için geçerli yasalara ve yasal düzenlemelere uygun olmasýyla ilgili olarak hiçbi sorumluluðu yoktur. Lisans Alan Taraf, Programýn ve sonuçta ortaya çýkan uygulamanýn kullanýmýndan sorumludur.
+IBM, Programýn veya sonuçta ortaya çýkan uygulamanýn Lisans Alan Tarafýn iþ ve içerik için geçerli yasalara ve yasal düzenlemelere uygun olmasýyla ilgili olarak hiçbir sorumluluðu yoktur. Lisans Alan Taraf, Programýn ve sonuçta ortaya çýkan uygulamanýn kullanýmýndan sorumludur.
 
-Herhangi bir geliþtirme sürecinde olduðu gibi, Lisans Alan Tarafýn ürün ve uygulamalarýnýn geliþtirilmesinden, yeterli düzeyde test edilmesinden ve iyileþtirilmesinden Lisans Alan Taraf sorumludur. Lisans Alan Tarafýn ürünlerinin veya uygulamalarýnýn öngörüle veya  öngörülemeyen sonuçlarýndan veya hatalarýndan tek baþýna Lisans Alan Taraf sorumludur.
+Herhangi bir geliþtirme sürecinde olduðu gibi, Lisans Alan Tarafýn ürün ve uygulamalarýnýn geliþtirilmesinden, yeterli düzeyde test edilmesinden ve iyileþtirilmesinden Lisans Alan Taraf sorumludur. Lisans Alan Tarafýn ürünlerinin veya uygulamalarýnýn öngörülen veya  öngörülemeyen sonuçlarýndan veya hatalarýndan tek baþýna Lisans Alan Taraf sorumludur.
 
-YENÝDEN DAÐITILABÝLENLER
+Lisans Alan Taraf, bu Programla birlikte kullanýlan herhangi bir aygýtýn veya donanýmýn geçerli yasal gereksinimlere ve yasal düzenleme gereksinimlerine uygun olmasýný saðlamaktan sorumludur. Lisans Alan Taraf, herhangi bir aygýtýn veya donanýmýn söz konusu gereksinimlere uymamasýyla veya bunun sonucunda Programda bir hata çýkmasý veya Programýn hatalý çalýþmasýyla baðlantýlý olarak veya herhangi bir aygýtýn veya donanýmýn arýzalanmasý nedeniyle baþka bir þekilde ortaya çýkan herhangi bir yükümlülükten tek baþýna sorumlu olacaktýr.
 
-Bu Program, Yeniden Daðýtýlabilenler olarak adlandýrýlan bileþenleri içeriyorsa bunlar, bu Programla birlikte gönderilen REDIST adlý dosyada tanýmlanýr. Bu Sözleþmede saðlanan lisans haklarýna ek olarak Lisans Alan Taraf Yeniden Daðýtýlabilenleri aþaðýdaki koþullara uygun olarak daðýtabilir:
+YENÝDEN DAÐITILABÝLEN BÝLEÞENLER
+
+Bu Program, Yeniden Daðýtýlabilen Bileþenler olarak adlandýrýlan bileþenleri içeriyorsa bunlar, bu Programla birlikte gönderilen REDIST adlý dosyada tanýmlanýr. Bu Sözleþmede saðlanan lisans haklarýna ek olarak Lisans Alan Taraf, Yeniden Daðýtýlabilen Bileþenleri aþaðýdaki koþullara uygun olarak daðýtabilir:
 
 1) Yeniden Daðýtým iþlemi, yalnýzca kaynak kod biçiminde ve bu Programla birlikte gönderilen REDIST adlý dosyada veya diðer belgelerde yer alan yönergelere ve belirtimlere uygun olarak gerçekleþtirilmelidir;
-2) Bu Programla birlikte gönderilen belgelerde Lisans Alan Tarafa, Yeniden Daðýtýlabilenleri deðiþtirme izni açýkça veriliyorsa, Lisans Alan Tarafýn yapacaðý deðiþikliklerin ilgili belgelerdeki yönergelerin ve belirtimlerin tümüne uygun olmasý gerekir; eðer varsa, bu tür deðiþiklikler, Yeniden Daðýtýlabilenler olarak deðerlendirilmelidir;
-3) Yeniden Daðýtýlabilenler, yalnýzca bu Program kullanýlarak geliþtirilen Lisans Alan Tarafýn Uygulamasýnýn ("Lisans Alan Tarafýn Uygulamasý") bir parçasý olarak ve yalnýzca Lisans Alan Tarafýn müþterilerini, ilgili Uygulamayý kullanmalarýyla baðlantýlý olarak desteklemek amacýyla daðýtýlabilir. Lisans Alan Tarafýn uygulamasýnýn son kullanýcýlara, Lisans Alan Tarafýn yazýlým ürününün son kullanýcýlar tarafýndan edinilmesinde bu Yeniden Daðýtýlabilenlerin temel motivasyon olmayacaðý þekilde, önemli bir katma deðer saðlamasý gerekir.
-4) Yeniden Daðýtýlabilenlerin Java Çalýþtýrma Zamaný Ortamý (Java Runtime Environment) içermesi durumunda, Uygulama, yalnýzca genel bilgisayar aygýtlarýnda (örneðin, dizüstü bilgisayarlar, masaüstü bilgisayarlar ve sunucular) çalýþtýrýlmak üzere tasarlandýysa ve elde taþýnabilen veya yaygýn olarak kullanýlan diðer aygýtlarda (örneðin, bir mikroiþlemci içeren ancak hesaplama birincil çalýþma amaçlarý olarak belirlenmiþ olmayan aygýtlar) çalýþtýrýlmak üzere tasarlanmadýysa, Lisans Alan Tarafýn kendi Uygulamasýyla birlikte diðer Java-dýþý Yeniden Daðýtýlabilenleri de içermesi gerekir.
-5) Lisans Alan Taraf, Yeniden Daðýtýlabilenlerin içinde yer alan herhangi bir telif hakký bildirimini veya bildirim dosyasýný kaldýramaz.
+2) Bu Programla birlikte gönderilen belgelerde Lisans Alan Tarafa, Yeniden Daðýtýlabilen Bileþenleri deðiþtirme izni açýkça veriliyorsa, Lisans Alan Tarafýn yapacaðý deðiþikliklerin ilgili belgelerdeki yönergelerin ve belirtimlerin tümüne uygun olmasý gerekir; eðer varsa, bu tür deðiþiklikler, Yeniden Daðýtýlabilen Bileþenler olarak deðerlendirilmelidir;
+3) Yeniden Daðýtýlabilen Bileþenler, yalnýzca bu Program kullanýlarak geliþtirilen Lisans Alan Tarafýn Uygulamasýnýn ("Lisans Alan Tarafýn Uygulamasý") bir parçasý olarak ve yalnýzca Lisans Alan Tarafýn müþterilerini, ilgili Uygulamayý kullanmalarýyla baðlantýlý olarak desteklemek amacýyla daðýtýlabilir. Lisans Alan Tarafýn uygulamasýnýn, son kullanýcýlara, bu Yeniden Daðýtýlabilen Bileþenlerin Lisans Alan Tarafýn yazýlým ürününün son kullanýcýlar tarafýndan edinilmesinde temel motivasyon olmayacaðý þekilde, önemli bir katma deðer saðlamasý gerekir.
+4) Yeniden Daðýtýlabilen Bileþenlerin Java Çalýþtýrma Zamaný Ortamý (Java Runtime Environment) içermesi durumunda, Uygulama, yalnýzca genel bilgisayar aygýtlarýnda (örneðin, dizüstü bilgisayarlar, masaüstü bilgisayarlar ve sunucular) çalýþtýrýlmak üzere tasarlandýysa ve elde taþýnabilen veya yaygýn olarak kullanýlan diðer aygýtlarda (örneðin, bir mikroiþlemci içeren ancak hesaplama birincil çalýþma amaçlarý olarak belirlenmiþ olmayan aygýtlar) çalýþtýrýlmak üzere tasarlanmadýysa, Lisans Alan Tarafýn kendi Uygulamasýyla birlikte diðer Java-dýþý Yeniden Daðýtýlabilen Bileþenleri de içermesi gerekir.
+5) Lisans Alan Taraf, Yeniden Daðýtýlabilen Bileþenlerin içinde yer alan herhangi bir telif hakký bildirimini veya bildirim dosyasýný kaldýramaz.
 6) Lisans Alan Taraf, Lisans Alan Tarafýn Uygulamasýnýn kullanýlmasý veya daðýtýlmasýndan dolayý yöneltilen iddialara karþý IBM'i, IBM'in saðlayýcýlarýný ve distribütörlerini tazmin etmekle yükümlüdür;
-7) Lisans Alan Taraf, özgün Yeniden Daðýtýlabilenler ile ayný yol adýný (path name) kullanamaz;
+7) Lisans Alan Taraf, özgün Yeniden Daðýtýlabilen Bileþenler ile ayný yol adýný (path name) kullanamaz;
 8) Lisans Alan Taraf, IBM'in, IBM'in saðlayýcýlarýnýn veya IBM'in distribütörlerinin önceden yazýlý izni olmadan, IBM'in, IBM'in saðlayýcýlarýnýn veya IBM'in distribütörlerinin adlarýný veya ticari markalarýný, Lisans Alan Tarafýn Uygulamasýnýn pazarlanmasýyla baðlantýlý olarak kullanamaz;
-9) IBM, IBM'in saðlayýcýlarý ve IBM'in distribütörleri Yeniden Daðýtýlabilenleri ve bunlarla ilgili belgeleri herhangi bir destek yükümlülüðü olmaksýzýn MÜLKÝYETE, HAK ÝHLALÝ YAPILMAYACAÐINA VE MÜDAHALEYE DAÝR GARANTÝLER ÝLE TÝCARÝLÝÐE VE BELÝRLÝ BÝR AMACA UYGUNLUÐA DAÝR ZIMNÝ GARANTÝLER VE KOÞULLAR DA DAHÝL OLMAK, ANCAK BUNLARLA SINIRLI OLMAMAK ÜZERE, AÇIK VEYA ZIMNÝ HÝÇBÝR GARANTÝ VERMEKSÝZÝN "OLDUÐU GÝBÝ" ESASIYLA SAÐLAR;
-10) Uygulamasýna ve Yeniden Daðýtýlabilenlerde yaptýðý deðiþikliklere iliþkin tüm teknik desteðin saðlanmasýndan tamamen Lisans Alan Taraf sorumlu olur ve
-11) Lisans Alan Taraf, Uygulamasýnýn son kullanýcýsý ile gerçekleþtireceði lisans sözleþmesinde, bu Yeniden Daðýtýlabilenlerin veya bunlardaki deðiþikliklerin, i) Uygulamasýnýn geçerli kýlýnmasý dýþýnda bir amaçla kullanýlamayacaðý, ii) kopyalanamayacaðý (yedekleme amacý dýþýnda), iii) Lisans Alan Tarafýn Uygulamasýndan ayrý olarak baþkalarýna daðýtýlamayacaðý veya devredilemeyeceði ya da iv) geçerli yasalarýn sözleþme ile deðiþtirilmesine olanak tanýmayarak açýkça izin verdiði durumlar dýþýnda, ters çevrilemeyeceði, ters derlenemeyeceði veya baþka bir yolla çevrilemeyeceði konusunda son kullanýcýyý önceden bilgilendirecektir. Ayrýca, Lisans Alan Tarafýn lisans sözleþmesindeki koþullarýn, IBM açýsýndan, en az bu Sözleþmede yer alan koþullar kadar koruyucu olmasý gereklidir.
+9) IBM, IBM'in saðlayýcýlarý ve IBM'in distribütörleri Yeniden Daðýtýlabilen Bileþenleri ve bunlarla ilgili belgeleri herhangi bir destek  yükümlülüðü olmaksýzýn MÜLKÝYETE, HAK ÝHLALÝ YAPILMAYACAÐINA VE MÜDAHALEDE BULUNULMAYACAÐINA DAÝR GARANTÝLER ÝLE TÝCARÝLÝÐE VE BELÝRLÝ BÝR AMACA UYGUNLUÐA DAÝR ZIMNÝ GARANTÝLER VE KOÞULLAR DA DAHÝL OLMAK, ANCAK BUNLARLA SINIRLI OLMAMAK ÜZERE, AÇIK VEYA ZIMNÝ HÝÇBÝR GARANTÝ VERMEKSÝZÝN "OLDUÐU GÝBÝ" ESASIYLA SAÐLAR;
+10) Kendi Uygulamasýna ve Yeniden Daðýtýlabilen Bileþenlerde yaptýðý deðiþikliklere iliþkin tüm teknik desteðin saðlanmasýndan tamamen Lisans Alan Taraf sorumlu olur ve
+11) Lisans Alan Taraf, Uygulamasýnýn son kullanýcýsý ile gerçekleþtireceði lisans sözleþmesinde, bu Yeniden Daðýtýlabilen Bileþenlerin veya bunlardaki deðiþikliklerin, i) Uygulamasýnýn geçerli kýlýnmasý dýþýnda bir amaçla kullanýlamayacaðý, ii) kopyalanamayacaðý (yedekleme amacý dýþýnda), iii) Lisans Alan Tarafýn Uygulamasýndan ayrý olarak baþkalarýna daðýtýlamayacaðý veya devredilemeyeceði ya da iv) geçerli yasalarýn sözleþme ile deðiþtirilmesine olanak tanýmayarak açýkça izin verdiði durumlar dýþýnda, ters çevrilemeyeceði, ters derlenemeyeceði veya baþka bir yolla çevrilemeyeceði konusunda son kullanýcýyý önceden bilgilendirecektir. Ayrýca, Lisans Alan Tarafýn lisans sözleþmesindeki koþullarýn, IBM açýsýndan, en az bu Sözleþmede yer alan koþullar kadar koruyucu olmasý gereklidir.
 
 Geri Bildirim Lisansý
 
 Lisans Alan Tarafýn Program ilgili olarak IBM'e geri bildirim vermesi durumunda, Lisans Alan Taraf 1) Programla ilgili olan ve 2) Lisans Alan Tarafýn IBM'e saðladýðý tüm verilere, önerilere veya yazýlý malzemelere iliþkin tüm haklarý, mülkiyet hakkýný ve çýkarý (telif hakký sahipliði de dahil olmak üzere) IBM'e devretmeyi kabul eder.
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Garanti Verilmeyen Programlar Ýçin Uluslararasý Lisans Sözleþmesi

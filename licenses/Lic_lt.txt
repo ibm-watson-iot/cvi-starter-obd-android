@@ -2,119 +2,55 @@ LICENCIJOS INFORMACIJA
 
 Toliau nurodytos Programos licencijuojamos pagal ðias Licencijos informacijos sàlygas, kurios papildo Programos licencijos sàlygas, dël kuriø susitarë Klientas ir IBM. Jei Klientas anksèiau nëra sutikæs su Programai taikomomis licencijos sàlygomis, taikoma Programø kurioms neteikiama garantija tarptautinë licencinë sutartis (Z125-5589-05).
 
-Programos pavadinimas: IBM IoT for Automotive-Mobility Starter Application (Android)
-Programos numeris: TOOL
+Programos pavadinimas (Programos numeris):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Programos pavadinimas: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Programos numeris: TOOL
-
-Programos pavadinimas: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Programos numeris: TOOL
-
-Programos pavadinimas: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Programos numeris: TOOL
-
-Unikalios programos sàlygos
+Be anksèiau nurodytos informacijos, toliau nurodytos sàlygos taikomos Licenciato Programos naudojimui.
 
 Atsakomyb?s d?l duomen¸ privatumo atsisakymas
 
-?? Programa buvo sukurta tik demonstraciniais tikslais, siekiant
-parodyti „IBM IoT for Automotive“ technines ir panaudojimo versle
-galimybes.
+?? Programa buvo sukurta tik demonstraciniais tikslais, siekiant parodyti „IBM IoT for Automotive“ technines ir panaudojimo versle galimybes.
 
-? ?i? Program? ?traukti komponentai gali apimti asmenin?s
-informacijos apdorojim? (pavyzd?iui, vietos sekim? ir elgsenos
-analiz¿). Praktikoje ?gyvendinamam tokiam apdorojimui gali b?ti
-taikomi tam tikri teisiniai ir reguliuojamieji reikalavimai,
-nustatyti atitinkamuose ?alies duomen¸ apsaugos ir privatumo teis?s
-aktuose. ?ioje Programoje jokie tokie reikalavimai netaikomi.
+? ?i? Program? ?traukti komponentai gali apimti asmenin?s informacijos apdorojim? (pavyzd?iui, vietos sekim? ir elgsenos analiz¿). Praktikoje ?gyvendinamam tokiam apdorojimui gali b?ti taikomi tam tikri teisiniai ir reguliuojamieji reikalavimai, nustatyti atitinkamuose ?alies duomen¸ apsaugos ir privatumo teis?s aktuose. ?ioje Programoje jokie tokie reikalavimai netaikomi.
 
-Licenciatas privalo u?tikrinti, kad naudojant ?i? Program? ir bet
-kur? ?diegt? sprendim? b?t¸ laikomasi taikom¸ teis?s ir reguliacini¸
-reikalavim¸. Tam gali reik?ti ?diegti papildomas, ? Program?
-ne?trauktas priemones ir funkcijas.
+Licenciatas privalo u?tikrinti, kad naudojant ?i? Program? ir bet kur? ?diegt? sprendim? b?t¸ laikomasi taikom¸ teis?s ir reguliacini¸ reikalavim¸. Tam gali reik?ti ?diegti papildomas, ? Program? ne?trauktas priemones ir funkcijas. 
 
 Garantija ir atsakomyb?s atsisakymas
 
-Programa ir bet kokia jos pagrindu sukurta taikomoji programa n?ra
-skirta kurti, konstruoti, valdyti ar pri?i?r?ti automatines valdymo
-sistemas, kuriose tokio pavyzdinio kodo ar naujai sukurtos
-taikomosios programos gedimas gal?t¸ sukelti mirties ar rimto asmens
-su?alojimo gr?sm¿.
+Programa ir bet kokia jos pagrindu sukurta taikomoji programa n?ra skirta kurti, konstruoti, valdyti ar pri?i?r?ti automatines valdymo sistemas, kuriose tokio pavyzdinio kodo ar naujai sukurtos taikomosios programos gedimas gal?t¸ sukelti mirties ar rimto asmens su?alojimo gr?sm¿. 
 
-IBM neprisiima jokios atsakomyb?s d?l Programos ar jos pagrindu
-sukurtos taikomosios programos atitikties teis?s aktams ar
-taisykl?ms, kurios taikomos Licenciato verslui ir turiniui. 
-Licenciatas yra atsakingas u? Programos ir bet kokios jos pagrindu
-sukurtos taikomosios programos naudojim?.
+IBM neprisiima jokios atsakomyb?s d?l Programos ar jos pagrindu sukurtos taikomosios programos atitikties teis?s aktams ar taisykl?ms, kurios taikomos Licenciato verslui ir turiniui. Licenciatas yra atsakingas u? Programos ir bet kokios jos pagrindu sukurtos taikomosios programos naudojim?.
 
-Bet kokio k?rimo proceso metu Licenciatas yra atsakingas u? savo
-produkt¸ k?rim?, pakankam? tikrinim? ir taisym?, ir i?skirtinai
-atsakingas u? bet kurias nusp?jamas arba nenusp?jamas pasekmes arba
-Licenciato produkt¸ ar taikom¸j¸ program¸ triktis.
+Bet kokio k?rimo proceso metu Licenciatas yra atsakingas u? savo produkt¸ k?rim?, pakankam? tikrinim? ir taisym?, ir i?skirtinai atsakingas u? bet kurias nusp?jamas arba nenusp?jamas pasekmes arba Licenciato produkt¸ ar taikom¸j¸ program¸ triktis.
+
+Licenciatas privalo u?tikrinti, kad su ?ia Programa naudojamas ?renginys ar aparat?ra atitiks teisinius ir reglamentinius reikalavimus. Tik Licenciatas atsako u? visus ?sipareigojimus, kylan?ius d?l bet kokios ?renginio ar aparat?ros neatitikties arba d?l to atsiradusi¸ Programos netikslum¸ ar gedim¸, arba d?l kokios nors ?renginio ar aparat?ros gedimo.
 
 PERSKIRSTOMIEJI KOMPONENTAI
 
-Jeigu ? Program? ?traukti Perskirstomieji komponentai, jie bus nurodyti REDIST faile, pateiktame kartu su Programa. Kartu
-su Sutarties suteiktomis licencijos teis?mis Licenciatas gali
-platinti Perskirstomuosius komponentus laikydamasis ?i¸ s?lyg¸:
+Jeigu ? Program? ?traukti Perskirstomieji komponentai, jie bus nurodyti REDIST faile, pateiktame kartu su Programa. Kartu su Sutarties suteiktomis licencijos teis?mis Licenciatas gali platinti Perskirstomuosius komponentus laikydamasis ?i¸ s?lyg¸:
 
-1) Perskirstomieji komponentai turi b?ti tik ?altinio kodo formos ir
-turi atitikti visus kartu su Programa teikiamoje REDIST arba
-dokumentacijoje pateiktus nurodymus, instrukcijas ir specifikacijas;
-2) Jei Programos lydra?tyje Licenciatui ai?kiai leid?iama
-Perskirstomuosius komponentus modifikuoti, toks modifikavimas turi
-atitikti visus tokioje dokumentacijoje pateiktus nurodymus,
-instrukcijas ir specifikacijas, o tokie modifikavimai, jei atliekami,
-laikomi Perskirstomaisiais komponentais;
-3) Perskirstomieji komponentai gali b?ti platinami tik kaip Licenciato
-taikomosios programos, kuri buvo sukurta naudojant Program?, („Licenciato taikomoji programa“) dalis ir tik Licenciato klient¸ naudojamai Licenciato taikomajai programai palaikyti. Licenciato
-taikomoji programa turi teikti svarbi? prid?tin¿ vert¿ taip, kad
-Licenciato taikomosios programos produkto galutiniai vartotojai
-neb?t¸ motyvuoti ?sigyti Perskirstomuosius komponentus;
-4) Jeigu ? Perskirstomuosius komponentus ?traukta „Java“ vykdymo
-aplinka, Licenciatas taip pat privalo ? Licenciato taikom?j? program?
-?traukti kitus ne „Java“ Perskirstomuosius komponentus, nebent Taikomoji
-programa sukurta veikti tik bendruosiuose kompiuteri¸ ?renginiuose (pvz., skreitiniuose, staliniuose kompiuteriuose ir serveriuose), o ne ki?eniniuose ar kituose skvarbiuosiuose ?renginiuose (t. y. ?renginiuose, kurie turi mikroprocesori¸, ta?iau kuri¸ kompiuterio funkcijos n?ra pirminis naudojimo tikslas);
-5) Licenciatas negali pa?alinti joki¸ Perskirstomuosiuose
-komponentuose esan?i¸ autoriaus teisi¸ arba pastab¸ fail¸;
+1) Perskirstomieji komponentai turi b?ti tik ?altinio kodo formos ir turi atitikti visus kartu su Programa teikiamoje REDIST arba dokumentacijoje pateiktus nurodymus, instrukcijas ir specifikacijas;
+2) Jei Programos lydra?tyje Licenciatui ai?kiai leid?iama Perskirstomuosius komponentus modifikuoti, toks modifikavimas turi atitikti visus tokioje dokumentacijoje pateiktus nurodymus, instrukcijas ir specifikacijas, o tokie modifikavimai, jei atliekami, laikomi Perskirstomaisiais komponentais;
+3) Perskirstomieji komponentai gali b?ti platinami tik kaip Licenciato taikomosios programos, kuri buvo sukurta naudojant Program?, („Licenciato taikomoji programa“) dalis ir tik Licenciato klient¸ naudojamai Licenciato taikomajai programai palaikyti. Licenciato taikomoji programa turi teikti svarbi? prid?tin¿ vert¿ taip, kad Licenciato taikomosios programos produkto galutiniai vartotojai neb?t¸ motyvuoti ?sigyti Perskirstomuosius komponentus;
+4) Jeigu ? Perskirstomuosius komponentus ?traukta „Java“ vykdymo aplinka, Licenciatas taip pat privalo ? Licenciato taikom?j? program? ?traukti kitus ne „Java“ Perskirstomuosius komponentus, nebent Taikomoji programa sukurta veikti tik bendruosiuose kompiuteri¸ ?renginiuose (pvz., skreitiniuose, staliniuose kompiuteriuose ir serveriuose), o ne ki?eniniuose ar kituose skvarbiuosiuose ?renginiuose (t. y. ?renginiuose, kurie turi mikroprocesori¸, ta?iau kuri¸ kompiuterio funkcijos n?ra pirminis naudojimo tikslas);
+5) Licenciatas negali pa?alinti joki¸ Perskirstomuosiuose komponentuose esan?i¸ autoriaus teisi¸ arba pastab¸ fail¸;
 6) Licenciatas nelaikys IBM, jos tiek?j¸ arba platintoj¸ atsakingais u? jokias pretenzijas, susijusias su Licenciato taikomosios programos naudojimu ar platinimu;
-7) Licenciatas negali naudoti tokio paties kaip originali¸
-Perskirstom¸j¸ komponent¸ fail¸ / moduli¸ kelio pavadinimo;
-8) Parduodamas Licenciato taikom?j? program? Licenciatas negali
-naudoti IBM, jos tiek?j¸ arba platintoj¸ pavadinim¸ arba preki¸
-?enkl¸, netur?damas IBM, to tiek?jo arba platintojo i?ankstinio
-ra?ti?ko sutikimo;
-9) IBM, jos tiek?jai ir platintojai pateikia Perskirstomuosius
-komponentus ir susijusi? dokumentacij? be palaikymo ?sipareigojimo ir
-TOKI?, KOKIA YRA, NESUTEIKDAMI JOKIOS APIBR??TOS AR NUMANOMOS
-GARANTIJOS, ?SKAITANT PAVADINIMO, NEPA?EID?IAMUMO AR NE?SIKI?IMO
-GARANTIJAS IR NUMANOMAS TINKAMUMO PREKYBAI BEI TAM TIKRAM TIKSLUI
-GARANTIJAS IR S?LYGAS;
-10) Licenciatas atsakingas u? vis? technin¿ pagalb?, susijusi? su
-Licenciato taikom?ja programa, ir u? bet kokias Perskirstom¸j¸
-komponent¸ modifikacijas; ir
-11) Licenciato ir Licenciato taikomosios programos galutinio
-vartotojo licencijos sutartis turi ?sp?ti galutin? vartotoj?, kad
-Perskirstom¸j¸ komponent¸ arba j¸ modifikavim¸ negalima i) naudoti
-kitu tikslu, nei Licenciato taikomajai programai ?galinti, ii)
-kopijuoti (i?skyrus kuriant atsargin¿ kopij?), iii) platinti ar
-perduoti naudoti be Licenciato taikomosios programos, arba iv)
-i?ardyti, dekompiliuoti ar kitaip versti, i?skyrus, jei tai ai?kiai
-leid?ia teis?s aktai ir nepa?eid?iami sutartiniai ?sipareigojimai. Be to, Licenciato licencin? sutartis turi b?ti sauganti IBM bent tiek, kiek tai apibr??ia ?ios Sutarties s?lygos.
+7) Licenciatas negali naudoti tokio paties kaip originali¸ Perskirstom¸j¸ komponent¸ fail¸ / moduli¸ kelio pavadinimo;
+8) Parduodamas Licenciato taikom?j? program? Licenciatas negali naudoti IBM, jos tiek?j¸ arba platintoj¸ pavadinim¸ arba preki¸ ?enkl¸, netur?damas IBM, to tiek?jo arba platintojo i?ankstinio ra?ti?ko sutikimo;
+9) IBM, jos tiek?jai ir platintojai pateikia Perskirstomuosius komponentus ir susijusi? dokumentacij? be palaikymo ?sipareigojimo ir TOKI?, KOKIA YRA, NESUTEIKDAMI JOKIOS APIBR??TOS AR NUMANOMOS GARANTIJOS, ?SKAITANT PAVADINIMO, NEPA?EID?IAMUMO AR NE?SIKI?IMO GARANTIJAS IR NUMANOMAS TINKAMUMO PREKYBAI BEI TAM TIKRAM TIKSLUI GARANTIJAS IR S?LYGAS;
+10) Licenciatas atsakingas u? vis? technin¿ pagalb?, susijusi? su Licenciato taikom?ja programa, ir u? bet kokias Perskirstom¸j¸ komponent¸ modifikacijas; ir
+11) Licenciato ir Licenciato taikomosios programos galutinio vartotojo licencijos sutartis turi ?sp?ti galutin? vartotoj?, kad Perskirstom¸j¸ komponent¸ arba j¸ modifikavim¸ negalima i) naudoti kitu tikslu, nei Licenciato taikomajai programai ?galinti, ii) kopijuoti (i?skyrus kuriant atsargin¿ kopij?), iii) platinti ar perduoti naudoti be Licenciato taikomosios programos, arba iv) i?ardyti, dekompiliuoti ar kitaip versti, i?skyrus, jei tai ai?kiai leid?ia teis?s aktai ir nepa?eid?iami sutartiniai ?sipareigojimai. Be to, Licenciato licencin? sutartis turi b?ti sauganti IBM bent tiek, kiek tai apibr??ia ?ios Sutarties s?lygos.
 
 Atsiliepim¸ licencija
 
-Tais atvejais, kai Licenciatas pateikia IBM atsiliepim? d?l
-Programos, Licenciatas sutinka perduoti IBM visas vis¸ duomen¸,
-pasi?lym¸ arba ra?ytin?s med?iagos, 1) susijusios su Programa ir 2)
-Licenciato perduodamos IBM, teises, ?skaitant nuosavyb?s teis¿ ir bet
-kokias kitas turtines teises (taip pat autoriaus teises).
+Tais atvejais, kai Licenciatas pateikia IBM atsiliepim? d?l Programos, Licenciatas sutinka perduoti IBM visas vis¸ duomen¸, pasi?lym¸ arba ra?ytin?s med?iagos, 1) susijusios su Programa ir 2) Licenciato perduodamos IBM, teises, ?skaitant nuosavyb?s teis¿ ir bet kokias kitas turtines teises (taip pat autoriaus teises).
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Programø kurioms neteikiama garantija tarptautinë licencinë sutartis

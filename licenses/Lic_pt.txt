@@ -2,19 +2,13 @@ INFORMAÇÕES DA LICENÇA
 
 Os Programas listados abaixo são licenciados sob os/ao abrigo dos termos e condições da seguinte Informação sobre a Licença a seguir, além dos termos de licença do Programa acordados anteriormente pelo Cliente e pela IBM. Se o Cliente não tiver acordado anteriormente com os termos de licença em vigor para o Programa, o Contrato de Licença Internacional para Programas Não Garantidos (Z125-5589-05) será aplicável.
 
-Nome do Programa: IBM IoT for Automotive-Mobility Starter Application (Android)
-Número do Programa: TOOL
+Nome do Programa (Número do Programa):
+IBM IoT for Automotive-Mobility Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Starter Application (Android) (TOOL)
+IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
+IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android) (TOOL)
 
-Nome do Programa: IBM IoT for Automotive-Fleet Management Starter Application (Android)
-Número do Programa: TOOL
-
-Nome do Programa: IBM IoT for Automotive-Mobility Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Número do Programa: TOOL
-
-Nome do Programa: IBM IoT for Automotive-Fleet Management Server Starter App (Companion to Mobile Starter Apps iOS & Android)
-Número do Programa: TOOL
-
-Termos Exclusivos do Programa
+Além do apresentado acima, os termos a seguir se aplicam ao uso do Programa pelo Licenciado.
 
 Avisos Jutrídicos sobre Privacidade de Dados
 
@@ -31,6 +25,8 @@ O Programa, bem como qualquer aplicativo resultante dele, não se destina ao dese
 A IBM não terá qualquer responsabilidade quanto à conformidade do Programa ou de seus aplicativos resultantes com as leis e regulamentações aplicáveis aos negócios do Licenciado e seus conteúdos. O Licenciado é responsável pelo(a) uso/utilização do Programa e qualquer aplicativo resultante.
 
 Como com qualquer processo de desenvolvimento, o Licenciado é responsável por desenvolver, testar suficientemente e corrigir seus produtos e aplicativos, além de ser o único responsável por qualquer falha, prevista ou não, de seus produtos e aplicativos.
+
+O Licenciado é responsável por assegurar que qualquer dispositivo ou hardware usado/utilizado com este Programa atenda aos requisitos legais e regulamentares aplicáveis e é unicamente responsável por quaisquer responsabilidades suscitadas em conexão com qualquer falta de conformidade de qualquer dispositivo ou hardware ou com qualquer inadequação ou mau funcionamento do Programa que seja resultado disso ou, de outra forma, resultante do mau funcionamento de quaisquer dispositivos ou hardwares. 
 
 REDISTRIBUÍVEIS
 
@@ -53,10 +49,9 @@ Licença de Feedback
 Caso o Licenciado forneça feedback para a IBM relativo ao Programa, o Licenciado concorda em ceder à IBM todos os direitos, títulos e interesse (incluindo de propriedade e de direitos autorais/de autor) de quaisquer dados, sugestões ou materiais escritos que 1) sejam relacionados ao Programa e 2) que o Licenciado forneça à IBM.
 
 
-
-L/N:  L-DDIN-AEGGZJ
-D/N:  L-DDIN-AEGGZJ
-P/N:  L-DDIN-AEGGZJ
+L/N:  L-DDIN-AHKPKY
+D/N:  L-DDIN-AHKPKY
+P/N:  L-DDIN-AHKPKY
 
 
 Contrato de Licença Internacional para Programas Não Garantidos
