@@ -65,18 +65,18 @@ abstract public class ObdParameter {
                     value = getValueText();
                     Log.d(label, value);
                 } catch (com.github.pires.obd.exceptions.UnableToConnectException e) {
-                    // reach here when OBD device is not connected
-                    value = "BT Connection Error";
+                    // reach here when OBD device is not connected to the vehicle
+                    value = "Vehicle Not Connected";
                 } catch (com.github.pires.obd.exceptions.NoDataException e) {
                     // reach here when this OBD parameter is not supported
-                    value = "No Data";
+                    value = "No OBD2 Data";
                     //e.printStackTrace();
                 } catch (com.github.pires.obd.exceptions.MisunderstoodCommandException e) {
-                    value = "Not Supported";
+                    value = "Misunderstood Command";
                     System.err.println("OBD Library Error: " + e.getMessage());
                     //e.printStackTrace();
                 } catch (Exception e) {
-                    value = "No Connection";
+                    value = "Command Failed";
                     e.printStackTrace();
                 }
             }
