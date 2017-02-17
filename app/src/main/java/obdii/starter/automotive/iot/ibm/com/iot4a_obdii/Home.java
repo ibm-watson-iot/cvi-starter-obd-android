@@ -47,6 +47,7 @@ import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.github.pires.obd.enums.ObdProtocols;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -86,8 +87,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private static final int SETTINGS_INTENT = 001;
     private static final int BLUETOOTH_REQUEST = 002;
 
-    private static final int MIN_FREQUENCY_SEC = 5;
-    private static final int MAX_FREQUENCY_SEC = 60;
+    static final int MIN_FREQUENCY_SEC = 5;
+    static final int MAX_FREQUENCY_SEC = 60;
     static final int DEFAULT_FREQUENCY_SEC = 10;
 
     private static final int OBD_SCAN_DELAY_MS = 200;
@@ -348,6 +349,8 @@ public class Home extends AppCompatActivity implements LocationListener {
         intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ADDRESS, obdBridgeBluetooth.getUserDeviceAddress());
         intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_NAME, obdBridgeBluetooth.getUserDeviceName());
         intent.putExtra(SettingsFragment.UPLOAD_FREQUENCY, "" + getUploadFrequencySec());
+        intent.putExtra(SettingsFragment.OBD_TIMEOUT_MS, "" + getObdTimeoutMs());
+        intent.putExtra(SettingsFragment.OBD_PROTOCOL, "" + getObdProtocol());
 
         startActivity(intent);
     }
@@ -359,6 +362,13 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         if (!iotpDevice.isCurrentOrganizationSameAs(orgId) || !iotpDevice.isConnected()) {
             restartApp(orgId, apiKey, apiToken);
+
+        } else if (!obdBridge.isSimulation()) {
+            final int obd_timeout_ms = Integer.parseInt(getPreference(SettingsFragment.OBD_TIMEOUT_MS, "" + ObdBridge.DEFAULT_OBD_TIMEOUT_MS));
+            final ObdProtocols obd_protocol = ObdProtocols.valueOf(getPreference(SettingsFragment.OBD_PROTOCOL, ObdBridge.DEFAULT_OBD_PROTOCOL.name()));
+            if (!obdBridge.isCurrentObdTimeoutSameAs(obd_timeout_ms) || !obdBridge.isCurrentObdProtocolSameAs(obd_protocol)) {
+                runRealObdScan(obd_timeout_ms, obd_protocol);
+            }
         }
     }
 
@@ -489,17 +499,25 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void runRealObdScan() {
+        final int obd_timeout_ms = getObdTimeoutMs();
+        final ObdProtocols obd_protocol = getObdProtocol();
+        runRealObdScan(obd_timeout_ms, obd_protocol);
+    }
+
+    private void runRealObdScan(final int obd_timeout_ms, final ObdProtocols obd_protocol) {
+        obdBridge.stopObdScan();
+
         if (obdBridge instanceof ObdBridgeBluetooth) {
-            runRealObdBluetoothScan();
+            runRealObdBluetoothScan(obd_timeout_ms, obd_protocol);
         } else if (obdBridge instanceof ObdBridgeWifi) {
-            runRealObdWifiScan();
+            runRealObdWifiScan(obd_timeout_ms, obd_protocol);
         }
     }
 
-    private void runRealObdWifiScan() {
+    private void runRealObdWifiScan(final int obd_imeout_ms, final ObdProtocols obd_protocol) {
         final String address = "192.168.0.10";
         final int port = 35000;
-        final boolean connected = obdBridgeWifi.connectSocket(address, port);
+        final boolean connected = obdBridgeWifi.connectSocket(address, port, obd_imeout_ms, obd_protocol);
         System.out.println("WI-FI CONNECTED " + connected);
         if (connected) {
             showStatus("Connected to " + address + ":" + port, View.GONE);
@@ -510,7 +528,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private void runRealObdBluetoothScan() {
+    private void runRealObdBluetoothScan(final int obd_timeout_ms, final ObdProtocols obd_protocol) {
         if (!obdBridgeBluetooth.isBluetoothEnabled()) {
             final Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, BLUETOOTH_REQUEST);
@@ -546,7 +564,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             final int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                             final String deviceAddress = deviceAddresses.get(position);
                             final String deviceName = deviceNames.get(position);
-                            startConnectingBluetoothDevice(deviceAddress, deviceName);
+                            startConnectingBluetoothDevice(deviceAddress, deviceName, obd_timeout_ms, obd_protocol);
                             setPreference(SettingsFragment.BLUETOOTH_DEVICE_NAME, deviceName);
                         }
                     })
@@ -556,7 +574,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private synchronized void startConnectingBluetoothDevice(final String userDeviceAddress, final String userDeviceName) {
+    private synchronized void startConnectingBluetoothDevice(final String userDeviceAddress, final String userDeviceName, final int obd_timeout_ms, final ObdProtocols obd_protocol) {
         completeConnectingBluetoothDevice(); // clean up previous try
 
         retryCount = 0;
@@ -566,7 +584,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         bluetoothConnectorHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (obdBridgeBluetooth.connectBluetoothSocket(userDeviceAddress, userDeviceName)) {
+                if (obdBridgeBluetooth.connectBluetoothSocket(userDeviceAddress, userDeviceName, obd_timeout_ms, obd_protocol)) {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
                     completeConnectingBluetoothDevice();
@@ -914,8 +932,18 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     public int getUploadFrequencySec() {
-        String value = getPreference(SettingsFragment.UPLOAD_FREQUENCY, "" + DEFAULT_FREQUENCY_SEC);
+        final String value = getPreference(SettingsFragment.UPLOAD_FREQUENCY, "" + DEFAULT_FREQUENCY_SEC);
         return Integer.parseInt(value);
+    }
+
+    public int getObdTimeoutMs() {
+        final String value = getPreference(SettingsFragment.OBD_TIMEOUT_MS, "" + ObdBridge.DEFAULT_OBD_TIMEOUT_MS);
+        return Integer.parseInt(value);
+    }
+
+    public ObdProtocols getObdProtocol() {
+        final String value = getPreference(SettingsFragment.OBD_PROTOCOL, "" + ObdBridge.DEFAULT_OBD_PROTOCOL);
+        return ObdProtocols.valueOf(value);
     }
 
     private boolean wasDisclaimerShown(boolean agreed) {

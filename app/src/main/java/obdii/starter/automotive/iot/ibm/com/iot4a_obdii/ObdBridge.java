@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -43,6 +44,22 @@ import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST
  * abstract obd2 bridge for ELM 327 devices (common part for bluetooth, wifi, or usb type)
  */
 public abstract class ObdBridge {
+
+    static final int DEFAULT_OBD_TIMEOUT_MS = 500;
+    static final int MIN_TIMEOUT_MS = 0;
+    static final int MAX_TIMEOUT_MS = 1020;
+    private int obd_timeout_ms = DEFAULT_OBD_TIMEOUT_MS;
+
+    static final ObdProtocols DEFAULT_OBD_PROTOCOL = ObdProtocols.AUTO;
+    private ObdProtocols obd_protocol = DEFAULT_OBD_PROTOCOL;
+
+    public static CharSequence[] getOBDProtocols() {
+        final ArrayList<CharSequence> retv = new ArrayList<CharSequence>();
+        for (ObdProtocols protocol : ObdProtocols.values()) {
+            retv.add(protocol.name());
+        }
+        return (CharSequence[]) retv.toArray(new CharSequence[0]);
+    }
 
     private boolean simulation = false;
     private List<ObdParameter> obdParameterList = null;
@@ -104,12 +121,15 @@ public abstract class ObdBridge {
         }
     }
 
-    protected void socketConnected() throws InterruptedException {
-        Log.i("OBD2 Device Connection", "CONNECTED - " + isConnected());
-        initializeOBD2Device();
+    protected void socketConnected(final int obd_timeout_ms, final ObdProtocols obd_protocol) throws InterruptedException {
+        Log.i("OBD2 Device Connection", "CONNECTED - " + isConnected() + " timeout_ms=" + obd_timeout_ms + " protocol=" + obd_protocol);
+        initializeOBD2Device(obd_timeout_ms, obd_protocol);
     }
 
-    private void initializeOBD2Device() throws InterruptedException {
+    private void initializeOBD2Device(final int obd_timeout_ms, final ObdProtocols obd_protocol) throws InterruptedException {
+        this.obd_timeout_ms = obd_timeout_ms;
+        this.obd_protocol = obd_protocol;
+
         final InputStream ins = getInputStream();
         final OutputStream outs = getOutputStream();
         runObdCommandIgnoreException(ins, outs, new ObdRawCommand("ATD")); // Set all to defaults
@@ -118,9 +138,9 @@ public abstract class ObdBridge {
         runObdCommandIgnoreException(ins, outs, new EchoOffCommand());
         runObdCommandIgnoreException(ins, outs, new LineFeedOffCommand());
         runObdCommandIgnoreException(ins, outs, new HeadersOffCommand());
-        runObdCommandIgnoreException(ins, outs, new TimeoutCommand(125));
+        runObdCommandIgnoreException(ins, outs, new TimeoutCommand(obd_timeout_ms / 4)); // value should be 0-255 (0 - 1020 milli sec)
         runObdCommandIgnoreException(ins, outs, new AdaptiveTimingCommand(1));
-        runObdCommandIgnoreException(ins, outs, new SelectProtocolCommand(ObdProtocols.AUTO));
+        runObdCommandIgnoreException(ins, outs, new SelectProtocolCommand(obd_protocol));
     }
 
     private void runObdCommandIgnoreException(final InputStream ins, final OutputStream outs, final ObdCommand cmd) throws InterruptedException {
@@ -164,6 +184,14 @@ public abstract class ObdBridge {
         return event;
     }
 
+    public boolean isCurrentObdTimeoutSameAs(final int obd_timeout_ms) {
+        return this.obd_timeout_ms == obd_timeout_ms;
+    }
+
+    public boolean isCurrentObdProtocolSameAs(final ObdProtocols obd_protocol) {
+        return this.obd_protocol == obd_protocol;
+    }
+
     protected abstract String getDeviceUniqueKey();
 
     public abstract boolean isConnected();
@@ -171,4 +199,6 @@ public abstract class ObdBridge {
     protected abstract OutputStream getOutputStream();
 
     protected abstract InputStream getInputStream();
+
+
 }

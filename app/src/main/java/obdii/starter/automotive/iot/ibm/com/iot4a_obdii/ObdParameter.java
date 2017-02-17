@@ -72,7 +72,7 @@ abstract public class ObdParameter {
                     value = "No OBD2 Data";
                     //e.printStackTrace();
                 } catch (com.github.pires.obd.exceptions.MisunderstoodCommandException e) {
-                    value = "Misunderstood Command";
+                    value = "Misunderstood";
                     System.err.println("OBD Library Error: " + e.getMessage());
                     //e.printStackTrace();
                 } catch (Exception e) {

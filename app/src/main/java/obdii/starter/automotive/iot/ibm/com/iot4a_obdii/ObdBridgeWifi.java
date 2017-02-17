@@ -12,6 +12,8 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.os.AsyncTask;
 
+import com.github.pires.obd.enums.ObdProtocols;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,7 +69,7 @@ public class ObdBridgeWifi extends ObdBridge {
         }
     }
 
-    public synchronized boolean connectSocket(final String address, final int port) {
+    public synchronized boolean connectSocket(final String address, final int port, final int timeout_ms, final ObdProtocols obd_protocol) {
         doSyncTask(new Runnable() {
             @Override
             public void run() {
@@ -76,7 +78,7 @@ public class ObdBridgeWifi extends ObdBridge {
                         sockets[0].close();
                     }
                     sockets[0] = new Socket(address, port);
-                    socketConnected();
+                    socketConnected(timeout_ms, obd_protocol);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (Exception e) {

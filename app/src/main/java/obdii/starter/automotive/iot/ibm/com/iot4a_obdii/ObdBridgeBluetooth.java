@@ -16,6 +16,8 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.github.pires.obd.enums.ObdProtocols;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,7 +70,7 @@ public class ObdBridgeBluetooth extends ObdBridge {
         }
     }
 
-    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress, final String userDeviceName) {
+    public synchronized boolean connectBluetoothSocket(final String userDeviceAddress, final String userDeviceName, final int timeout_ms, final ObdProtocols obd_protocol) {
         if (this.userDeviceAddress == userDeviceAddress && socket != null && socket.isConnected()) {
             return true;
         }
@@ -87,7 +89,7 @@ public class ObdBridgeBluetooth extends ObdBridge {
         }
         try {
             socket.connect();
-            socketConnected();
+            socketConnected(timeout_ms, obd_protocol);
             return true;
 
         } catch (IOException e) {
@@ -96,7 +98,7 @@ public class ObdBridgeBluetooth extends ObdBridge {
                 Log.i("Bluetooth Connection", "Using fallback method");
                 socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
                 socket.connect();
-                socketConnected();
+                socketConnected(timeout_ms, obd_protocol);
                 return true;
             } catch (IOException e2) {
                 Log.e("Bluetooth Connection", "Couldn't establish connection");

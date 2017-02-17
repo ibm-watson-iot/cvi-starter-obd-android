@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -28,6 +29,8 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String BLUETOOTH_DEVICE_NAME = "bt_device_name";
     public static final String BLUETOOTH_DEVICE_ADDRESS = "bt_device_address";
     public static final String UPLOAD_FREQUENCY = "upload_frequency";
+    public static final String OBD_TIMEOUT_MS = "obd_timeout_ms";
+    public static final String OBD_PROTOCOL = "obd_protocol";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -44,17 +47,42 @@ public class SettingsFragment extends PreferenceFragment {
 
     public void initializeSettings() {
         final Intent intent = getActivity().getIntent();
-        prepareEditTextPreference(ORGANIZATION_ID, intent.getStringExtra(ORGANIZATION_ID), IoTPlatformDevice.defaultOrganizationId, true);
-        prepareEditTextPreference(API_KEY, intent.getStringExtra(API_KEY), IoTPlatformDevice.defaultApiKey, true);
-        prepareEditTextPreference(API_TOKEN, intent.getStringExtra(API_TOKEN), IoTPlatformDevice.defaultApiToken, true);
-        prepareEditTextPreference(DEVICE_ID, intent.getStringExtra(DEVICE_ID), "", false);
-        prepareEditTextPreference(DEVICE_TOKEN, intent.getStringExtra(DEVICE_TOKEN), "", true);
-        prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, intent.getStringExtra(BLUETOOTH_DEVICE_NAME), "", false);
-        prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, intent.getStringExtra(BLUETOOTH_DEVICE_ADDRESS), "", false);
-        prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + Home.DEFAULT_FREQUENCY_SEC, false);
+        prepareEditTextPreference(ORGANIZATION_ID, intent.getStringExtra(ORGANIZATION_ID), IoTPlatformDevice.defaultOrganizationId, true, null);
+        prepareEditTextPreference(API_KEY, intent.getStringExtra(API_KEY), IoTPlatformDevice.defaultApiKey, true, null);
+        prepareEditTextPreference(API_TOKEN, intent.getStringExtra(API_TOKEN), IoTPlatformDevice.defaultApiToken, true, null);
+        prepareEditTextPreference(DEVICE_ID, intent.getStringExtra(DEVICE_ID), "", false, null);
+        prepareEditTextPreference(DEVICE_TOKEN, intent.getStringExtra(DEVICE_TOKEN), "", true, null);
+        prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, intent.getStringExtra(BLUETOOTH_DEVICE_NAME), "", false, null);
+        prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, intent.getStringExtra(BLUETOOTH_DEVICE_ADDRESS), "", false, null);
+        prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + Home.DEFAULT_FREQUENCY_SEC, true, new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final int intValue = Integer.parseInt(newValue.toString());
+                if (Home.MIN_FREQUENCY_SEC <= intValue && intValue <= Home.MAX_FREQUENCY_SEC) {
+                    preference.setSummary(newValue.toString());
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        prepareEditTextPreference(OBD_TIMEOUT_MS, intent.getStringExtra(OBD_TIMEOUT_MS), "" + ObdBridge.DEFAULT_OBD_TIMEOUT_MS, true, new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final int intValue = Integer.parseInt(newValue.toString());
+                if (ObdBridge.MIN_TIMEOUT_MS <= intValue && intValue <= ObdBridge.MAX_TIMEOUT_MS) {
+                    preference.setSummary(newValue.toString());
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        final CharSequence[] protocols = ObdBridge.getOBDProtocols();
+        prepareListPreference(OBD_PROTOCOL, intent.getStringExtra(OBD_PROTOCOL), "" + ObdBridge.DEFAULT_OBD_PROTOCOL, protocols, protocols);
     }
 
-    private void prepareEditTextPreference(final String prefKey, final String currentValue, final String defaultValue, final boolean enabled) {
+    private void prepareEditTextPreference(final String prefKey, final String currentValue, final String defaultValue, final boolean enabled, Preference.OnPreferenceChangeListener changeListener) {
         final Preference preference = findPreference(prefKey);
         if (preference instanceof EditTextPreference) {
             final EditTextPreference editTextPref = (EditTextPreference) preference;
@@ -65,13 +93,40 @@ public class SettingsFragment extends PreferenceFragment {
             editTextPref.setEnabled(enabled);
 
             editTextPref.setSummary(editTextPref.getText());
-            editTextPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            if (changeListener == null) {
+                changeListener = new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        preference.setSummary(newValue.toString());
+                        return true;
+                    }
+                };
+            }
+            editTextPref.setOnPreferenceChangeListener(changeListener);
+        }
+    }
+
+    private void prepareListPreference(final String prefKey, final String currentValue, final String defaultValue, final CharSequence[] entries, CharSequence[] entryValues) {
+        final Preference preference = findPreference(prefKey);
+        if (preference instanceof ListPreference) {
+            final ListPreference listPref = (ListPreference) preference;
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            final String storedValue = preferences.getString(prefKey, defaultValue);
+            final String valueToSet = currentValue != null ? currentValue : storedValue;
+            listPref.setEntries(entries);
+            listPref.setEntryValues(entryValues);
+            listPref.setValue(valueToSet);
+            listPref.setSummary(listPref.getValue());
+            listPref.setEnabled(true);
+
+            final Preference.OnPreferenceChangeListener changeListener = new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     preference.setSummary(newValue.toString());
                     return true;
                 }
-            });
+            };
+            listPref.setOnPreferenceChangeListener(changeListener);
         }
     }
 
