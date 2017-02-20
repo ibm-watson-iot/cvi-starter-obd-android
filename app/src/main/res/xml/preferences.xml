@@ -34,21 +34,32 @@
             android:key="upload_frequency"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Upload/OBD2 Scan Frequency" />
+            android:title="Upload/OBD2 Scan Interval (sec) [5-60]" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="obd2_settings"
         android:title="OBD2 Device">
+        <ListPreference
+            android:defaultValue="1"
+            android:title="OBD2 Protocol"
+            android:entries="@array/obd_protocols"
+            android:entryValues="@array/obd_protocols"
+            android:key="obd_protocol" />
         <EditTextPreference
-            android:key="bt_device_name"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Bluetooth Device Name" />
+            android:title="Timeout (ms) [0-1020]"
+            android:key="obd_timeout_ms" />
         <EditTextPreference
             android:key="bt_device_address"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Bluetooth Device Address" />
+        <EditTextPreference
+            android:key="bt_device_name"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Bluetooth Device Name" />
     </PreferenceCategory>
 </PreferenceScreen>
