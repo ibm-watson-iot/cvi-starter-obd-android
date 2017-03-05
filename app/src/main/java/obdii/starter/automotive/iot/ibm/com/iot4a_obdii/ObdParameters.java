@@ -64,7 +64,7 @@ public class ObdParameters {
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("engineRPM", engineRPM + "");
+                json.addProperty("engineRPM", engineRPM);
             }
 
             @Override
@@ -146,7 +146,7 @@ public class ObdParameters {
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("engineOilTemp", engineOil + "");
+                json.addProperty("engineOilTemp", engineOil);
             }
 
             @Override
@@ -173,7 +173,7 @@ public class ObdParameters {
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("engineTemp", engineCoolant + "");
+                json.addProperty("engineTemp", engineCoolant);
             }
 
             @Override
@@ -203,7 +203,7 @@ public class ObdParameters {
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("fuelLevel", fuelLevel + "");
+                json.addProperty("fuelLevel", fuelLevel);
             }
 
             @Override

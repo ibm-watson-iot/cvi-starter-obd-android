@@ -994,7 +994,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(provider, 500, 1, this);
+        if (provider != null) {
+            locationManager.requestLocationUpdates(provider, 500, 1, this);
+        }
 
         if (initialized) {
             checkSettingsOnResume();
