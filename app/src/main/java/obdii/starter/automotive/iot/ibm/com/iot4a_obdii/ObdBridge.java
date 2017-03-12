@@ -132,7 +132,7 @@ public abstract class ObdBridge {
 
         final InputStream ins = getInputStream();
         final OutputStream outs = getOutputStream();
-        runObdCommandIgnoreException(ins, outs, new ObdRawCommand("ATD")); // Set all to defaults
+        //runObdCommandIgnoreException(ins, outs, new ObdRawCommand("ATD")); // Set all to defaults
         runObdCommandIgnoreException(ins, outs, new ObdWarmstartCommand()); // reset
         runObdCommandIgnoreException(ins, outs, new ObdResetCommand());
         runObdCommandIgnoreException(ins, outs, new EchoOffCommand());
