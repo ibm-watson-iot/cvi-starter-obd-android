@@ -239,7 +239,7 @@ public class IoTPlatformDevice {
         connectDevice();
 
         if (deviceClient != null) {
-            deviceClient.publishEvent("status", event, 0);
+            deviceClient.publishEvent("carprobe", event, 0);
             return true;
         } else {
             return false;
