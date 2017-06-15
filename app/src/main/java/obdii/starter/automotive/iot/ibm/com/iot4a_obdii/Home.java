@@ -83,6 +83,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     public static final String DOESNOTEXIST = "doesNotExist";
 
     private static final int INITIAL_PERMISSIONS = 000;
+    private static final int INITIAL_LOCATION_PERMISSIONS = 001;
     private static final int GPS_INTENT = 000;
     private static final int SETTINGS_INTENT = 001;
     private static final int BLUETOOTH_REQUEST = 002;
@@ -459,6 +460,17 @@ public class Home extends AppCompatActivity implements LocationListener {
                     Toast.makeText(getApplicationContext(), "Permissions Denied", Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case INITIAL_LOCATION_PERMISSIONS:
+                if (results[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (provider == null)
+                        provider = locationManager.getBestProvider(new Criteria(), false);
+                    setChangeNetworkEnabled(false);
+                    checkDeviceRegistry(true);
+                    setChangeFrequencyEnabled(true);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Permissions Denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, results);
         }
@@ -493,6 +505,13 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void runSimulatedObdScan() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, INITIAL_LOCATION_PERMISSIONS);
+                return;
+            }
+        }
         setChangeNetworkEnabled(false);
         checkDeviceRegistry(true);
         setChangeFrequencyEnabled(true);
