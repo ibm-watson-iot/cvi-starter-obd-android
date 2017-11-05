@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.github.pires.obd.commands.ObdCommand;
 import com.google.gson.JsonObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -46,7 +47,7 @@ abstract public class ObdParameter {
         return obdCommand;
     }
 
-    public synchronized void showScannedValue(final InputStream in, final OutputStream out, final boolean simulation) {
+    public synchronized void showScannedValue(final InputStream in, final OutputStream out, final boolean simulation) throws IOException, InterruptedException {
         if (simulation) {
             fetchValue(null, simulation);
             showText(getValueText());
@@ -75,9 +76,9 @@ abstract public class ObdParameter {
                     value = "Misunderstood";
                     System.err.println("OBD Library Error: " + e.getMessage());
                     //e.printStackTrace();
-                } catch (Exception e) {
-                    value = "Command Failed";
-                    e.printStackTrace();
+                } catch (IOException | InterruptedException e) {
+                    showText("N/A");
+                    throw e;
                 }
             }
             showText(value);

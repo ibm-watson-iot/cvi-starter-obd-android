@@ -94,7 +94,7 @@ public abstract class ObdBridge {
         return device_id;
     }
 
-    public synchronized void startObdScan(final boolean simulation, final int scanDelayMS, final int scanIntervalMS) {
+    public synchronized void startObdScan(final boolean simulation, final int scanDelayMS, final int scanIntervalMS, final Runnable terminationHandler) {
         stopObdScan();
 
         this.simulation = simulation;
@@ -103,10 +103,19 @@ public abstract class ObdBridge {
         obdScannerHandle = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (simulation || isConnected()) {
-                    for (ObdParameter obdParam : obdParameterList) {
-                        obdParam.showScannedValue(getInputStream(), getOutputStream(), simulation);
+                try {
+                    if (simulation || isConnected()) {
+                        for (ObdParameter obdParam : obdParameterList) {
+                            obdParam.showScannedValue(getInputStream(), getOutputStream(), simulation);
+                        }
+                    } else {
+                        terminationHandler.run();
                     }
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                    System.out.println("Cancelling OBD Scan Thread");
+                    disconnect();
+                    terminationHandler.run();
                 }
             }
         }, scanDelayMS, scanIntervalMS, TimeUnit.MILLISECONDS);
@@ -195,6 +204,10 @@ public abstract class ObdBridge {
     protected abstract String getDeviceUniqueKey();
 
     public abstract boolean isConnected();
+
+    public void disconnect() {
+    }
+
 
     protected abstract OutputStream getOutputStream();
 

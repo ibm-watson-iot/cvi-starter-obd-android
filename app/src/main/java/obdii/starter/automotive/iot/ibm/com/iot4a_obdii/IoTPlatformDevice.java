@@ -213,16 +213,22 @@ public class IoTPlatformDevice {
         uploadHandler = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                try {
-                    final JsonObject event = eventGenerator.generateData();
-                    if (event != null) {
-                        eventGenerator.notifyPostResult(publishEvent(event), event);
+
+                final JsonObject event = eventGenerator.generateData();
+                if (event != null) {
+                    try {
+                        final boolean success = publishEvent(event);
+                        eventGenerator.notifyPostResult(success, event);
+                        if (!success) {
+                            stopPublishing();
+                        }
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                        stopPublishing();
                     }
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
+
                 }
+
             }
         }, uploadDelayMS, uploadIntervalMS, TimeUnit.MILLISECONDS);
     }
@@ -239,8 +245,7 @@ public class IoTPlatformDevice {
         connectDevice();
 
         if (deviceClient != null) {
-            deviceClient.publishEvent("carprobe", event, 0);
-            return true;
+            return deviceClient.publishEvent("carprobe", event, 0);
         } else {
             return false;
         }

@@ -86,40 +86,36 @@ public class ObdBridgeBluetooth extends ObdBridge {
         } catch (Exception e) {
             Log.e("Bluetooth Connection", "Socket couldn't be created");
             e.printStackTrace();
+            return false;
         }
         try {
             socket.connect();
             socketConnected(timeout_ms, obd_protocol);
             return true;
-
-        } catch (IOException e) {
-            Log.e("Bluetooth Connection", e.getMessage());
-            try {
-                Log.i("Bluetooth Connection", "Using fallback method");
-                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
-                socket.connect();
-                socketConnected(timeout_ms, obd_protocol);
-                return true;
-            } catch (IOException e2) {
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-                return false;
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                Log.e("Bluetooth Connection", "Couldn't establish connection");
-                return false;
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.e("BT Connection Error: ", e.getMessage());
-            return false;
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            Log.e("BT Connection Error: ", e.getMessage());
+        } catch (Exception e) {
+            //e.printStackTrace();
+            Log.e("BT Connection failed:", e.getMessage());
             return false;
         }
     }
 
     public synchronized void closeBluetoothSocket() {
+        final OutputStream outs = getOutputStream();
+        if (outs != null) {
+            try {
+                outs.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        final InputStream ins = getInputStream();
+        if (ins != null) {
+            try {
+                ins.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if (socket != null) {
             try {
                 if (socket.isConnected()) {
@@ -136,6 +132,11 @@ public class ObdBridgeBluetooth extends ObdBridge {
     @Override
     public boolean isConnected() {
         return (socket != null && socket.isConnected());
+    }
+
+    @Override
+    public void disconnect() {
+        this.closeBluetoothSocket();
     }
 
     @Override

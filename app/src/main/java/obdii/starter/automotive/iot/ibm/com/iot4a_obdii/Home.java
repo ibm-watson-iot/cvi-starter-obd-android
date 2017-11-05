@@ -111,6 +111,11 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
 
+    private String userDeviceAddress;
+    private String userDeviceName;
+    private int obd_timeout_ms;
+    private ObdProtocols obd_protocol;
+
     /**
      * ATTENTION: support for ELM 327 WiFi dongle is experimental. With Android, it seems not possible to
      * have a WiFi connection to the dongle and an internet connection simultaneously.
@@ -124,7 +129,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
-    private int retryCount = 0;
 
     private boolean initialized = false;
 
@@ -507,7 +511,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private void runSimulatedObdScan() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, INITIAL_LOCATION_PERMISSIONS);
                 return;
             }
@@ -596,7 +600,14 @@ public class Home extends AppCompatActivity implements LocationListener {
     private synchronized void startConnectingBluetoothDevice(final String userDeviceAddress, final String userDeviceName, final int obd_timeout_ms, final ObdProtocols obd_protocol) {
         completeConnectingBluetoothDevice(); // clean up previous try
 
-        retryCount = 0;
+        // save for reconnection later
+        this.userDeviceAddress = userDeviceAddress;
+        this.userDeviceName = userDeviceName;
+        this.obd_timeout_ms = obd_timeout_ms;
+        this.obd_protocol = obd_protocol;
+
+        final int[] retryCount = new int[1];
+        retryCount[0] = 0;
         Log.i("BT Connection Task", "STARTED");
         System.out.println("BT Connection Task: STARTED");
         showStatus("Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
@@ -607,12 +618,12 @@ public class Home extends AppCompatActivity implements LocationListener {
                     showStatus("Connected to \"" + userDeviceName + "\"", View.GONE);
                     checkDeviceRegistry(false);
                     completeConnectingBluetoothDevice();
-                } else if (++retryCount >= MAX_RETRY) {
+                } else if (++retryCount[0] > MAX_RETRY) {
                     showToastText("Unable to connect to the device, please make sure to choose the right network");
                     showStatus("Connection Failed", View.GONE);
                     completeConnectingBluetoothDevice();
                 } else {
-                    showStatus("Retry Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
+                    showStatus("Retry [" + retryCount[0] + "] Connecting to \"" + userDeviceName + "\"", View.VISIBLE);
                 }
             }
         }, BLUETOOTH_CONNECTION_RETRY_DELAY_MS, BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS, TimeUnit.MILLISECONDS);
@@ -881,13 +892,29 @@ public class Home extends AppCompatActivity implements LocationListener {
         }, UPLOAD_DELAY_MS, uploadIntervalMS);
     }
 
+    private void stopPublishingProbeData() {
+        iotpDevice.stopPublishing();
+    }
+
     private void startObdScan() {
         startObdScan(obdBridge.isSimulation());
     }
 
     private void startObdScan(final boolean simulation) {
         final int scanIntervalMS = getUploadFrequencySec() * 1000;
-        obdBridge.startObdScan(simulation, OBD_SCAN_DELAY_MS, scanIntervalMS);
+        obdBridge.startObdScan(simulation, OBD_SCAN_DELAY_MS, scanIntervalMS, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Obd Scan Thread: Terminating");
+                obdBridge.stopObdScan();
+                // reconnect
+                if (!simulation) {
+                    //stopPublishingProbeData();
+                    startConnectingBluetoothDevice(userDeviceAddress, userDeviceName, obd_timeout_ms, obd_protocol);
+                    //startPublishingProbeData();
+                }
+            }
+        });
     }
 
     public void changeFrequency(View view) {
