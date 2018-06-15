@@ -5,5 +5,5 @@
 /build/**
 local.properties
 .DS_Store
-.iml
+*.iml
 /app/release/
