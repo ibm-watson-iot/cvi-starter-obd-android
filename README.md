@@ -1,8 +1,8 @@
-# IBM IoT for Automotive - OBDII Fleet Management App for Android
+# IBM IoT Connected Vehicle Insights - OBDII Fleet Management App for Android
 
 
 ## Overview
-The IBM IoT for Automotive - Mobility Starter Application uses the **IBM IoT Platform** that is available on **IBM Cloud** to help you to quickly build a smart fleet management solution. The solution consists of a mobile app and a server component which is the **IBM IoT for Automotive - Fleet Management Starter Web Application**.
+The IBM IoT Connected Vehicle Insights - Mobility Starter Application uses the **IBM IoT Platform** that is available on **IBM Cloud** to help you to quickly build a smart fleet management solution. The solution consists of a mobile app and a server component which is the **IBM IoT Connected Vehicle Insights - Fleet Management Starter Web Application**.
 
 ### Mobile app
 The starter app provides a mobile app to connect to an OBDII dongle plugged in to your car. If you are a user of the application, you can use the mobile app to do the following tasks:
@@ -17,7 +17,7 @@ Once you want to stop the application from recording your data, simply press "En
 You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
-The "IoT for Automotive - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Cloud and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [ibm-watson-iot/iota-starter-server-fm](https://github.com/ibm-watson-iot/iota-starter-server-fm).
+The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Cloud and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [ibm-watson-iot/iota-starter-server-fm](https://github.com/ibm-watson-iot/iota-starter-server-fm).
 
 
 ## Prerequisites
@@ -54,17 +54,17 @@ To try the Android application using Android Emulator, complete the following st
 5. To deploy the mobile app on your device, see [Build and Run Your App](https://developer.android.com/studio/run/index.html).
 
 ## Reporting defects
-To report a defect with the IoT for Automotive - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-obd-android/issues) section.
+To report a defect with the IBM IoT Connected Vehicle Insights - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-obd-android/issues) section.
 
 ## Privacy notice
-The "IoT for Automotive - OBDII Fleet Management App for Android" on IBM Cloud stores all of the driving data that is obtained while you use the mobile app.
+The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App for Android" on IBM Cloud stores all of the driving data that is obtained while you use the mobile app.
 
 ## Questions, comments or suggestions
-For your questions, comments or suggestions to us, visit [Watson IoT for Automotive Application community site] (https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
+For your questions, comments or suggestions to us, visit [IBM IoT Connected Vehicle Insights Application community site] (https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
 
 ## Useful links
 
-- [IBM IoT for Automotive](http://www.ibm.com/internet-of-things/iot-industry/iot-automotive)
+- [IBM IoT Connected Vehicle Insights](http://www.ibm.com/internet-of-things/iot-industry/iot-automotive)
 - [IBM Watson Internet of Things](http://www.ibm.com/internet-of-things/)  
 - [IBM Watson IoT Platform](http://www.ibm.com/internet-of-things/iot-solutions/watson-iot-platform/)   
 - [IBM Watson IoT Platform Developers Community](https://developer.ibm.com/iotplatform/)

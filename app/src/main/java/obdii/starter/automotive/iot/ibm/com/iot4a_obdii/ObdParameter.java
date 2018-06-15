@@ -95,7 +95,7 @@ abstract public class ObdParameter {
     }
 
     protected boolean isBaseProp() {
-        return false; // return true for IoT4A standard car probe properties
+        return false; // return true for IoTCVI standard car probe properties
     }
 
     /*

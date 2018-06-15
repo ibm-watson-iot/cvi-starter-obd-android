@@ -1,0 +1,9 @@
+/_ghe_copy_mobile_repo.properties
+/.gradle/**
+/.idea/workspace.xml
+/.idea/libraries
+/build/**
+local.properties
+.DS_Store
+.iml
+/app/release/

@@ -1,4 +1,4 @@
-IBM IoT for Automotive - Mobility Starter Application Redistributables:
+IBM IoT Connected Vehicle Insights - Mobility Starter Application Redistributables:
 
 The following list includes files that are provided to Licensee pursuant to the Redistributables section of the IBM International Program License Agreements License Information that applies to this Program:
 

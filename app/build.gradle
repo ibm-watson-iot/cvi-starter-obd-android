@@ -8,8 +8,8 @@ android {
         applicationId "odbii.starter.automotive.iot.ibm.com.iot4a_odbii"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.0.2"
         multiDexEnabled true
     }
     buildTypes {
@@ -26,6 +26,12 @@ android {
 repositories {
     maven {
         url "https://repo.eclipse.org/content/repositories/paho-releases/"
+    }
+}
+configurations {
+    all {
+        exclude module: 'httpclient'
+        exclude module: 'commons-logging'
     }
 }
 
