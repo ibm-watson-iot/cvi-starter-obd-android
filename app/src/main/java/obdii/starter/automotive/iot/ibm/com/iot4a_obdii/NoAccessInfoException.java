@@ -10,5 +10,11 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-public class NoIoTPOrganizationException extends Exception {
+public class NoAccessInfoException extends Exception {
+    public NoAccessInfoException(String message){
+        super(message);
+    }
+    public NoAccessInfoException(String message, Throwable cause){
+        super(message, cause);
+    }
 }

@@ -89,7 +89,9 @@ abstract public class ObdParameter {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                textView.setText(text);
+                if(textView != null){
+                    textView.setText(text);
+                }
             }
         });
     }

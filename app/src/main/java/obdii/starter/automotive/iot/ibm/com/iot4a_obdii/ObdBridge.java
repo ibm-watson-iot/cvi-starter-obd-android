@@ -61,7 +61,7 @@ public abstract class ObdBridge {
         return (CharSequence[]) retv.toArray(new CharSequence[0]);
     }
 
-    private boolean simulation = false;
+    private boolean simulation = true;
     private List<ObdParameter> obdParameterList = null;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> obdScannerHandle = null;
@@ -175,13 +175,11 @@ public abstract class ObdBridge {
     }
 
     @NonNull
-    public JsonObject generateMqttEvent(final Location location, final String trip_id) {
+    public JsonObject generateEvent(final Location location, final String trip_id) {
         if (obdParameterList == null) {
             // parameter list has to be set
         }
-        final JsonObject event = new JsonObject();
         final JsonObject data = new JsonObject();
-        event.add("d", data);
         data.addProperty("trip_id", trip_id);
 
         final JsonObject props = new JsonObject();
@@ -190,7 +188,7 @@ public abstract class ObdBridge {
             obdParameter.setJsonProp(obdParameter.isBaseProp() ? data : props);
         }
         data.add("props", props);
-        return event;
+        return data;
     }
 
     public boolean isCurrentObdTimeoutSameAs(final int obd_timeout_ms) {

@@ -13,4 +13,7 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 public class DeviceNotConnectedException extends Exception {
     public DeviceNotConnectedException() {
     }
+    public DeviceNotConnectedException(Throwable cause){
+        super(cause);
+    }
 }

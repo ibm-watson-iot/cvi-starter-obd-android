@@ -36,9 +36,42 @@
                 android:paddingTop="0dp">
 
                 <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="15dp">
+
+                </TableRow>
+
+                <TableRow
                     android:layout_marginTop="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="10"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/headingLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="Heading"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/headingValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:text="N/A"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textSize="17dp" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/linearLayout61"
@@ -293,6 +326,24 @@
                     android:onClick="changeFrequency"
                     android:text="Change Frequency" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal">
+
+                <Switch
+                    android:id="@+id/protocolSwitch"
+                    style="@style/Base.TextAppearance.AppCompat.Widget.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:contentDescription="Select protocol to send probe data (HTTP or MQTT)"
+                    android:showText="true"
+                    android:text="Protocol (HTTP / MQTT)"
+                    android:textOff="HTTP"
+                    android:textOn="MQTT" />
             </LinearLayout>
 
             <Button

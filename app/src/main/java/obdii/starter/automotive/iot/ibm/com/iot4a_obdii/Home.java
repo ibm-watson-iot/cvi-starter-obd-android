@@ -42,9 +42,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.github.pires.obd.enums.ObdProtocols;
@@ -52,12 +54,9 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,11 +71,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventDataGenerator;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventFormat;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IVehicleDevice;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IoTPlatformDevice;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
 public class Home extends AppCompatActivity implements LocationListener {
 
@@ -88,9 +93,9 @@ public class Home extends AppCompatActivity implements LocationListener {
     private static final int SETTINGS_INTENT = 001;
     private static final int BLUETOOTH_REQUEST = 002;
 
-    static final int MIN_FREQUENCY_SEC = 5;
+    static final int MIN_FREQUENCY_SEC = 1;
     static final int MAX_FREQUENCY_SEC = 60;
-    static final int DEFAULT_FREQUENCY_SEC = 10;
+    static final int DEFAULT_FREQUENCY_SEC = 1;
 
     private static final int OBD_SCAN_DELAY_MS = 200;
     private static final int UPLOAD_DELAY_MS = 500;
@@ -110,6 +115,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private ActionBar supportActionBar;
     private Button changeNetwork;
     private Button changeFrequency;
+    private Switch protocolSwitch;
 
     private String userDeviceAddress;
     private String userDeviceName;
@@ -125,7 +131,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private final ObdBridgeWifi obdBridgeWifi = new ObdBridgeWifi(this); // experimental
     private final ObdBridge obdBridge = bluetooth_mode ? obdBridgeBluetooth : obdBridgeWifi;
 
-    final IoTPlatformDevice iotpDevice = new IoTPlatformDevice(this);
+    private Protocol protocol = Protocol.HTTP;
+    private IVehicleDevice vehicleDevice;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
@@ -141,7 +148,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     void clean() {
         completeConnectingBluetoothDevice();
         scheduler.shutdown();
-        iotpDevice.clean();
+        vehicleDevice.clean();
         obdBridge.clean();
     }
 
@@ -165,6 +172,31 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         changeNetwork = (Button) findViewById(R.id.changeNetwork);
         changeFrequency = (Button) findViewById(R.id.changeFrequency);
+        protocolSwitch = (Switch) findViewById(R.id.protocolSwitch);
+        protocolSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Protocol newProtocol = b ? Protocol.MQTT : Protocol.HTTP;
+                if(newProtocol == protocol){
+                    return;
+                }
+                stopPublishingProbeData();
+                protocol = newProtocol;
+                final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
+                final String vendor = getPreference(SettingsFragment.VENDOR, null);
+                final String mo_id = getPreference(SettingsFragment.MO_ID, null);
+                if(endpoint == null || vendor == null || mo_id == null){
+                    vehicleDevice = null;
+                    checkDeviceRegistry(obdBridge.isSimulation());
+                }else{
+                    final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
+                    final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
+                    AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                    vehicleDevice = protocol.createDevice(accessInfo);
+                    deviceRegistered(obdBridge.isSimulation());
+                }
+            }
+        });
 
         obdBridge.initializeObdParameterList(this);
 
@@ -225,22 +257,38 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void startApp() {
-        initialized = true;
-
-        final String orgId = getPreference(SettingsFragment.ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId);
-        final String apiKey = getPreference(SettingsFragment.API_KEY, IoTPlatformDevice.defaultApiKey);
-        final String apiToken = getPreference(SettingsFragment.API_TOKEN, IoTPlatformDevice.defaultApiToken);
-        iotpDevice.changeOrganization(orgId, apiKey, apiToken);
+        if(vehicleDevice == null || !vehicleDevice.hasValidAccessInfo()){
+            final String appServerUrl = getPreference(SettingsFragment.APP_SERVER_URL, API.connectedAppURL);
+            final String publishProtocol = getPreference(SettingsFragment.PROTOCOL, Protocol.HTTP.name());
+            this.protocol = Protocol.valueOf(publishProtocol.toUpperCase());
+            protocolSwitch.setChecked(protocol == Protocol.MQTT);
+            final String vendor = getPreference(SettingsFragment.VENDOR, null);
+            final String mo_id = getPreference(SettingsFragment.MO_ID, null);
+            final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
+            final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
+            final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
+            if(endpoint != null && !endpoint.isEmpty() && vendor != null && !vendor.isEmpty() && mo_id != null && !mo_id.isEmpty()){
+                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                try{
+                    vehicleDevice = protocol.createDevice(accessInfo);
+                    initialized = true;
+                }catch(Exception e){
+                    Toast.makeText(Home.this, "Cannot create device to connect to !", Toast.LENGTH_LONG).show();
+                    Home.this.finishAffinity();
+                }
+            }
+        }
         startApp2();
     }
 
-    void restartApp(final String orgId, final String apiKey, final String apiToken) {
+    void restartApp(final String endpoint, final String vendor, final String mo_id, final String username, final String password) {
         // this may be called from a non UI thread
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (iotpDevice.getOrganizationId() != orgId) {
-                    iotpDevice.changeOrganization(orgId, apiKey, apiToken);
+                if (vehicleDevice != null && vehicleDevice.hasValidAccessInfo()) {
+                    AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                    vehicleDevice.setAccessInfo(accessInfo);
                     startApp2();
                 }
             }
@@ -254,11 +302,12 @@ public class Home extends AppCompatActivity implements LocationListener {
             // GPS and/or Network is disabled
             return;
         }
-        if (!iotpDevice.hasValidOrganization()) {
-            // IoT Platform setting is missing
-            startSettingsActivity();
-            return;
-        }
+//        if (!iotpDevice.hasValidAccessInfo()) {
+//            //TODO should check application api
+//            // IoT Platform setting is missing
+//            startSettingsActivity();
+//            return;
+//        }
         if (!obdBridgeBluetooth.setupBluetooth()) {
             // when bluetooth is not available (e.g. Android Studio simulator)
             final boolean doNotRunSimulationWithoutBluetooth = false; // testing purpose
@@ -340,17 +389,18 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startSettingsActivity() {
         final Intent intent = new Intent(this, AppSettingsActivity.class);
-        intent.putExtra(SettingsFragment.ORGANIZATION_ID, iotpDevice.getOrganizationId());
-        intent.putExtra(SettingsFragment.API_KEY, iotpDevice.getApiKey());
-        intent.putExtra(SettingsFragment.API_TOKEN, iotpDevice.getApiToken());
+        AccessInfo accessInfo = vehicleDevice.getAccessInfo();
+        intent.putExtra(SettingsFragment.ENDPOINT, accessInfo.get(AccessInfo.ParamName.ENDPOINT));
+        intent.putExtra(SettingsFragment.VENDOR, accessInfo.get(AccessInfo.ParamName.VENDOR));
+        intent.putExtra(SettingsFragment.USERNAME, accessInfo.get(AccessInfo.ParamName.USERNAME));
+        intent.putExtra(SettingsFragment.PASSWORD, accessInfo.get(AccessInfo.ParamName.PASSWORD));
         String device_id = "";
         try {
             device_id = obdBridge.getDeviceId(obdBridge.isSimulation(), getUUID());
         } catch (DeviceNotConnectedException e) {
             device_id = "";
         }
-        intent.putExtra(SettingsFragment.DEVICE_ID, device_id);
-        intent.putExtra(SettingsFragment.DEVICE_TOKEN, iotpDevice.getDeviceToken(device_id));
+        intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ID, device_id);
         intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_ADDRESS, obdBridgeBluetooth.getUserDeviceAddress());
         intent.putExtra(SettingsFragment.BLUETOOTH_DEVICE_NAME, obdBridgeBluetooth.getUserDeviceName());
         intent.putExtra(SettingsFragment.UPLOAD_FREQUENCY, "" + getUploadFrequencySec());
@@ -361,13 +411,15 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void checkSettingsOnResume() {
-        final String orgId = getPreference(SettingsFragment.ORGANIZATION_ID, IoTPlatformDevice.defaultOrganizationId);
-        final String apiKey = getPreference(SettingsFragment.API_KEY, IoTPlatformDevice.defaultApiKey);
-        final String apiToken = getPreference(SettingsFragment.API_TOKEN, IoTPlatformDevice.defaultApiToken);
-
-        if (!iotpDevice.isCurrentOrganizationSameAs(orgId) || !iotpDevice.isConnected()) {
-            restartApp(orgId, apiKey, apiToken);
-
+        final String endpoint = getPreference(SettingsFragment.ENDPOINT, null);
+        final String vendor = getPreference(SettingsFragment.VENDOR, null);
+        final String mo_id = getPreference(SettingsFragment.MO_ID, null);
+        final String username = getPreference(SettingsFragment.USERNAME, null);
+        final String password = getPreference(SettingsFragment.PASSWORD, null);
+        AccessInfo accessInfo = vehicleDevice != null ? vehicleDevice.getAccessInfo() : null;
+        String currentEndpoint = accessInfo != null ? accessInfo.get(AccessInfo.ParamName.ENDPOINT) : null;
+        if (currentEndpoint == null || !currentEndpoint.equals(endpoint)) {
+//            restartApp(endpoint, vendor, mo_id, username, password);
         } else if (!obdBridge.isSimulation()) {
             final int obd_timeout_ms = Integer.parseInt(getPreference(SettingsFragment.OBD_TIMEOUT_MS, "" + ObdBridge.DEFAULT_OBD_TIMEOUT_MS));
             final ObdProtocols obd_protocol = ObdProtocols.valueOf(getPreference(SettingsFragment.OBD_PROTOCOL, ObdBridge.DEFAULT_OBD_PROTOCOL.name()));
@@ -448,9 +500,12 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     @Override
     protected void onDestroy() {
-        iotpDevice.stopPublishing();
-        iotpDevice.disconnectDevice();
-        obdBridge.stopObdScan();
+        if(vehicleDevice != null){
+            vehicleDevice.stopPublishing();
+        }
+        if(obdBridge != null){
+            obdBridge.stopObdScan();
+        }
         super.onDestroy();
     }
 
@@ -646,41 +701,50 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             final String uuid = getUUID();
             final String device_id = obdBridge.getDeviceId(simulation, uuid);
-            iotpDevice.checkDeviceRegistration(new IoTPlatformDevice.ResponseListener() {
-                @Override
-                protected void response(final int statusCode, final JSONArray result) {
-                    try {
-                        result.remove(result.length() - 1);
-                        Log.d("Check Device Registry", result.toString(4));
-
-                        final JSONObject deviceDefinition = result.length() > 0 ? result.getJSONObject(0) : null;
-                        onDeviceRegistrationChecked(statusCode, deviceDefinition, simulation);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+            if(vehicleDevice == null || !vehicleDevice.hasValidAccessInfo()){
+                API.getDeviceAccessInfo(uuid, protocol, new API.TaskListener() {
+                    @Override
+                    public void postExecute(API.Response result) throws JsonSyntaxException {
+                        onDeviceRegistrationChecked(result.getStatusCode(), result.getBody(), simulation);
                     }
-                }
-            }, device_id, uuid);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+                });
+            }
+            deviceRegistered(obdBridge.isSimulation());
         } catch (DeviceNotConnectedException e) {
-            e.printStackTrace();
-        } catch (NoIoTPOrganizationException e) {
             e.printStackTrace();
         }
     }
 
-    private void onDeviceRegistrationChecked(final int statusCode, final JSONObject deviceDefinition, final boolean simulation) {
+    private void onDeviceRegistrationChecked(final int statusCode, final JsonObject deviceDefinition, final boolean simulation) {
         // run in UI thread
         switch (statusCode) {
             case 200: {
                 Log.d("Check Device Registry", "***Already Registered***");
                 showStatus("Device Already Registered", View.GONE);
 
-                deviceRegistered(deviceDefinition, simulation);
+                JsonElement obj = deviceDefinition.get("endpoint");
+                final String endpoint = obj.getAsString();
+                obj = deviceDefinition.get("vendor");
+                final String vendor = obj != null ? obj.getAsString() : null;
+                obj = deviceDefinition.get("mo_id");
+                final String mo_id = obj != null ? obj.getAsString() : null;
+                obj = deviceDefinition.get("username");
+                final String username = obj != null ? obj.getAsString() : null;
+                obj = deviceDefinition.get("password");
+                final String password = obj != null ? obj.getAsString() : null;
+                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password); // FIXME
+                if(vehicleDevice == null){
+                    vehicleDevice = protocol.createDevice(accessInfo);
+                }else {
+                    vehicleDevice.setAccessInfo(accessInfo);
+                }
+                setPreference(protocol.prefName(SettingsFragment.ENDPOINT), endpoint);
+                setPreference(SettingsFragment.VENDOR, vendor);
+                setPreference(SettingsFragment.MO_ID, mo_id);
+                setPreference(protocol.prefName(SettingsFragment.USERNAME), username);
+                setPreference(protocol.prefName(SettingsFragment.PASSWORD), password);
+
+                deviceRegistered(simulation);
                 break;
             }
             case 404:
@@ -711,25 +775,25 @@ public class Home extends AppCompatActivity implements LocationListener {
                 break;
             }
             default: {
-                Log.d("Failed to connect IoTP", "statusCode: " + statusCode);
+                Log.d("Check Device Registry", "Failed to connect Fleet Management Server: statusCode=" + statusCode);
                 progressBar.setVisibility(View.GONE);
 
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                 alertDialog
                         .setCancelable(false)
-                        .setTitle("Failed to connect to IBM IoT Platform")
-                        .setMessage("Check orgId, apiKey and apiToken of your IBM IoT Platform. statusCode:" + statusCode)
+                        .setTitle("Failed to connect to Fleet Management Server")
+                        .setMessage("Check endpoint of your fleet management server. statusCode:" + statusCode)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                showStatus("Failed to connect to IBM IoT Platform");
+                                showStatus("Failed to connect to Fleet Management Server");
                                 deviceNotRegistered(simulation);
                             }
                         })
                         .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                Toast.makeText(Home.this, "Cannot continue without connecting to IBM IoT Platform!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(Home.this, "Cannot continue without connecting to Fleet Management Server!", Toast.LENGTH_LONG).show();
                                 Home.this.finishAffinity();
                             }
                         })
@@ -745,79 +809,50 @@ public class Home extends AppCompatActivity implements LocationListener {
 
             final String uuid = getUUID();
             final String device_id = obdBridge.getDeviceId(simulation, uuid);
-            iotpDevice.requestDeviceRegistration(new IoTPlatformDevice.ResponseListener() {
-
+            API.registerDevice(uuid, protocol, new API.TaskListener() {
                 @Override
-                protected void response(final int statusCode, final JSONArray result) {
-                    try {
-                        result.remove(result.length() - 1);
-                        Log.d("Register Device", result.toString(4));
-
-                        final JSONObject deviceDefinition = result.getJSONObject(0);
-                        onDeviceRegistration(statusCode, deviceDefinition, simulation);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                public void postExecute(API.Response result) {
+                    onDeviceRegistration(result.getStatusCode(), result.getBody(), simulation);
                 }
-            }, device_id, uuid);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            });
         } catch (DeviceNotConnectedException e) {
-            e.printStackTrace();
-        } catch (NoIoTPOrganizationException e) {
             e.printStackTrace();
         }
     }
 
-    void storeSetting(final String prefKey, final String value) {
-        PreferenceManager.getDefaultSharedPreferences(this).getString(prefKey, value);
-    }
-
-    String readSetting(final String prefKey, final String defaultValue) {
-        return PreferenceManager.getDefaultSharedPreferences(this).getString(prefKey, defaultValue);
-    }
-
-    private void onDeviceRegistration(int statusCode, final JSONObject deviceDefinition, final boolean simulation) throws JSONException {
+    private void onDeviceRegistration(int statusCode, final JsonObject deviceDefinition, final boolean simulation) {
         // run in UI thread
         switch (statusCode) {
+            case 200:
             case 201:
             case 202:
+                final String endpoint = deviceDefinition.get(SettingsFragment.ENDPOINT).getAsString();
+                final String vendor = deviceDefinition.get(SettingsFragment.VENDOR).getAsString();
+                final String mo_id = deviceDefinition.get(SettingsFragment.MO_ID).getAsString();
+                final String username = deviceDefinition.get(SettingsFragment.USERNAME).getAsString();
+                final String password = deviceDefinition.get(SettingsFragment.PASSWORD).getAsString();
+                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                if(vehicleDevice == null) {
+                    vehicleDevice = protocol.createDevice(accessInfo);
+                }else{
+                    vehicleDevice.setAccessInfo(accessInfo);
+                }
 
-                final String authToken = deviceDefinition.getString("authToken");
-                final String deviceId = deviceDefinition.getString("deviceId");
-                iotpDevice.setDeviceToken(deviceId, authToken);
+                setPreference(protocol.prefName(SettingsFragment.ENDPOINT), endpoint);
+                setPreference(SettingsFragment.VENDOR, vendor);
+                setPreference(SettingsFragment.MO_ID, mo_id);
+                setPreference(protocol.prefName(SettingsFragment.USERNAME), username);
+                setPreference(protocol.prefName(SettingsFragment.PASSWORD), password);
 
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
-                final View authTokenAlert = getLayoutInflater().inflate(R.layout.activity_home_authtokenalert, null, false);
-                final EditText authTokenField = (EditText) authTokenAlert.findViewById(R.id.authTokenField);
-                authTokenField.setText(authToken);
-
-                final Button copyToClipboard = (Button) authTokenAlert.findViewById(R.id.copyToClipboard);
-                copyToClipboard.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                        final ClipData clipData = ClipData.newPlainText("authToken", authToken);
-                        clipboardManager.setPrimaryClip(clipData);
-
-                        Toast.makeText(Home.this, "Successfully copied to your Clipboard!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                storeSetting(SettingsFragment.DEVICE_TOKEN, authToken);
-
-                alertDialog.setView(authTokenAlert);
                 alertDialog
                         .setCancelable(false)
                         .setTitle("Your Device is Now Registered!")
-                        .setMessage("Please take note of this Autentication Token as you will need it in the future")
+                        .setMessage("")
                         .setPositiveButton("Close", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                deviceRegistered(deviceDefinition, simulation);
+                                deviceRegistered(simulation);
                             }
                         })
                         .show();
@@ -828,18 +863,12 @@ public class Home extends AppCompatActivity implements LocationListener {
         progressBar.setVisibility(View.GONE);
     }
 
-    private void deviceRegistered(final JSONObject deviceDefinition, final boolean simulation) {
+    private void deviceRegistered(final boolean simulation) {
         // starts OBD scan and data transmission process here
-
         trip_id = createTripId();
         try {
-            iotpDevice.createDeviceClient(deviceDefinition);
-            iotpDevice.connectDevice();
             startObdScan(simulation);
             startPublishingProbeData();
-
-        } catch (MqttException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -868,11 +897,16 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startPublishingProbeData() {
         final int uploadIntervalMS = getUploadFrequencySec() * 1000;
-        iotpDevice.startPublishing(new IoTPlatformDevice.ProbeDataGenerator() {
+        final String mo_id = vehicleDevice.getAccessInfo().get(AccessInfo.ParamName.MO_ID);
+        vehicleDevice.startPublishing(new EventDataGenerator() {
             @Override
-            public JsonObject generateData() {
+            public String generateData() {
                 if (location != null) {
-                    return obdBridge.generateMqttEvent(location, trip_id);
+                    JsonObject data = obdBridge.generateEvent(location, trip_id);
+                    data.addProperty("mo_id", mo_id);
+                    data.addProperty("trip_id", trip_id);
+                    String payload = protocol.defaultFormat().format(data);
+                    return payload;
                 } else {
                     showStatus("Waiting to Find Location", View.VISIBLE);
                     return null;
@@ -880,7 +914,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
 
             @Override
-            public void notifyPostResult(final boolean success, final JsonObject event) {
+            public void notifyPostResult(final boolean success, final String event) {
                 if (success) {
                     showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
                     System.out.println("DATA SUCCESSFULLY POSTED......");
@@ -893,7 +927,9 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void stopPublishingProbeData() {
-        iotpDevice.stopPublishing();
+        if(vehicleDevice != null){
+            vehicleDevice.stopPublishing();
+        }
     }
 
     private void startObdScan() {
@@ -1246,7 +1282,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     void setPreference(final String prefKey, final String value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putString(prefKey, "" + value).apply();
+            preferences.edit().putString(prefKey, value).apply();
         } catch (Exception e) {
             e.printStackTrace();
         }

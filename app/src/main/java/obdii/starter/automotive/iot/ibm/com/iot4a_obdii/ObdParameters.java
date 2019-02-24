@@ -84,24 +84,30 @@ public class ObdParameters {
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    if (speed >= max_speed) {
-                        delta = -1.0 * speed_increment;
-                    } else if (speed <= 0.0) {
-                        speed = 0.0;
-                        delta = speed_increment;
-                    } else {
-                        final double random = Math.random();
-                        if (random < 0.4) {
+                    final Location location = activity.getLocation();
+                    if (location != null) {
+                        speed = location.getSpeed();
+                    }
+                    if(Double.compare(speed, 0) == 0){
+                        if (speed >= max_speed) {
                             delta = -1.0 * speed_increment;
-                        } else if (random > 0.6) {
+                        } else if (speed <= 0.0) {
+                            speed = 0.0;
                             delta = speed_increment;
                         } else {
-                            delta = 0;
+                            final double random = Math.random();
+                            if (random < 0.4) {
+                                delta = -1.0 * speed_increment;
+                            } else if (random > 0.6) {
+                                delta = speed_increment;
+                            } else {
+                                delta = 0;
+                            }
                         }
-                    }
-                    speed += delta;
-                    if (speed <= 0.0) {
-                        speed = 0.01;
+                        speed += delta;
+                        if (speed <= 0.0) {
+                            speed = 0.01;
+                        }
                     }
                 } else {
                     final SpeedCommand speedCommand = (SpeedCommand) obdCommand;
@@ -203,7 +209,7 @@ public class ObdParameters {
 
             @Override
             protected void setJsonProp(JsonObject json) {
-                json.addProperty("fuelLevel", fuelLevel);
+                json.addProperty("fuel", fuelLevel);
             }
 
             @Override
@@ -253,8 +259,8 @@ public class ObdParameters {
                 if (location != null) {
                     latitude = location.getLatitude();
                 }
-                valueText = valueText = String.format("%1$.7f", latitude);
-            }
+                valueText = String.format("%1$.7f", latitude);
+           }
 
             @Override
             protected boolean isBaseProp() {
@@ -272,6 +278,65 @@ public class ObdParameters {
             }
         };
         obdParameters.add(latitude);
+
+        final ObdParameter heading = new ObdParameter((TextView) activity.findViewById(R.id.headingValue), activity, "Heading", null) {
+            private float heading = 0;
+            private String valueText;
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                final Location location = activity.getLocation();
+                if(location != null){
+                    heading = location.getBearing();
+                }
+                heading = 0; // TODO Calculate from location and prev location instead of using bearing
+                valueText = String.format("%1$.4f", heading);
+            }
+
+            @Override
+            protected boolean isBaseProp() {
+                return true;
+            }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("heading", heading);
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(heading);
+
+        final ObdParameter altitude = new ObdParameter(null, activity, "Altitude", null) {
+            private double altitude = 0;
+            private String valueText;
+            @Override
+            protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
+                final Location location = activity.getLocation();
+                if(location != null){
+                    altitude = location.getAltitude();
+                }
+                valueText = String.format("%1$.4f", altitude);
+            }
+
+            @Override
+            protected boolean isBaseProp() {
+                return true;
+            }
+
+            @Override
+            protected void setJsonProp(JsonObject json) {
+                json.addProperty("altitude", altitude);
+            }
+
+            @Override
+            protected String getValueText() {
+                return valueText;
+            }
+        };
+        obdParameters.add(altitude);
 
         return obdParameters;
     }
