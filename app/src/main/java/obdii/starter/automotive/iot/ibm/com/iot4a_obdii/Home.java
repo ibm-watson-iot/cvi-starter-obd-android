@@ -76,6 +76,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.SpecifyServer;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventDataGenerator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventFormat;
@@ -92,6 +93,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private static final int GPS_INTENT = 000;
     private static final int SETTINGS_INTENT = 001;
     private static final int BLUETOOTH_REQUEST = 002;
+    private static final int SPECIFY_SERVER_INTENT = 003;
 
     static final int MIN_FREQUENCY_SEC = 1;
     static final int MAX_FREQUENCY_SEC = 60;
@@ -181,7 +183,10 @@ public class Home extends AppCompatActivity implements LocationListener {
                     return;
                 }
                 stopPublishingProbeData();
+                vehicleDevice.clean();
+
                 protocol = newProtocol;
+                setPreference(SettingsFragment.PROTOCOL, protocol.name());
                 final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
                 final String vendor = getPreference(SettingsFragment.VENDOR, null);
                 final String mo_id = getPreference(SettingsFragment.MO_ID, null);
@@ -409,6 +414,10 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         startActivity(intent);
     }
+    private void startSpecifyServerActivity(){
+        final Intent intent = new Intent(Home.this, SpecifyServer.class);
+        startActivityForResult(intent, SPECIFY_SERVER_INTENT);
+    }
 
     private void checkSettingsOnResume() {
         final String endpoint = getPreference(SettingsFragment.ENDPOINT, null);
@@ -492,6 +501,9 @@ public class Home extends AppCompatActivity implements LocationListener {
         switch (item.getItemId()) {
             case R.id.optionsMenu_1:
                 startSettingsActivity();
+                return true;
+            case R.id.specifyServerMenu:
+                startSpecifyServerActivity();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1200,7 +1212,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
                 final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
                 startActivityForResult(settingsIntent, SETTINGS_INTENT);
-
             } else {
                 setLocationInformation();
                 startApp2();
@@ -1211,6 +1222,20 @@ public class Home extends AppCompatActivity implements LocationListener {
             startApp2();
 
         } else if (requestCode == BLUETOOTH_REQUEST) {
+            startApp2();
+        } else if(requestCode == SPECIFY_SERVER_INTENT){
+            if(data == null){
+                removePreference(SettingsFragment.APP_SERVER_URL);
+                removePreference(SettingsFragment.APP_SERVER_USERNAME);
+                removePreference(SettingsFragment.APP_SERVER_PASSWORD);
+            }else{
+                String appUrl = data.getStringExtra(SettingsFragment.APP_SERVER_URL);
+                String appUsername = data.getStringExtra(SettingsFragment.APP_SERVER_USERNAME);
+                String appPassword = data.getStringExtra(SettingsFragment.APP_SERVER_PASSWORD);
+                setPreference(SettingsFragment.APP_SERVER_URL, appUrl);
+                setPreference(SettingsFragment.APP_SERVER_USERNAME, appUsername);
+                setPreference(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
+            }
             startApp2();
         }
     }
@@ -1284,6 +1309,14 @@ public class Home extends AppCompatActivity implements LocationListener {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putString(prefKey, value).apply();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    void removePreference(final String prefKey){
+        try{
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().remove(prefKey).apply();
+        }catch (Exception e){
             e.printStackTrace();
         }
     }

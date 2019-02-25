@@ -28,7 +28,7 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
+import android.util.Base64;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -61,6 +61,16 @@ public class API {
         return request.execute(url, "POST", null, connectedAppUser, connectedAppPassword);
     }
 
+    public static void useDefault(){
+        connectedAppURL = defaultAppURL;
+        connectedAppUser = defaultAppUser;
+        connectedAppPassword = defaultAppPassword;
+    }
+    public static void doInitialize(String appUrl, String appUsername, String appPassword){
+        connectedAppURL = appUrl;
+        connectedAppUser = appUsername;
+        connectedAppPassword = appPassword;
+    }
     public static class doRequest extends AsyncTask<String, Void, Response> {
         private final TaskListener taskListener;
 
@@ -93,11 +103,7 @@ public class API {
                 // params[3] == user, params[4] == password
                 if(params.length >= 5 && params[3] != null && params[3].length() > 0 && params[4] != null && params[4].length() > 0){
                     Log.i("Using Basic Auth", "");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        urlConnection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString((params[3]+":"+params[4]).getBytes("UTF-8")));
-                    }else{
-                        Log.e("Basic Auth", "Version " + Build.VERSION.SDK_INT + " is not supporting Base64.");
-                    }
+                    urlConnection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((params[3]+":"+params[4]).getBytes("UTF-8"), Base64.NO_WRAP));
                 }
 
                 if (requestType.equals("POST") || requestType.equals("PUT") || requestType.equals("GET")) {

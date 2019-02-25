@@ -48,6 +48,12 @@ public class IoTPlatformDevice extends AbstractVehicleDevice {
         this.accessInfo = accessInfo;
     }
 
+    @Override
+    public void clean() {
+        super.clean();
+        disconnect();
+    }
+
     public void connect() throws Exception {
         if(deviceClient == null){
             createDeviceClient();
