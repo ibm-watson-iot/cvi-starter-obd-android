@@ -344,21 +344,48 @@
                     android:text="Protocol (HTTP / MQTT)"
                     android:textOff="HTTP"
                     android:textOn="MQTT" />
+
             </LinearLayout>
 
-            <Button
-                android:id="@+id/button"
-                style="@style/Widget.AppCompat.Button"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_above="@+id/versionAndBuild"
-                android:layout_centerHorizontal="true"
-                android:layout_marginRight="2.5dp"
-                android:layout_marginBottom="15dp"
-                android:layout_weight="5"
-                android:nestedScrollingEnabled="false"
-                android:onClick="endSession"
-                android:text="End Session" />
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/send_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:onClick="send"
+                    android:text="Send  Car Probe"
+                    android:textOff="Send Car Probe"
+                    android:textOn="Send Car Probe" />
+
+                <ToggleButton
+                    android:id="@+id/pause_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:onClick="pause"
+                    android:text="Pause"
+                    android:textOff="Pause"
+                    android:textOn="Pause" />
+
+                <Button
+                    android:id="@+id/button"
+                    style="@style/Widget.AppCompat.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@+id/versionAndBuild"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1"
+                    android:nestedScrollingEnabled="false"
+                    android:onClick="endSession"
+                    android:text="End Session" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/versionAndBuild"
@@ -368,6 +395,7 @@
                 android:layout_centerHorizontal="true"
                 android:text="Version: 1.0.2 Build: 20180615"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
+
         </LinearLayout>
     </LinearLayout>
 

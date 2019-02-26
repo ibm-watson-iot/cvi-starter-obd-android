@@ -13,8 +13,6 @@ package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,11 +41,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.github.pires.obd.enums.ObdProtocols;
 import com.google.android.gms.appindexing.Action;
@@ -79,7 +77,6 @@ import java.util.concurrent.TimeUnit;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.SpecifyServer;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventDataGenerator;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventFormat;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IVehicleDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IoTPlatformDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
@@ -118,6 +115,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private Button changeNetwork;
     private Button changeFrequency;
     private Switch protocolSwitch;
+    private ToggleButton sendButton, pauseButton;
 
     private String userDeviceAddress;
     private String userDeviceName;
@@ -202,6 +200,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
         });
+        sendButton = (ToggleButton) findViewById(R.id.send_btn);
+        pauseButton = (ToggleButton)findViewById(R.id.pause_btn);
 
         obdBridge.initializeObdParameterList(this);
 
@@ -936,12 +936,25 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
         }, UPLOAD_DELAY_MS, uploadIntervalMS);
+
+        sendButton.setEnabled(false);
+        pauseButton.setEnabled(true);
+        pauseButton.setChecked(false);
     }
 
     private void stopPublishingProbeData() {
         if(vehicleDevice != null){
             vehicleDevice.stopPublishing();
         }
+        pauseButton.setEnabled(false);
+        sendButton.setEnabled(true);
+        sendButton.setChecked(false);
+    }
+    public void send(View view){
+        startPublishingProbeData();
+    }
+    public void pause(View view){
+        stopPublishingProbeData();
     }
 
     private void startObdScan() {
