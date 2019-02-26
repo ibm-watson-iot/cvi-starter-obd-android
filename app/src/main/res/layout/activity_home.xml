@@ -339,11 +339,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
+                    android:checked="false"
                     android:contentDescription="Select protocol to send probe data (HTTP or MQTT)"
                     android:showText="true"
                     android:text="Protocol (HTTP / MQTT)"
                     android:textOff="HTTP"
-                    android:textOn="MQTT" />
+                    android:textOn="MQTT"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

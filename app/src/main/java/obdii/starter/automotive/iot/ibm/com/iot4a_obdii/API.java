@@ -60,6 +60,11 @@ public class API {
         String url = connectedAppURL + "/user/device/" + uuid + "?protocol=" + protocol.name().toLowerCase();
         return request.execute(url, "POST", null, connectedAppUser, connectedAppPassword);
     }
+    public static AsyncTask checkMQTTAvailable(TaskListener listener){
+        final API.doRequest request = new API.doRequest(listener);
+        String url = connectedAppURL + "/user/capability/device";
+        return request.execute(url, "GET", null, connectedAppUser, connectedAppPassword);
+    }
 
     public static void useDefault(){
         connectedAppURL = defaultAppURL;

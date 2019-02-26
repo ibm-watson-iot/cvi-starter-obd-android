@@ -200,6 +200,17 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
         });
+
+        API.checkMQTTAvailable(new API.TaskListener() {
+            @Override
+            public void postExecute(API.Response result) throws JsonSyntaxException {
+                if(result != null && result.getStatusCode() == 200){
+                    boolean available = result.getBody().get("available").getAsBoolean();
+                    protocolSwitch.setVisibility(available ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+
         sendButton = (ToggleButton) findViewById(R.id.send_btn);
         pauseButton = (ToggleButton)findViewById(R.id.pause_btn);
 
@@ -720,8 +731,9 @@ public class Home extends AppCompatActivity implements LocationListener {
                         onDeviceRegistrationChecked(result.getStatusCode(), result.getBody(), simulation);
                     }
                 });
+            }else{
+                deviceRegistered(obdBridge.isSimulation());
             }
-            deviceRegistered(obdBridge.isSimulation());
         } catch (DeviceNotConnectedException e) {
             e.printStackTrace();
         }
