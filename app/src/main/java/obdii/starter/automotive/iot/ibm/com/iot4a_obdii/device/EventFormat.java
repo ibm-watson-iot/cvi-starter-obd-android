@@ -29,10 +29,11 @@ public enum EventFormat{
             list.add(""); // confidence
             list.add(""); // map_vendor_name
             list.add(""); // map_version
-//                    JsonElement props = data.get("props");
-//                    if(props != null && props.isJsonObject()){
-//                        list.add(props.getAsJsonObject().get("fuelLevel").getAsString());
-//                    }
+            JsonElement props = data.get("props");
+            if(props != null && props.isJsonObject()){
+                list.add(props.getAsJsonObject().get("engineOil").getAsString());
+                list.add(props.getAsJsonObject().get("fuel").getAsString());
+            }
             String csv = TextUtils.join(",", list);
             return csv;
         }
