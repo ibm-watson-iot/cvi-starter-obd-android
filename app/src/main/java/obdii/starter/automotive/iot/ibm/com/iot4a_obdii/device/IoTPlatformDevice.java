@@ -126,14 +126,4 @@ public class IoTPlatformDevice extends AbstractVehicleDevice {
     public final boolean isCurrentOrganizationSameAs(final String newId) {
         return accessInfo != null && accessInfo.get(AccessInfo.ParamName.ENDPOINT).equals(newId);
     }
-
-    public void changeOrganization(final String orgId, final String typeId, final String deviceId, final String deviceToken) {
-
-
-        setAccessInfo(new AccessInfo(orgId, typeId, deviceId, null, deviceToken));
-    }
-
-    public static AccessInfo createAccessInfo(String endpoint, String vendor, String mo_id, String user, String password){
-        return new AccessInfo(endpoint, vendor, mo_id, user, password);
-    }
 }

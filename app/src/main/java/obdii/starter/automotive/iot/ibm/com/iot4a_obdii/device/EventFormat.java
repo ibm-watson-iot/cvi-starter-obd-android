@@ -31,7 +31,7 @@ public enum EventFormat{
             list.add(""); // map_version
             JsonElement props = data.get("props");
             if(props != null && props.isJsonObject()){
-                list.add(props.getAsJsonObject().get("engineOil").getAsString());
+                list.add(props.getAsJsonObject().get("engineTemp").getAsString());
                 list.add(props.getAsJsonObject().get("fuel").getAsString());
             }
             String csv = TextUtils.join(",", list);

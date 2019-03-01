@@ -10,8 +10,12 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
     private ScheduledFuture<?> uploadHandler = null;
 
     protected AccessInfo accessInfo;
+
     AbstractVehicleDevice(AccessInfo accessInfo){
         this.accessInfo = accessInfo;
+    }
+    public static AccessInfo createAccessInfo(String endpoint, String vendor, String mo_id, String user, String password){
+        return new AccessInfo(endpoint, vendor, mo_id, user, password);
     }
 
     public synchronized void startPublishing(final EventDataGenerator eventGenerator, final int uploadDelayMS, final int uploadIntervalMS) {

@@ -169,6 +169,9 @@ public abstract class ObdBridge {
     public boolean isSimulation() {
         return simulation;
     }
+    public void setIsSimulation(boolean simulation){
+        this.simulation = simulation;
+    }
 
     public void initializeObdParameterList(final Home home) {
         obdParameterList = ObdParameters.getObdParameterList(home);

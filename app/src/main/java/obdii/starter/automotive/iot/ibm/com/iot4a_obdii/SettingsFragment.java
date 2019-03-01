@@ -53,11 +53,9 @@ public class SettingsFragment extends PreferenceFragment {
 
     public void initializeSettings() {
         final Intent intent = getActivity().getIntent();
-        prepareEditTextPreference(ENDPOINT, intent.getStringExtra(ENDPOINT), "https://demb.automotive.interntofthings.ibmcloud.com/vehicle/carProbe", true, null);
-        prepareEditTextPreference(VENDOR, intent.getStringExtra(VENDOR), "OBDII", true, null);
-        prepareEditTextPreference(USERNAME, intent.getStringExtra(USERNAME), "", true, null);
-        prepareEditTextPreference(PASSWORD, intent.getStringExtra(PASSWORD), "", true, null);
-        prepareEditTextPreference(MO_ID, intent.getStringExtra(MO_ID), "", false, null);
+        prepareEditTextPreference(APP_SERVER_URL, intent.getStringExtra(APP_SERVER_URL), "", true, null);
+        prepareEditTextPreference(APP_SERVER_USERNAME, intent.getStringExtra(APP_SERVER_USERNAME), "", true, null);
+        prepareEditTextPreference(APP_SERVER_PASSWORD, intent.getStringExtra(APP_SERVER_PASSWORD), "", true, null);
         prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, intent.getStringExtra(BLUETOOTH_DEVICE_NAME), "", false, null);
         prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, intent.getStringExtra(BLUETOOTH_DEVICE_ADDRESS), "", false, null);
         prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + Home.DEFAULT_FREQUENCY_SEC, true, new Preference.OnPreferenceChangeListener() {

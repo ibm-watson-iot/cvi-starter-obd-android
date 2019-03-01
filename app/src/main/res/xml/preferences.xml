@@ -3,38 +3,28 @@
 
     <PreferenceCategory
         android:key="iotp_settings"
-        android:title="IoT Platform">
+        android:title="Fleet Management Application">
 
         <EditTextPreference
-            android:key="organization_id"
+            android:key="app_server_url"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Organization ID" />
+            android:title="Application Server URL" />
         <EditTextPreference
-            android:key="api_key"
+            android:key="app_server_username"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="API Key" />
+            android:title="Application Server Username" />
         <EditTextPreference
-            android:key="api_token"
+            android:key="app_server_password"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="API Token" />
-        <EditTextPreference
-            android:key="device_id"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="Device ID" />
-        <EditTextPreference
-            android:key="device_token"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="Device Token" />
+            android:title="Application Server Password" />
         <EditTextPreference
             android:key="upload_frequency"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Upload/OBD2 Scan Interval (sec) [5-60]" />
+            android:title="Upload/OBD2 Scan Interval (sec) [1-60]" />
     </PreferenceCategory>
 
     <PreferenceCategory

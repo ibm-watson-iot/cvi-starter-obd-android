@@ -50,8 +50,9 @@ public class SpecifyServer extends AppCompatActivity {
 
     public void useDefaultServer(View view) {
         Log.i("Button Clicked", "Default Server");
-
-        setResult(RESULT_OK);
+        Intent intent = new Intent();
+        intent.putExtra("useDefault", true);
+        setResult(RESULT_OK, intent);
         finish();
     }
 

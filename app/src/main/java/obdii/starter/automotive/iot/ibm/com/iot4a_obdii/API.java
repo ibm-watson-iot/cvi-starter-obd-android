@@ -120,6 +120,7 @@ public class API {
                     if (params.length >= 3 && params[2] != null) { // params[3] == HTTP Body - String
                         String httpBody = params[2];
 
+                        urlConnection.setRequestProperty("Accept", "application/json");
                         urlConnection.setRequestProperty("Content-Type", "application/json");
                         urlConnection.setRequestProperty("Content-Length", httpBody.length() + "");
 

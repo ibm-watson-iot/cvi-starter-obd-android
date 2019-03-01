@@ -11,6 +11,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +45,21 @@ public class AppSettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        Intent result = new Intent();
+        result.putExtra("appServerChanged", isAppServerChanged());
+        setResult(RESULT_OK, result);
+        finish();
+    }
+    private boolean isAppServerChanged(){
+        Intent intent = getIntent();
+        String originalUrl = intent.getStringExtra(SettingsFragment.APP_SERVER_URL);
+        String originalUser = intent.getStringExtra(SettingsFragment.APP_SERVER_USERNAME);
+        String originalPass = intent.getStringExtra(SettingsFragment.APP_SERVER_PASSWORD);
+        String newUrl = fragment.getPreferenceValue(SettingsFragment.APP_SERVER_URL);
+        String newUser = fragment.getPreferenceValue(SettingsFragment.APP_SERVER_USERNAME);
+        String newPass = fragment.getPreferenceValue(SettingsFragment.APP_SERVER_PASSWORD);
+        return originalUrl == null || newUrl == null || !originalUrl.equals(newUrl)
+            || (originalUser == null && newUser != null) || !(originalUser == null && newUser == null) || !originalUser.equals(newUser)
+            || (originalPass == null && newPass != null) || !(originalPass == null && newPass == null) || !originalPass.equals(newPass);
     }
 }

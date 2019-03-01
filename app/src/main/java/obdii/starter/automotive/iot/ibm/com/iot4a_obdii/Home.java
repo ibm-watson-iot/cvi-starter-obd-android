@@ -138,6 +138,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
 
     private boolean initialized = false;
+    private boolean realOrSimuSelected = false; // Flag if user has already selected to use real obd device or simulation. It should be asked once per a app session.
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -201,20 +202,21 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
         });
 
-        API.checkMQTTAvailable(new API.TaskListener() {
-            @Override
-            public void postExecute(API.Response result) throws JsonSyntaxException {
-                if(result != null && result.getStatusCode() == 200){
-                    boolean available = result.getBody().get("available").getAsBoolean();
-                    protocolSwitch.setVisibility(available ? View.VISIBLE : View.GONE);
-                }
-            }
-        });
+        checkMQTTAvailable();
 
         sendButton = (ToggleButton) findViewById(R.id.send_btn);
         pauseButton = (ToggleButton)findViewById(R.id.pause_btn);
 
         obdBridge.initializeObdParameterList(this);
+
+        String appUrl = getPreference(SettingsFragment.APP_SERVER_URL, null);
+        String appUser = getPreference(SettingsFragment.APP_SERVER_USERNAME, null);
+        String appPass = getPreference(SettingsFragment.APP_SERVER_PASSWORD, null);
+        if(appUrl == null){
+            API.useDefault();
+        }else{
+            API.doInitialize(appUrl, appUser, appPass);
+        }
 
         try {
             checkForDisclaimer();
@@ -226,6 +228,20 @@ public class Home extends AppCompatActivity implements LocationListener {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    private void checkMQTTAvailable(){
+        API.checkMQTTAvailable(new API.TaskListener() {
+            @Override
+            public void postExecute(API.Response result) throws JsonSyntaxException {
+                if(result != null && result.getStatusCode() == 200){
+                    boolean available = result.getBody().get("available").getAsBoolean();
+                    if(!available){
+                        protocol = Protocol.HTTP;
+                    }
+                    protocolSwitch.setVisibility(available ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+    }
     public void checkForDisclaimer() throws IOException {
         if (!wasDisclaimerShown(false)) {
             final DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -274,7 +290,6 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startApp() {
         if(vehicleDevice == null || !vehicleDevice.hasValidAccessInfo()){
-            final String appServerUrl = getPreference(SettingsFragment.APP_SERVER_URL, API.connectedAppURL);
             final String publishProtocol = getPreference(SettingsFragment.PROTOCOL, Protocol.HTTP.name());
             this.protocol = Protocol.valueOf(publishProtocol.toUpperCase());
             protocolSwitch.setChecked(protocol == Protocol.MQTT);
@@ -405,11 +420,12 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startSettingsActivity() {
         final Intent intent = new Intent(this, AppSettingsActivity.class);
-        AccessInfo accessInfo = vehicleDevice.getAccessInfo();
-        intent.putExtra(SettingsFragment.ENDPOINT, accessInfo.get(AccessInfo.ParamName.ENDPOINT));
-        intent.putExtra(SettingsFragment.VENDOR, accessInfo.get(AccessInfo.ParamName.VENDOR));
-        intent.putExtra(SettingsFragment.USERNAME, accessInfo.get(AccessInfo.ParamName.USERNAME));
-        intent.putExtra(SettingsFragment.PASSWORD, accessInfo.get(AccessInfo.ParamName.PASSWORD));
+        String appUrl = getPreference(SettingsFragment.APP_SERVER_URL, null);
+        intent.putExtra(SettingsFragment.APP_SERVER_URL, appUrl);
+        String appUser = getPreference(SettingsFragment.APP_SERVER_USERNAME, null);
+        intent.putExtra(SettingsFragment.APP_SERVER_USERNAME, appUser);
+        String appPass = getPreference(SettingsFragment.APP_SERVER_PASSWORD, null);
+        intent.putExtra(SettingsFragment.APP_SERVER_PASSWORD, appPass);
         String device_id = "";
         try {
             device_id = obdBridge.getDeviceId(obdBridge.isSimulation(), getUUID());
@@ -423,7 +439,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         intent.putExtra(SettingsFragment.OBD_TIMEOUT_MS, "" + getObdTimeoutMs());
         intent.putExtra(SettingsFragment.OBD_PROTOCOL, "" + getObdProtocol());
 
-        startActivity(intent);
+        startActivityForResult(intent, SETTINGS_INTENT);
     }
     private void startSpecifyServerActivity(){
         final Intent intent = new Intent(Home.this, SpecifyServer.class);
@@ -565,25 +581,37 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void showObdScanModeDialog() {
         // allows the user to select real OBD Scan mode or Simulation mode
-        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        alertDialog
-                .setCancelable(false)
-                .setTitle("Do you want to try out a simulated version?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        runSimulatedObdScan();
-                    }
-                })
-                .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        runRealObdScan();
-                    }
-                })
-                .show();
+        if(realOrSimuSelected){
+            if(obdBridge.isSimulation()){
+                runSimulatedObdScan();
+            }else{
+                runRealObdScan();
+            }
+        }else{
+            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+            alertDialog
+                    .setCancelable(false)
+                    .setTitle("Do you want to try out a simulated version?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            obdBridge.setIsSimulation(true);
+                            realOrSimuSelected = true;
+                            runSimulatedObdScan();
+                        }
+                    })
+                    .setNegativeButton("No, I have a real OBDII Dongle", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            obdBridge.setIsSimulation(false);
+                            realOrSimuSelected = true; //
+                            runRealObdScan();
+                        }
+                    })
+                    .show();
+        }
     }
 
     private void runSimulatedObdScan() {
@@ -1232,36 +1260,52 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GPS_INTENT) {
-            if (networkIntentNeeded) {
-                Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
-                final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
-                startActivityForResult(settingsIntent, SETTINGS_INTENT);
-            } else {
-                setLocationInformation();
+        switch(requestCode){
+            case GPS_INTENT:
+                if (networkIntentNeeded) {
+                    Toast.makeText(getApplicationContext(), "Please connect to a network", Toast.LENGTH_LONG).show();
+                    final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                    startActivityForResult(settingsIntent, SETTINGS_INTENT);
+                } else {
+                    setLocationInformation();
+                    startApp2();
+                }
+                break;
+            case SETTINGS_INTENT:
+                if(data.getBooleanExtra("appServerChanged", true)){
+                    networkIntentNeeded = false;
+                    setLocationInformation();
+                    startApp2();
+                }
+                break;
+            case BLUETOOTH_REQUEST:
                 startApp2();
-            }
-        } else if (requestCode == SETTINGS_INTENT) {
-            networkIntentNeeded = false;
-            setLocationInformation();
-            startApp2();
-
-        } else if (requestCode == BLUETOOTH_REQUEST) {
-            startApp2();
-        } else if(requestCode == SPECIFY_SERVER_INTENT){
-            if(data == null){
-                removePreference(SettingsFragment.APP_SERVER_URL);
-                removePreference(SettingsFragment.APP_SERVER_USERNAME);
-                removePreference(SettingsFragment.APP_SERVER_PASSWORD);
-            }else{
-                String appUrl = data.getStringExtra(SettingsFragment.APP_SERVER_URL);
-                String appUsername = data.getStringExtra(SettingsFragment.APP_SERVER_USERNAME);
-                String appPassword = data.getStringExtra(SettingsFragment.APP_SERVER_PASSWORD);
-                setPreference(SettingsFragment.APP_SERVER_URL, appUrl);
-                setPreference(SettingsFragment.APP_SERVER_USERNAME, appUsername);
-                setPreference(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
-            }
-            startApp2();
+                break;
+            case SPECIFY_SERVER_INTENT:
+                if(data == null) {
+                    // App Server is not changed
+                    break;
+                }else if(data.getBooleanExtra("useDefault", false)){
+                    removePreference(SettingsFragment.APP_SERVER_URL);
+                    removePreference(SettingsFragment.APP_SERVER_USERNAME);
+                    removePreference(SettingsFragment.APP_SERVER_PASSWORD);
+                    API.useDefault();
+                }else{
+                    String appUrl = data.getStringExtra(SettingsFragment.APP_SERVER_URL);
+                    String appUsername = data.getStringExtra(SettingsFragment.APP_SERVER_USERNAME);
+                    String appPassword = data.getStringExtra(SettingsFragment.APP_SERVER_PASSWORD);
+                    setPreference(SettingsFragment.APP_SERVER_URL, appUrl);
+                    setPreference(SettingsFragment.APP_SERVER_USERNAME, appUsername);
+                    setPreference(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
+                    API.doInitialize(appUrl, appUsername, appPassword);
+                }
+                checkMQTTAvailable();
+                vehicleDevice.clean();
+                vehicleDevice = null;
+                startApp2();
+                break;
+            default:
+                break;
         }
     }
 
