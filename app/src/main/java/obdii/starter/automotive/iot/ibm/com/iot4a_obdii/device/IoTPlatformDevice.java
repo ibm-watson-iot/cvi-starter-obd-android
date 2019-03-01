@@ -10,6 +10,8 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 import com.ibm.iotf.client.device.DeviceClient;
 
@@ -111,16 +113,27 @@ public class IoTPlatformDevice extends AbstractVehicleDevice {
     }
 
     @Override
-    boolean publishEvent(final String probe) throws Exception {
+    boolean publishEvent(final String probe, NotificationHandler notificationHandler) {
         if(!isConnected()){
-            connect();
+            try {
+                connect();
+            }catch (Exception e){
+                Log.e("publish event", e.getMessage());
+                notificationHandler.notifyPostResult(false, new Notification(Notification.Type.Error, "Failed to connect to IoT Platform", null));
+            }
         }
 
         if (deviceClient != null) {
-            return deviceClient.publishEvent("carprobe", probe, "csv", 0);
+            try {
+                return deviceClient.publishEvent("carprobe", probe, "csv", 0);
+            }catch(Exception e){
+                Log.e("publish event", e.getMessage());
+                notificationHandler.notifyPostResult(false, new Notification(Notification.Type.Error, "Failed to publish to IoT Platform", null));
+            }
         } else {
             return false;
         }
+        return false;
     }
 
     public final boolean isCurrentOrganizationSameAs(final String newId) {

@@ -1,5 +1,6 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device;
 
+import android.bluetooth.BluetoothClass;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -13,16 +14,19 @@ public class VdhHttpDevice extends AbstractVehicleDevice{
     }
 
     @Override
-    boolean publishEvent(String event) throws Exception {
+    boolean publishEvent(String event, final NotificationHandler notificationHandler) {
         final String op = "sync";
         API.doRequest request = new API.doRequest(new API.TaskListener() {
             @Override
-            public void postExecute(API.Response result) throws JsonSyntaxException {
+            public void postExecute(API.Response result) {
                 if(op.equals("sync") && result.getStatusCode() == 200){
                     JsonObject body = result.getBody();
                     if(body != null){
                         Log.d("Publish Event", body.toString());
+                        notificationHandler.notifyPostResult(true, new Notification(Notification.Type.NotifyMessage, body.toString(), null));
                     }
+                }else if(result.getStatusCode() == 500){
+                    notificationHandler.notifyPostResult(false, new Notification(Notification.Type.Error, "Device cannot connect to Connected Vehicle Insights", null));
                 }
             }
         });

@@ -1,11 +1,16 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device;
 
+import android.util.Log;
+import android.view.View;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractVehicleDevice implements IVehicleDevice {
+    private static final int UPLOAD_DELAY_MS = 500;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> uploadHandler = null;
 
@@ -18,7 +23,7 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
         return new AccessInfo(endpoint, vendor, mo_id, user, password);
     }
 
-    public synchronized void startPublishing(final EventDataGenerator eventGenerator, final int uploadDelayMS, final int uploadIntervalMS) {
+    public synchronized void startPublishing(final EventDataGenerator eventGenerator, final int uploadIntervalMS, final NotificationHandler notificationHandler) {
         stopPublishing();
 
         uploadHandler = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -28,9 +33,12 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
                 final String event = eventGenerator.generateData();
                 if (event != null) {
                     try {
-                        final boolean success = publishEvent(event);
-                        eventGenerator.notifyPostResult(success, event);
-                        if (!success) {
+                        final boolean success = publishEvent(event, notificationHandler);
+                        if (success) {
+                            System.out.println("DATA SUCCESSFULLY POSTED......");
+                            Log.d("SEND_CAR_PROBE", event.toString());
+                            notificationHandler.notifyPostResult(success, null);
+                        }else{
                             stopPublishing();
                         }
                     } catch (Exception e) {
@@ -41,7 +49,7 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
                 }
 
             }
-        }, uploadDelayMS, uploadIntervalMS, TimeUnit.MILLISECONDS);
+        }, UPLOAD_DELAY_MS, uploadIntervalMS, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -68,5 +76,5 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
         scheduler.shutdown();
     }
 
-    abstract boolean publishEvent(String event) throws Exception;
+    abstract boolean publishEvent(String event, NotificationHandler notificationHandler);
 }

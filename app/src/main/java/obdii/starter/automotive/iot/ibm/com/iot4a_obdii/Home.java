@@ -79,6 +79,8 @@ import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventDataGenerator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IVehicleDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IoTPlatformDevice;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Notification;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.NotificationHandler;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
 public class Home extends AppCompatActivity implements LocationListener {
@@ -97,7 +99,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     static final int DEFAULT_FREQUENCY_SEC = 1;
 
     private static final int OBD_SCAN_DELAY_MS = 200;
-    private static final int UPLOAD_DELAY_MS = 500;
 
     private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;
     private static final int BLUETOOTH_CONNECTION_RETRY_INTERVAL_MS = 5000;
@@ -148,15 +149,30 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     void clean() {
         completeConnectingBluetoothDevice();
-        scheduler.shutdown();
-        vehicleDevice.clean();
-        obdBridge.clean();
+        if(scheduler != null){
+            scheduler.shutdown();
+        }
+        if(vehicleDevice != null){
+            vehicleDevice.clean();
+        }
+        if(obdBridge != null){
+            obdBridge.clean();
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        String appUrl = getPreference(SettingsFragment.APP_SERVER_URL, null);
+        String appUser = getPreference(SettingsFragment.APP_SERVER_USERNAME, null);
+        String appPass = getPreference(SettingsFragment.APP_SERVER_PASSWORD, null);
+        if(appUrl == null){
+            API.useDefault();
+        }else{
+            API.doInitialize(appUrl, appUser, appPass);
+        }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
@@ -182,7 +198,9 @@ public class Home extends AppCompatActivity implements LocationListener {
                     return;
                 }
                 stopPublishingProbeData();
-                vehicleDevice.clean();
+                if(vehicleDevice != null){
+                    vehicleDevice.clean();
+                }
 
                 protocol = newProtocol;
                 setPreference(SettingsFragment.PROTOCOL, protocol.name());
@@ -208,15 +226,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         pauseButton = (ToggleButton)findViewById(R.id.pause_btn);
 
         obdBridge.initializeObdParameterList(this);
-
-        String appUrl = getPreference(SettingsFragment.APP_SERVER_URL, null);
-        String appUser = getPreference(SettingsFragment.APP_SERVER_USERNAME, null);
-        String appPass = getPreference(SettingsFragment.APP_SERVER_PASSWORD, null);
-        if(appUrl == null){
-            API.useDefault();
-        }else{
-            API.doInitialize(appUrl, appUser, appPass);
-        }
 
         try {
             checkForDisclaimer();
@@ -896,7 +905,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 setPreference(protocol.prefName(SettingsFragment.USERNAME), username);
                 setPreference(protocol.prefName(SettingsFragment.PASSWORD), password);
 
-                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
                 alertDialog
                         .setCancelable(false)
                         .setTitle("Your Device is Now Registered!")
@@ -909,6 +918,19 @@ public class Home extends AppCompatActivity implements LocationListener {
                         })
                         .show();
                 break;
+            case 400:
+            case 404:
+            case 500:
+                alertDialog = new AlertDialog.Builder(Home.this, R.style.AppCompatAlertDialogStyle);
+                alertDialog.setCancelable(false)
+                        .setTitle("Device registration is failed.")
+                        .setMessage("Your device is not registered. Contact to the application administrator.")
+                        .setNeutralButton("Close", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                //Close
+                            }
+                        }).show();
             default:
                 break;
         }
@@ -964,18 +986,19 @@ public class Home extends AppCompatActivity implements LocationListener {
                     return null;
                 }
             }
-
+        }, uploadIntervalMS, new NotificationHandler() {
             @Override
-            public void notifyPostResult(final boolean success, final String event) {
-                if (success) {
-                    showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is Being Sent", View.VISIBLE);
-                    System.out.println("DATA SUCCESSFULLY POSTED......");
-                    Log.d("Posted", event.toString());
-                } else {
-                    showStatus("Device Not Connected to IoT Platform", View.INVISIBLE);
+            public void notifyPostResult(boolean success, Notification notification) {
+                if(success){
+                    showStatus(obdBridge.isSimulation() ? "Simulated Data is Being Sent" : "Live Data is eing Sent", View.VISIBLE);
+                    if(notification != null) {
+                        Log.d("notification", notification.getMessage());
+                    }
+                }else{
+                    showStatus(notification.getMessage(), View.INVISIBLE);
                 }
             }
-        }, UPLOAD_DELAY_MS, uploadIntervalMS);
+        });
 
         sendButton.setEnabled(false);
         pauseButton.setEnabled(true);
@@ -1300,8 +1323,10 @@ public class Home extends AppCompatActivity implements LocationListener {
                     API.doInitialize(appUrl, appUsername, appPassword);
                 }
                 checkMQTTAvailable();
-                vehicleDevice.clean();
-                vehicleDevice = null;
+                if(vehicleDevice != null){
+                    vehicleDevice.clean();
+                    vehicleDevice = null;
+                }
                 startApp2();
                 break;
             default:

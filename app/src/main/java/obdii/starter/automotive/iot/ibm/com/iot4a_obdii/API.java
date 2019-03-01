@@ -42,7 +42,7 @@ import java.security.cert.X509Certificate;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
 public class API {
-    private static String defaultAppURL = "http://anfi.dhcp.hakozaki.ibm.com:6001";
+    private static String defaultAppURL = "https://iota-starter-server-fleetmgmt.mybluemix.net";
     private static String defaultAppUser = "starter";
     private static String defaultAppPassword = "Starter4Iot";
 
@@ -92,12 +92,18 @@ public class API {
                     params[4] == password
             */
 
-            int code = 0;
+            int code = 500;
+            if(params == null || params.length <= 2){
+                JsonObject message = new JsonObject();
+                message.addProperty("error", "URL or method is not specified.");
+                return new Response(code, message);
+            }
+            HttpURLConnection urlConnection = null;
 
             try {
                 URL url = new URL(params[0]);   // params[0] == URL - String
                 String requestType = params[1]; // params[1] == Request Method - String e.g. "GET"
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection = (HttpURLConnection) url.openConnection();
 
                 Log.i(requestType + " Request", params[0]);
 
@@ -135,55 +141,50 @@ public class API {
                     urlConnection.connect();
                 }
 
+                code = urlConnection.getResponseCode();
+                Log.d("Responded With", code + "");
+
+                BufferedReader bufferedReader = null;
+                InputStream inputStream = null;
+
                 try {
-                    code = urlConnection.getResponseCode();
-                    Log.d("Responded With", code + "");
+                    inputStream = urlConnection.getInputStream();
+                } catch (IOException exception) {
+                    inputStream = urlConnection.getErrorStream();
+                }
 
-                    BufferedReader bufferedReader = null;
-                    InputStream inputStream = null;
+                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-                    try {
-                        inputStream = urlConnection.getInputStream();
-                    } catch (IOException exception) {
-                        inputStream = urlConnection.getErrorStream();
-                    }
+                StringBuilder stringBuilder = new StringBuilder();
 
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
 
-                    StringBuilder stringBuilder = new StringBuilder();
+                bufferedReader.close();
 
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
+                try {
+                    JsonObject result = new Gson().fromJson(stringBuilder.toString(), JsonObject.class);
+                    Response response = new Response(code, result);
+                    return response;
+                } catch (JsonSyntaxException ex) {
+                    JsonObject result = new JsonObject();
+                    result.addProperty("result", stringBuilder.toString());
 
-                    bufferedReader.close();
-
-                    try {
-                        JsonObject result = new Gson().fromJson(stringBuilder.toString(), JsonObject.class);
-                        Response response = new Response(code, result);
-
-                        return response;
-                    } catch (JsonSyntaxException ex) {
-                        try {
-                            JsonObject result = new Gson().fromJson(stringBuilder.toString(), JsonObject.class);
-                            Response response = new Response(code, result);
-                            return response;
-                        } catch (JsonSyntaxException exc) {
-                            JsonObject result = new JsonObject();
-                            result.addProperty("result", stringBuilder.toString());
-
-                            Response response = new Response(code, result);
-                            return response;
-                        }
-                    }
-                } finally {
-                    urlConnection.disconnect();
+                    Response response = new Response(code, result);
+                    return response;
                 }
             } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
-                Response response = new Response(code, null);
+                e.printStackTrace();
+                JsonObject result = new JsonObject();
+                result.addProperty("result", "Unknown error");
+                Response response = new Response(code, result);
                 return response;
+            }finally{
+                if(urlConnection != null){
+                    urlConnection.disconnect();
+                }
             }
         }
 
@@ -192,11 +193,7 @@ public class API {
             super.onPostExecute(response);
 
             if (this.taskListener != null) {
-                try {
-                    this.taskListener.postExecute(response);
-                } catch (JsonSyntaxException e) {
-                    e.printStackTrace();
-                }
+                this.taskListener.postExecute(response);
             }
         }
     }
@@ -229,12 +226,12 @@ public class API {
     }
 
     public interface TaskListener {
-        void postExecute(Response result) throws JsonSyntaxException;
+        void postExecute(Response result);
     }
 
     public static class Response{
-        private int statusCode;
-        private JsonObject body;
+        private final int statusCode;
+        private final JsonObject body;
 
         public Response(int statusCode, JsonObject body) {
             this.statusCode = statusCode;
