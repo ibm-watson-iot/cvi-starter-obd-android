@@ -9,7 +9,9 @@
  */
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -70,30 +72,46 @@ public class SpecifyServer extends AppCompatActivity {
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
         final IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanResult != null) {
+        if (scanResult == null) {
+            switch(requestCode){
+                case Home.SETTINGS_INTENT:
+                    setResult(RESULT_OK, intent);
+                    finish();
+                    break;
+                default:
+                    break;
+            }
+        }else{
             if (scanResult.getContents() != null) {
                 Log.d("RESULT", scanResult.toString());
 
                 final String[] fullString = scanResult.getContents().split(",");
 
-                if(fullString.length != 4 || !fullString[0].equals("1")){
+                if(fullString.length < 2 || !fullString[0].equals("1")){
                     Log.e("RESULT", "Failed");
                     setResult(RESULT_CANCELED);
                 }
+                Intent result = new Intent();
+
                 String appUrl = fullString[1];
-                String appUsername = fullString[2];
-                String appPassword = fullString[3];
+                result.putExtra(SettingsFragment.APP_SERVER_URL, appUrl);
                 setPreference(SettingsFragment.APP_SERVER_URL, appUrl);
-                setPreference(SettingsFragment.APP_SERVER_USERNAME, appUsername);
-                setPreference(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
+
+                if(fullString.length >= 4){
+                    String appUsername = fullString[2];
+                    String appPassword = fullString[3];
+                    result.putExtra(SettingsFragment.APP_SERVER_USERNAME, appUsername);
+                    result.putExtra(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
+                    setPreference(SettingsFragment.APP_SERVER_USERNAME, appUsername);
+                    setPreference(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
+                }else{
+                    removePreference(SettingsFragment.APP_SERVER_USERNAME);
+                    removePreference(SettingsFragment.APP_SERVER_PASSWORD);
+                }
 
                 final Toast toast = Toast.makeText(getApplicationContext(), "Changed were successfully applied!", Toast.LENGTH_SHORT);
                 toast.show();
 
-                Intent result = new Intent();
-                result.putExtra(SettingsFragment.APP_SERVER_URL, appUrl);
-                result.putExtra(SettingsFragment.APP_SERVER_USERNAME, appUsername);
-                result.putExtra(SettingsFragment.APP_SERVER_PASSWORD, appPassword);
                 setResult(RESULT_OK, result);
                 finish();
             } else {
@@ -117,6 +135,14 @@ public class SpecifyServer extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
             return defaultValue;
+        }
+    }
+    void removePreference(final String prefKey){
+        try{
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().remove(prefKey).apply();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

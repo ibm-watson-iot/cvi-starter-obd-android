@@ -76,6 +76,31 @@ public class API {
         connectedAppUser = appUsername;
         connectedAppPassword = appPassword;
     }
+
+    public static String getDefaultAppURL() {
+        return defaultAppURL;
+    }
+
+    public static String getDefaultAppUser() {
+        return defaultAppUser;
+    }
+
+    public static String getDefaultAppPassword() {
+        return defaultAppPassword;
+    }
+
+    public static String getConnectedAppURL() {
+        return connectedAppURL;
+    }
+
+    public static String getConnectedAppUser() {
+        return connectedAppUser;
+    }
+
+    public static String getConnectedAppPassword() {
+        return connectedAppPassword;
+    }
+
     public static class doRequest extends AsyncTask<String, Void, Response> {
         private final TaskListener taskListener;
 

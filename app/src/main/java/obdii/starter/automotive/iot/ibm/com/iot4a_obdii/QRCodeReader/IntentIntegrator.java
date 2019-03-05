@@ -35,6 +35,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.AppSettingsActivity;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.SettingsFragment;
+
 /**
  * <p>A utility class which helps ease integration with Barcode Scanner via {@link Intent}s. This is a simple
  * way to invoke barcode scanning and receive the result, without any need to integrate, modify, or learn the
@@ -393,6 +397,14 @@ public class IntentIntegrator {
                     // Hmm, market is not installed
                     Log.w(TAG, "Google Play is not installed; cannot install " + packageName);
                 }
+            }
+        });
+        final Activity parent = this.activity;
+        downloadDialog.setNeutralButton("Manual Setup", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(parent, AppSettingsActivity.class);
+                startActivityForResult(intent, Home.SETTINGS_INTENT);
             }
         });
         downloadDialog.setNegativeButton(buttonNo, null);

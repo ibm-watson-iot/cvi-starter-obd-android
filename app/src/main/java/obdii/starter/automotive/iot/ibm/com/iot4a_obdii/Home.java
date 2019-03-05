@@ -87,12 +87,12 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     public static final String DOESNOTEXIST = "doesNotExist";
 
-    private static final int INITIAL_PERMISSIONS = 000;
-    private static final int INITIAL_LOCATION_PERMISSIONS = 001;
-    private static final int GPS_INTENT = 000;
-    private static final int SETTINGS_INTENT = 001;
-    private static final int BLUETOOTH_REQUEST = 002;
-    private static final int SPECIFY_SERVER_INTENT = 003;
+    public static final int INITIAL_PERMISSIONS = 000;
+    public static final int INITIAL_LOCATION_PERMISSIONS = 001;
+    public static final int GPS_INTENT = 000;
+    public static final int SETTINGS_INTENT = 001;
+    public static final int BLUETOOTH_REQUEST = 002;
+    public static final int SPECIFY_SERVER_INTENT = 003;
 
     static final int MIN_FREQUENCY_SEC = 1;
     static final int MAX_FREQUENCY_SEC = 60;
@@ -298,6 +298,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void startApp() {
+        initAppServer();
         if(vehicleDevice == null || !vehicleDevice.hasValidAccessInfo()){
             final String publishProtocol = getPreference(SettingsFragment.PROTOCOL, Protocol.HTTP.name());
             this.protocol = Protocol.valueOf(publishProtocol.toUpperCase());
@@ -319,6 +320,13 @@ public class Home extends AppCompatActivity implements LocationListener {
             }
         }
         startApp2();
+    }
+
+    private void initAppServer() {
+        String appServer = getPreference(SettingsFragment.APP_SERVER_URL, null);
+        if(appServer == null){
+            startSpecifyServerActivity();
+        }
     }
 
     void restartApp(final String endpoint, final String vendor, final String mo_id, final String username, final String password) {
@@ -1309,10 +1317,19 @@ public class Home extends AppCompatActivity implements LocationListener {
                     // App Server is not changed
                     break;
                 }else if(data.getBooleanExtra("useDefault", false)){
-                    removePreference(SettingsFragment.APP_SERVER_URL);
-                    removePreference(SettingsFragment.APP_SERVER_USERNAME);
-                    removePreference(SettingsFragment.APP_SERVER_PASSWORD);
+                    setPreference(SettingsFragment.APP_SERVER_URL, API.getDefaultAppURL());
+                    setPreference(SettingsFragment.APP_SERVER_USERNAME, API.getDefaultAppUser());
+                    setPreference(SettingsFragment.APP_SERVER_PASSWORD, API.getDefaultAppPassword());
                     API.useDefault();
+                }else if(data.getBooleanExtra("appServerChanged", false)) {
+                    String appUrl = getPreference(SettingsFragment.APP_SERVER_URL, null);
+                    String appUser = getPreference(SettingsFragment.APP_SERVER_USERNAME, null);
+                    String appPass = getPreference(SettingsFragment.APP_SERVER_PASSWORD, null);
+                    API.doInitialize(appUrl, appUser, appPass);
+                    networkIntentNeeded = false;
+                    setLocationInformation();
+                    startApp2();
+                    break;
                 }else{
                     String appUrl = data.getStringExtra(SettingsFragment.APP_SERVER_URL);
                     String appUsername = data.getStringExtra(SettingsFragment.APP_SERVER_USERNAME);
