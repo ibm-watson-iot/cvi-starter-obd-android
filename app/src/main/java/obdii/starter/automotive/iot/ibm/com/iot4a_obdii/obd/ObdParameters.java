@@ -8,7 +8,7 @@
  * You may not use this file except in compliance with the license.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -24,6 +24,9 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
 
 /**
  * Obd Parameters
@@ -280,16 +283,21 @@ public class ObdParameters {
         obdParameters.add(latitude);
 
         final ObdParameter heading = new ObdParameter((TextView) activity.findViewById(R.id.headingValue), activity, "Heading", null) {
-            private float heading = 0;
+            private double heading = 0;
             private String valueText;
+            private Location prevLocation;
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 final Location location = activity.getLocation();
-                if(location != null){
-                    heading = location.getBearing();
+                if(prevLocation != null && !prevLocation.equals(location)){ // In case location is changed
+                    heading = calcHeading(prevLocation, location);
                 }
-                heading = 0; // TODO Calculate from location and prev location instead of using bearing
+//                Bearing from location object may not represent vehicle heading for example in landscape mode
+//                if(location != null){
+//                    heading = location.getBearing();
+//                }
                 valueText = String.format("%1$.4f", heading);
+                prevLocation = location;
             }
 
             @Override
@@ -305,6 +313,24 @@ public class ObdParameters {
             @Override
             protected String getValueText() {
                 return valueText;
+            }
+
+            private double calcHeading(Location p1, Location p2){
+                // this will calculate bearing
+                double p1lon = toRad(p1.getLongitude());
+                double p1lat = toRad(p1.getLatitude());
+                double p2lon = toRad(p2.getLongitude());
+                double p2lat = toRad(p2.getLatitude());
+                double y = Math.sin(p2lon-p1lon) * Math.cos(p2lat);
+                double x = Math.cos(p1lat)*Math.sin(p2lat) - Math.sin(p1lat)*Math.cos(p2lat)*Math.cos(p2lon-p1lon);
+                double brng = Math.atan2(y, x);
+                return (toDegree(brng) + 360) % 360;
+            }
+            private double toRad(double d){
+                return d * (Math.PI / 180);
+            }
+            private double toDegree(double d){
+                return d * (180 / Math.PI);
             }
         };
         obdParameters.add(heading);

@@ -19,6 +19,8 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridge;
+
 public class SettingsFragment extends PreferenceFragment {
     public static final String APP_SERVER_URL = "app_server_url";
     public static final String APP_SERVER_USERNAME = "app_server_username";

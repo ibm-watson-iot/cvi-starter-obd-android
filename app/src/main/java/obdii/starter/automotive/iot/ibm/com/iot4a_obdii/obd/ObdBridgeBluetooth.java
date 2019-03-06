@@ -8,7 +8,7 @@
  * You may not use this file except in compliance with the license.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
+
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
 
 /*
  * OBD Bridge via Bluetooth

@@ -37,6 +37,7 @@ import java.util.Map;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.AppSettingsActivity;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.SettingsFragment;
 
 /**
@@ -404,7 +405,7 @@ public class IntentIntegrator {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 Intent intent = new Intent(parent, AppSettingsActivity.class);
-                startActivityForResult(intent, Home.SETTINGS_INTENT);
+                startActivityForResult(intent, ObdAppIntents.SETTINGS_INTENT);
             }
         });
         downloadDialog.setNegativeButton(buttonNo, null);

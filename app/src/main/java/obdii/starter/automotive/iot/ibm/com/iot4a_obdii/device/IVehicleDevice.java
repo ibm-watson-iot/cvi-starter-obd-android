@@ -1,8 +1,6 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device;
 
-import com.google.gson.JsonObject;
-
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.DeviceNotConnectedException;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.EventDataGenerator;
 
 public interface IVehicleDevice {
     public void setAccessInfo(AccessInfo accessInfo);

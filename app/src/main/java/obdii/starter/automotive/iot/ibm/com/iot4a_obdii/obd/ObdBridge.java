@@ -8,7 +8,7 @@
  * You may not use this file except in compliance with the license.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -19,7 +19,6 @@ import com.github.pires.obd.commands.protocol.AdaptiveTimingCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.HeadersOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
-import com.github.pires.obd.commands.protocol.ObdRawCommand;
 import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.ObdWarmstartCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
@@ -38,6 +37,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.DeviceNotConnectedException;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST;
 
 /*
@@ -45,12 +47,12 @@ import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST
  */
 public abstract class ObdBridge {
 
-    static final int DEFAULT_OBD_TIMEOUT_MS = 500;
-    static final int MIN_TIMEOUT_MS = 0;
-    static final int MAX_TIMEOUT_MS = 1020;
+    public static final int DEFAULT_OBD_TIMEOUT_MS = 500;
+    public static final int MIN_TIMEOUT_MS = 0;
+    public static final int MAX_TIMEOUT_MS = 1020;
     private int obd_timeout_ms = DEFAULT_OBD_TIMEOUT_MS;
 
-    static final ObdProtocols DEFAULT_OBD_PROTOCOL = ObdProtocols.AUTO;
+    public static final ObdProtocols DEFAULT_OBD_PROTOCOL = ObdProtocols.AUTO;
     private ObdProtocols obd_protocol = DEFAULT_OBD_PROTOCOL;
 
     public static CharSequence[] getOBDProtocols() {

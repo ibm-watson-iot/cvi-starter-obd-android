@@ -75,24 +75,28 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.SpecifyServer;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AbstractVehicleDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.EventDataGenerator;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.EventDataGenerator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IVehicleDevice;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IoTPlatformDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Notification;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.NotificationHandler;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridge;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridgeBluetooth;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridgeWifi;
+
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.BLUETOOTH_REQUEST;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.GPS_INTENT;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.SETTINGS_INTENT;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.SPECIFY_SERVER_INTENT;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppPermissions.INITIAL_LOCATION_PERMISSIONS;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppPermissions.INITIAL_PERMISSIONS;
+
 
 public class Home extends AppCompatActivity implements LocationListener {
 
     public static final String DOESNOTEXIST = "doesNotExist";
-
-    public static final int INITIAL_PERMISSIONS = 000;
-    public static final int INITIAL_LOCATION_PERMISSIONS = 001;
-    public static final int GPS_INTENT = 000;
-    public static final int SETTINGS_INTENT = 001;
-    public static final int BLUETOOTH_REQUEST = 002;
-    public static final int SPECIFY_SERVER_INTENT = 003;
 
     static final int MIN_FREQUENCY_SEC = 1;
     static final int MAX_FREQUENCY_SEC = 60;
@@ -213,7 +217,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }else{
                     final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
                     final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
-                    AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                    AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
                     vehicleDevice = protocol.createDevice(accessInfo);
                     deviceRegistered(obdBridge.isSimulation());
                 }
@@ -309,7 +313,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
             final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
             if(endpoint != null && !endpoint.isEmpty() && vendor != null && !vendor.isEmpty() && mo_id != null && !mo_id.isEmpty()){
-                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
                 try{
                     vehicleDevice = protocol.createDevice(accessInfo);
                     initialized = true;
@@ -335,7 +339,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             @Override
             public void run() {
                 if (vehicleDevice != null && vehicleDevice.hasValidAccessInfo()) {
-                    AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                    AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
                     vehicleDevice.setAccessInfo(accessInfo);
                     startApp2();
                 }
@@ -801,7 +805,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 final String username = obj != null ? obj.getAsString() : null;
                 obj = deviceDefinition.get("password");
                 final String password = obj != null ? obj.getAsString() : null;
-                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password); // FIXME
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password); // FIXME
                 if(vehicleDevice == null){
                     vehicleDevice = protocol.createDevice(accessInfo);
                 }else {
@@ -900,7 +904,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 final String mo_id = deviceDefinition.get(SettingsFragment.MO_ID).getAsString();
                 final String username = deviceDefinition.get(SettingsFragment.USERNAME).getAsString();
                 final String password = deviceDefinition.get(SettingsFragment.PASSWORD).getAsString();
-                AccessInfo accessInfo = IoTPlatformDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
                 if(vehicleDevice == null) {
                     vehicleDevice = protocol.createDevice(accessInfo);
                 }else{
@@ -1367,7 +1371,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 .build();
     }
 
-    int getPreferenceInt(final String prefKey, final int defaultValue) {
+    public int getPreferenceInt(final String prefKey, final int defaultValue) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             return preferences.getInt(prefKey, defaultValue);
@@ -1377,7 +1381,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    boolean getPreferenceBoolean(final String prefKey, final boolean defaultValue) {
+    public boolean getPreferenceBoolean(final String prefKey, final boolean defaultValue) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             return preferences.getBoolean(prefKey, defaultValue);
@@ -1387,7 +1391,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    String getPreference(final String prefKey, final String defaultValue) {
+    public String getPreference(final String prefKey, final String defaultValue) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             return preferences.getString(prefKey, defaultValue);
@@ -1397,7 +1401,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    void setPreferenceInt(final String prefKey, final int value) {
+    public void setPreferenceInt(final String prefKey, final int value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putInt(prefKey, value).apply();
@@ -1406,7 +1410,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    void setPreferenceBoolean(final String prefKey, final boolean value) {
+    public void setPreferenceBoolean(final String prefKey, final boolean value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putBoolean(prefKey, value).apply();
@@ -1415,7 +1419,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    void setPreference(final String prefKey, final String value) {
+    public void setPreference(final String prefKey, final String value) {
         try {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putString(prefKey, value).apply();
@@ -1423,7 +1427,7 @@ public class Home extends AppCompatActivity implements LocationListener {
             e.printStackTrace();
         }
     }
-    void removePreference(final String prefKey){
+    public void removePreference(final String prefKey){
         try{
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().remove(prefKey).apply();

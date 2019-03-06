@@ -1,12 +1,13 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device;
 
 import android.util.Log;
-import android.view.View;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.EventDataGenerator;
 
 public abstract class AbstractVehicleDevice implements IVehicleDevice {
     private static final int UPLOAD_DELAY_MS = 500;

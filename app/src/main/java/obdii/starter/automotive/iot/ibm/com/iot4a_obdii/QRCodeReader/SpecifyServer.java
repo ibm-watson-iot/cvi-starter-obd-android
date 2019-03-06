@@ -27,6 +27,7 @@ import java.util.Set;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.IntentIntegrator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.IntentResult;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
@@ -74,7 +75,7 @@ public class SpecifyServer extends AppCompatActivity {
         final IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult == null) {
             switch(requestCode){
-                case Home.SETTINGS_INTENT:
+                case ObdAppIntents.SETTINGS_INTENT:
                     setResult(RESULT_OK, intent);
                     finish();
                     break;

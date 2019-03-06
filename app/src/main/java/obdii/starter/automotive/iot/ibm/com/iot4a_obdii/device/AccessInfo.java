@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AccessInfo {
-    public enum ParamName implements IAccessInfoParamName {ENDPOINT, VENDOR, MO_ID, USERNAME, PASSWORD};
+    public enum ParamName {ENDPOINT, VENDOR, MO_ID, USERNAME, PASSWORD};
 
-    private Map<IAccessInfoParamName, String> map = new HashMap<>();
+    private Map<ParamName, String> map = new HashMap<>();
     AccessInfo(String endpoint, String vendor, String mo_id, String username, String password){
         map.put(ParamName.ENDPOINT, endpoint);
         map.put(ParamName.VENDOR, vendor);
@@ -15,7 +15,7 @@ public class AccessInfo {
         map.put(ParamName.PASSWORD, password);
     }
 
-    public String get(IAccessInfoParamName key) {
+    public String get(ParamName key) {
         String value = map.get(key);
         if(value == null){
             value = "";
