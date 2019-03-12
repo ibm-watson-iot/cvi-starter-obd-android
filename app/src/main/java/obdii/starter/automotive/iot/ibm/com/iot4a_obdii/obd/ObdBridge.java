@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.DeviceNotConnectedException;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
 
-import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home.DOESNOTEXIST;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.DOESNOTEXIST;
 
 /*
  * abstract obd2 bridge for ELM 327 devices (common part for bluetooth, wifi, or usb type)

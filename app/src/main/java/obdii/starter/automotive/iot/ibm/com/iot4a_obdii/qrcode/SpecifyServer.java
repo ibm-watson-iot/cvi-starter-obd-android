@@ -7,11 +7,8 @@
  *
  * You may not use this file except in compliance with the license.
  */
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.qrcode;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -19,19 +16,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
-import java.util.Set;
-
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.IntentIntegrator;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.IntentResult;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.SettingsFragment;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.settings.SettingsFragment;
 
 public class SpecifyServer extends AppCompatActivity {
     public static SharedPreferences sharedpreferences;

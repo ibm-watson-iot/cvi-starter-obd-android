@@ -74,18 +74,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.SpecifyServer;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AbstractVehicleDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.AccessInfo;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.EventDataGenerator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.IVehicleDevice;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Notification;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.NotificationHandler;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.EventDataGenerator;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridge;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridgeBluetooth;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridgeWifi;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.qrcode.SpecifyServer;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.settings.AppSettingsActivity;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.settings.SettingsFragment;
 
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.DEFAULT_FREQUENCY_SEC;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.DOESNOTEXIST;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.MAX_FREQUENCY_SEC;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.MIN_FREQUENCY_SEC;
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.BLUETOOTH_REQUEST;
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.GPS_INTENT;
 import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents.SETTINGS_INTENT;
@@ -95,13 +101,6 @@ import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppPermissions
 
 
 public class Home extends AppCompatActivity implements LocationListener {
-
-    public static final String DOESNOTEXIST = "doesNotExist";
-
-    static final int MIN_FREQUENCY_SEC = 1;
-    static final int MAX_FREQUENCY_SEC = 60;
-    static final int DEFAULT_FREQUENCY_SEC = 1;
-
     private static final int OBD_SCAN_DELAY_MS = 200;
 
     private static final int BLUETOOTH_CONNECTION_RETRY_DELAY_MS = 100;

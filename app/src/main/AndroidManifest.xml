@@ -25,12 +25,12 @@
         </activity>
 
         <activity
-            android:name=".QRCodeReader.SpecifyServer"
+            android:name=".qrcode.SpecifyServer"
             android:label="Specify Server"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".AppSettingsActivity"
+            android:name=".settings.AppSettingsActivity"
             android:label="Settings"
             android:screenOrientation="portrait">
         </activity>

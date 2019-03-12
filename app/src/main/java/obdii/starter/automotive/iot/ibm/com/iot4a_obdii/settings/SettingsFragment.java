@@ -8,7 +8,7 @@
  * You may not use this file except in compliance with the license.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.settings;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,7 +19,12 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridge;
+
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.DEFAULT_FREQUENCY_SEC;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.MAX_FREQUENCY_SEC;
+import static obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppConstants.MIN_FREQUENCY_SEC;
 
 public class SettingsFragment extends PreferenceFragment {
     public static final String APP_SERVER_URL = "app_server_url";
@@ -60,11 +65,11 @@ public class SettingsFragment extends PreferenceFragment {
         prepareEditTextPreference(APP_SERVER_PASSWORD, intent.getStringExtra(APP_SERVER_PASSWORD), "", true, null);
         prepareEditTextPreference(BLUETOOTH_DEVICE_NAME, intent.getStringExtra(BLUETOOTH_DEVICE_NAME), "", false, null);
         prepareEditTextPreference(BLUETOOTH_DEVICE_ADDRESS, intent.getStringExtra(BLUETOOTH_DEVICE_ADDRESS), "", false, null);
-        prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + Home.DEFAULT_FREQUENCY_SEC, true, new Preference.OnPreferenceChangeListener() {
+        prepareEditTextPreference(UPLOAD_FREQUENCY, intent.getStringExtra(UPLOAD_FREQUENCY), "" + DEFAULT_FREQUENCY_SEC, true, new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 final int intValue = Integer.parseInt(newValue.toString());
-                if (Home.MIN_FREQUENCY_SEC <= intValue && intValue <= Home.MAX_FREQUENCY_SEC) {
+                if (MIN_FREQUENCY_SEC <= intValue && intValue <= MAX_FREQUENCY_SEC) {
                     preference.setSummary(newValue.toString());
                     return true;
                 } else {

@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader.SpecifyServer">
+    tools:context="obdii.starter.automotive.iot.ibm.com.iot4a_obdii.qrcode.SpecifyServer">
 
     <TextView
         android:layout_width="wrap_content"

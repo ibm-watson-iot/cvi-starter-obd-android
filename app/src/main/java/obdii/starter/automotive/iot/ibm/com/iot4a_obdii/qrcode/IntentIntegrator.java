@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.qrcode;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,10 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.AppSettingsActivity;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.Home;
+import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.settings.AppSettingsActivity;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.ObdAppIntents;
-import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.SettingsFragment;
 
 /**
  * <p>A utility class which helps ease integration with Barcode Scanner via {@link Intent}s. This is a simple

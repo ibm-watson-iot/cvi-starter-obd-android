@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.QRCodeReader;
+package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.qrcode;
 
 /**
  * <p>Encapsulates the result of a barcode scan invoked through {@link IntentIntegrator}.</p>
