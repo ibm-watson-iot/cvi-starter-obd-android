@@ -142,6 +142,8 @@ public class Home extends AppCompatActivity implements LocationListener {
     private ScheduledFuture<?> bluetoothConnectorHandle = null;
 
     private boolean initialized = false;
+    private boolean deviceRegistryChecking = false;
+    private boolean realOrSimuChecking = false;
     private boolean realOrSimuSelected = false; // Flag if user has already selected to use real obd device or simulation. It should be asked once per a app session.
 
     /**
@@ -601,6 +603,9 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void showObdScanModeDialog() {
         // allows the user to select real OBD Scan mode or Simulation mode
+        if(realOrSimuChecking){
+            return;
+        }
         if(realOrSimuSelected){
             if(obdBridge.isSimulation()){
                 runSimulatedObdScan();
@@ -608,6 +613,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                 runRealObdScan();
             }
         }else{
+            realOrSimuChecking = true;
             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
             alertDialog
                     .setCancelable(false)
@@ -618,6 +624,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                             dialog.dismiss();
                             obdBridge.setIsSimulation(true);
                             realOrSimuSelected = true;
+                            realOrSimuChecking = false;
                             runSimulatedObdScan();
                         }
                     })
@@ -626,7 +633,8 @@ public class Home extends AppCompatActivity implements LocationListener {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             obdBridge.setIsSimulation(false);
-                            realOrSimuSelected = true; //
+                            realOrSimuSelected = true;
+                            realOrSimuChecking = false;
                             runRealObdScan();
                         }
                     })
@@ -765,6 +773,10 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void checkDeviceRegistry(final boolean simulation) {
+        if(deviceRegistryChecking){
+            return;
+        }
+        deviceRegistryChecking = true;
         setLocationInformation();
 
         try {
@@ -832,7 +844,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-
                                 registerDevice(simulation);
                             }
                         })
@@ -949,6 +960,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void deviceRegistered(final boolean simulation) {
+        deviceRegistryChecking = false;
         // starts OBD scan and data transmission process here
         trip_id = createTripId();
         try {
@@ -960,6 +972,7 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void deviceNotRegistered(final boolean simulation) {
+        deviceRegistryChecking = false;
         // starts OBD scan without data transmission
         try {
             // go settings for correct server connection
@@ -1023,6 +1036,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         pauseButton.setEnabled(false);
         sendButton.setEnabled(true);
         sendButton.setChecked(false);
+        showStatus("Trip is finished", View.GONE);
     }
     public void send(View view){
         startPublishingProbeData();
