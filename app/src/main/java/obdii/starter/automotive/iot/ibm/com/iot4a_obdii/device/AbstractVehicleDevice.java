@@ -20,8 +20,8 @@ public abstract class AbstractVehicleDevice implements IVehicleDevice {
     AbstractVehicleDevice(AccessInfo accessInfo){
         this.accessInfo = accessInfo;
     }
-    public static AccessInfo createAccessInfo(String endpoint, String vendor, String mo_id, String user, String password){
-        return new AccessInfo(endpoint, vendor, mo_id, user, password);
+    public static AccessInfo createAccessInfo(String endpoint, String tenant_id, String vendor, String mo_id, String user, String password){
+        return new AccessInfo(endpoint, tenant_id, vendor, mo_id, user, password);
     }
 
     public synchronized void startPublishing(final EventDataGenerator eventGenerator, final int uploadIntervalMS, final NotificationHandler notificationHandler) {

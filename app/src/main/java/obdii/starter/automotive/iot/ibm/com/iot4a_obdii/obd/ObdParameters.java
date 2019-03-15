@@ -88,10 +88,7 @@ public class ObdParameters {
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
                     final Location location = activity.getLocation();
-                    if (location != null) {
-                        speed = location.getSpeed();
-                    }
-                    if(Double.compare(speed, 0) == 0){
+                    if(location == null){
                         if (speed >= max_speed) {
                             delta = -1.0 * speed_increment;
                         } else if (speed <= 0.0) {
@@ -111,6 +108,8 @@ public class ObdParameters {
                         if (speed <= 0.0) {
                             speed = 0.01;
                         }
+                    } else {
+                        speed = location.getSpeed();
                     }
                 } else {
                     final SpeedCommand speedCommand = (SpeedCommand) obdCommand;

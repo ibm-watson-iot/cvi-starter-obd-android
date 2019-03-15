@@ -15,11 +15,19 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Application Server Username" />
+        <!-- This password will be stored as PLAIN TEXT because this is a sample application -->
         <EditTextPreference
+            android:editable="false"
+            android:inputType="textPassword"
             android:key="app_server_password"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Application Server Password" />
+        <EditTextPreference
+            android:key="vdh_user_agent"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="VDH User Agent" />
         <EditTextPreference
             android:key="upload_frequency"
             android:selectAllOnFocus="true"

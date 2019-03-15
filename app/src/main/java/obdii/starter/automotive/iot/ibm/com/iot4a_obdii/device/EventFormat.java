@@ -29,6 +29,7 @@ public enum EventFormat{
             list.add(""); // confidence
             list.add(""); // map_vendor_name
             list.add(""); // map_version
+            list.add(data.get("tenant_id").getAsString());
             JsonElement props = data.get("props");
             if(props != null && props.isJsonObject()){
                 list.add(props.getAsJsonObject().get("engineTemp").getAsString());

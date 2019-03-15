@@ -18,6 +18,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.text.InputType;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd.ObdBridge;
@@ -33,10 +34,12 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String PROTOCOL = "protocol"; // Protocol to send car probe data. HTTP/MQTT
 
     public static final String ENDPOINT = "endpoint"; // VDH: URL, IoTP: organization id
+    public static final String TENANT_ID = "tenant_id"; // VDH: Tenant ID, IoTP: Tenant ID
     public static final String VENDOR = "vendor"; // VDH: vendor, IoTP type id
     public static final String USERNAME = "username"; //VDH: uesr, IoTP: N/A
     public static final String PASSWORD = "password"; // VDH: password, IoTP: device token
     public static final String MO_ID = "mo_id"; // VDH: mo_id, IoTP: device id
+    public static final String USER_AGENT = "userAgent"; // VDH: User-Agent, IoTP: N/A
 
     public static final String BLUETOOTH_DEVICE_ID = "bt_device_id";
     public static final String BLUETOOTH_DEVICE_NAME = "bt_device_name";
@@ -103,13 +106,33 @@ public class SettingsFragment extends PreferenceFragment {
             editTextPref.setText(valueToSet);
             editTextPref.setEnabled(enabled);
 
-            editTextPref.setSummary(editTextPref.getText());
+            if(editTextPref.getEditText().getInputType() == (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+                StringBuffer sb = new StringBuffer();
+                for(int i=0;i<editTextPref.getText().length();i++){
+                    sb.append("*");
+                }
+                editTextPref.setSummary(sb.toString());
+            }else{
+                editTextPref.setSummary(editTextPref.getText());
+            }
             if (changeListener == null) {
                 changeListener = new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
-                        preference.setSummary(newValue.toString());
-                        return true;
+                        if(preference instanceof EditTextPreference){
+                            EditTextPreference editTextPref = (EditTextPreference)preference;
+                            if(editTextPref.getEditText().getInputType() == (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+                                StringBuffer sb = new StringBuffer();
+                                for(int i=0;i<newValue.toString().length();i++){
+                                    sb.append("*");
+                                }
+                                editTextPref.setSummary(sb.toString());
+                            }else{
+                                editTextPref.setSummary(newValue.toString());
+                            }
+                            return true;
+                        }
+                        return false;
                     }
                 };
             }

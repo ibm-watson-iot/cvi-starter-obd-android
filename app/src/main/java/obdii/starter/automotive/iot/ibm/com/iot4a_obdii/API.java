@@ -11,7 +11,8 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
 import android.os.AsyncTask;
-import android.os.Build;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -28,7 +29,12 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import android.util.Base64;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -36,8 +42,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
@@ -51,19 +55,26 @@ public class API {
     public static String connectedAppPassword = defaultAppPassword;
 
     public static AsyncTask getDeviceAccessInfo(String uuid, Protocol protocol, TaskListener listener){
-        final API.doRequest request = new API.doRequest(listener);
         String url = connectedAppURL + "/user/device/" + uuid + "?protocol=" + protocol.name().toLowerCase();
-        return request.execute(url, "GET", null, connectedAppUser, connectedAppPassword);
+        doRequest request = new doRequest.Builder(url, "GET", listener)
+                .credentials(connectedAppUser, connectedAppPassword)
+                .build();
+        return request.execute();
     }
     public static AsyncTask registerDevice(String uuid, Protocol protocol, TaskListener listener){
-        final API.doRequest request = new API.doRequest(listener);
-        String url = connectedAppURL + "/user/device/" + uuid + "?protocol=" + protocol.name().toLowerCase();
-        return request.execute(url, "POST", null, connectedAppUser, connectedAppPassword);
+        String url = connectedAppURL + "/user/device/" + uuid;
+        doRequest request = new doRequest.Builder(url, "POST", listener)
+                .credentials(connectedAppUser, connectedAppPassword)
+                .addQueryString("protocol", protocol.name().toLowerCase())
+                .build();
+        return request.execute();
     }
     public static AsyncTask checkMQTTAvailable(TaskListener listener){
-        final API.doRequest request = new API.doRequest(listener);
         String url = connectedAppURL + "/user/capability/device";
-        return request.execute(url, "GET", null, connectedAppUser, connectedAppPassword);
+        doRequest request = new doRequest.Builder(url, "GET", listener)
+                .credentials(connectedAppUser, connectedAppPassword)
+                .build();
+        return request.execute();
     }
 
     public static void useDefault(){
@@ -101,24 +112,79 @@ public class API {
         return connectedAppPassword;
     }
 
-    public static class doRequest extends AsyncTask<String, Void, Response> {
+    public static class doRequest extends AsyncTask<Void, Void, Response> {
+        private final String strurl;
+        private final String method;
         private final TaskListener taskListener;
+        private String user;
+        private String password;
+        private final Map<String, String> headers = new HashMap<>();
+        private String body;
 
-        public doRequest(final TaskListener listener) {
-            this.taskListener = listener;
+        public static class Builder{
+            private String strurl;
+            private final String method;
+            private final TaskListener listener;
+            private String user;
+            private String password;
+            private final Map<String, String> headers = new HashMap<>();
+            private final Map<String, String> qs = new HashMap<>();
+            private String body;
+            public Builder(String url, String method, TaskListener listener){
+                this.strurl = url;
+                this.method = method;
+                this.listener = listener;
+            }
+            public Builder credentials(String user, String password){
+                this.user = user;
+                this.password = password;
+                return this;
+            }
+            public Builder addHeader(String name, String value){
+                if(name == null){
+                    throw new IllegalArgumentException("Invalid header name: " + name);
+                }
+                headers.put(name, value);
+                return this;
+            }
+            public Builder addQueryString(String name, String value){
+                if(name == null){
+                    throw new IllegalArgumentException("Invalid query string: null = " + value);
+                }
+                qs.put(name, value);
+                return this;
+            }
+            public Builder body(String body){
+                this.body = body;
+                return this;
+            }
+
+            public doRequest build(){
+                if(!qs.isEmpty()){
+                    List<String> list = new ArrayList<>();
+                    for(Map.Entry entry : qs.entrySet()){
+                        list.add(entry.getKey() + "=" + entry.getValue());
+                    }
+                    strurl = strurl + (strurl.indexOf("?") > 0 ? "&" : "?") + TextUtils.join("&", list);
+                }
+
+                return new doRequest(this);
+            }
+        }
+        private doRequest(Builder builder) {
+            this.strurl = builder.strurl;
+            this.method = builder.method;
+            this.taskListener = builder.listener;
+            this.user = builder.user;
+            this.password = builder.password;
+            this.headers.putAll(builder.headers);
+            this.body = builder.body;
         }
 
         @Override
-        protected Response doInBackground(String... params) {
-            /*      params[0] == url (String)
-                    params[1] == request method (String e.g. "GET")
-                    params[2] == body (JsonObject converted to String)
-                    params[3] == user
-                    params[4] == password
-            */
-
+        protected Response doInBackground(Void... params){
             int code = 500;
-            if(params == null || params.length <= 2){
+            if(strurl == null || method == null){
                 JsonObject message = new JsonObject();
                 message.addProperty("error", "URL or method is not specified.");
                 return new Response(code, message);
@@ -126,41 +192,38 @@ public class API {
             HttpURLConnection urlConnection = null;
 
             try {
-                URL url = new URL(params[0]);   // params[0] == URL - String
-                String requestType = params[1]; // params[1] == Request Method - String e.g. "GET"
+                Log.i(method + " Request", strurl);
+                URL url = new URL(strurl);
                 urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod(method);
 
-                Log.i(requestType + " Request", params[0]);
-
-                urlConnection.setRequestProperty("Accept", "application/json");
-
-                urlConnection.setRequestMethod(requestType);
-
-                // params[3] == user, params[4] == password
-                if(params.length >= 5 && params[3] != null && params[3].length() > 0 && params[4] != null && params[4].length() > 0){
-                    Log.i("Using Basic Auth", "");
-                    urlConnection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((params[3]+":"+params[4]).getBytes("UTF-8"), Base64.NO_WRAP));
+                if(user != null && password != null){
+                    Log.i("Using Basic Auth", String.format("user(%s)", user));
+                    urlConnection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((user+":"+password).getBytes("UTF-8"), Base64.NO_WRAP));
                 }
 
-                if (requestType.equals("POST") || requestType.equals("PUT") || requestType.equals("GET")) {
-                    if (!requestType.equals("GET")) {
+                urlConnection.setRequestProperty("Accept", "application/json");
+                if(headers != null && !headers.isEmpty()){
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
+                }
+                if (method.equals("POST") || method.equals("PUT") || method.equals("GET")) {
+                    if (!method.equals("GET")) {
                         urlConnection.setDoInput(true);
                         urlConnection.setDoOutput(true);
                     }
 
-                    if (params.length >= 3 && params[2] != null) { // params[3] == HTTP Body - String
-                        String httpBody = params[2];
-
-                        urlConnection.setRequestProperty("Accept", "application/json");
-                        urlConnection.setRequestProperty("Content-Type", "application/json");
-                        urlConnection.setRequestProperty("Content-Length", httpBody.length() + "");
-
-                        OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
-                        wr.write(httpBody);
-                        wr.flush();
-                        wr.close();
-
-                        Log.i("Using Body", httpBody);
+                    if (body != null) {
+                        if(!headers.containsKey("Content-Type")){
+                            urlConnection.setRequestProperty("Content-Type", "application/json");
+                        }
+                        urlConnection.setRequestProperty("Content-Length", body.length() + "");
+                        Log.i("Using Body", body);
+                        try(OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8")){
+                            wr.write(body);
+                            wr.flush();
+                        }
                     }
 
                     urlConnection.connect();

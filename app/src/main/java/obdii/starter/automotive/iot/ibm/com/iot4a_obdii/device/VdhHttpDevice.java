@@ -9,6 +9,8 @@ import com.google.gson.JsonSyntaxException;
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.API;
 
 public class VdhHttpDevice extends AbstractVehicleDevice{
+    private static String defaultVdhUserAgent = "IBM IoT Connected Vehicle Insights Client";
+
     VdhHttpDevice(AccessInfo accessInfo){
         super(accessInfo);
     }
@@ -16,7 +18,15 @@ public class VdhHttpDevice extends AbstractVehicleDevice{
     @Override
     boolean publishEvent(String event, final NotificationHandler notificationHandler) {
         final String op = "sync";
-        API.doRequest request = new API.doRequest(new API.TaskListener() {
+        String url = accessInfo.get(AccessInfo.ParamName.ENDPOINT);
+        String tenantId = accessInfo.get(AccessInfo.ParamName.TENANT_ID);
+        String userAgent = accessInfo.get(AccessInfo.ParamName.USER_AGENT);
+        if(userAgent == null){
+            userAgent = defaultVdhUserAgent;
+        }
+        String user = accessInfo.get(AccessInfo.ParamName.USERNAME);
+        String password = accessInfo.get(AccessInfo.ParamName.PASSWORD);
+        API.doRequest request = new API.doRequest.Builder(url, "POST", new API.TaskListener() {
             @Override
             public void postExecute(API.Response result) {
                 if(op.equals("sync") && result.getStatusCode() == 200){
@@ -29,11 +39,12 @@ public class VdhHttpDevice extends AbstractVehicleDevice{
                     notificationHandler.notifyPostResult(false, new Notification(Notification.Type.Error, "Device cannot connect to Connected Vehicle Insights", null));
                 }
             }
-        });
-        String url = accessInfo.get(AccessInfo.ParamName.ENDPOINT) + "?op=" + op;
-        String user = accessInfo.get(AccessInfo.ParamName.USERNAME);
-        String password = accessInfo.get(AccessInfo.ParamName.PASSWORD);
-        request.execute(url, "POST", event, user, password);
+        }).credentials(user, password)
+                .addHeader("User-Agent", userAgent)
+                .addQueryString("op", op)
+                .addQueryString("tenant_id", tenantId)
+                .body(event).build();
+        request.execute();
         return true;
     }
 

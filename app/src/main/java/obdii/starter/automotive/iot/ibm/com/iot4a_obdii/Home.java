@@ -44,6 +44,7 @@ import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -114,6 +115,7 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private String trip_id;
 
+    private TextView moIdText;
     private ProgressBar progressBar;
     private ActionBar supportActionBar;
     private Button changeNetwork;
@@ -182,6 +184,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
 
+        moIdText = (TextView)findViewById(R.id.mo_id);
         progressBar = new ProgressBar(this);
         progressBar.setVisibility(View.GONE);
         progressBar.setIndeterminate(true);
@@ -210,15 +213,20 @@ public class Home extends AppCompatActivity implements LocationListener {
                 protocol = newProtocol;
                 setPreference(SettingsFragment.PROTOCOL, protocol.name());
                 final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
-                final String vendor = getPreference(SettingsFragment.VENDOR, null);
-                final String mo_id = getPreference(SettingsFragment.MO_ID, null);
+                final String vendor = getPreference(protocol.prefName(SettingsFragment.VENDOR), null);
+                final String mo_id = getPreference(protocol.prefName(SettingsFragment.MO_ID), null);
                 if(endpoint == null || vendor == null || mo_id == null){
                     vehicleDevice = null;
                     checkDeviceRegistry(obdBridge.isSimulation());
                 }else{
+                    final String tenant_id = getPreference(protocol.prefName(SettingsFragment.TENANT_ID), "public");
                     final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
                     final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
-                    AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                    AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, tenant_id, vendor, mo_id, username, password);
+                    final String userAgent = getPreference(protocol.prefName(SettingsFragment.USER_AGENT), null);
+                    if(userAgent != null){
+                        accessInfo.put(AccessInfo.ParamName.USER_AGENT, userAgent);
+                    }
                     vehicleDevice = protocol.createDevice(accessInfo);
                     deviceRegistered(obdBridge.isSimulation());
                 }
@@ -308,13 +316,18 @@ public class Home extends AppCompatActivity implements LocationListener {
             final String publishProtocol = getPreference(SettingsFragment.PROTOCOL, Protocol.HTTP.name());
             this.protocol = Protocol.valueOf(publishProtocol.toUpperCase());
             protocolSwitch.setChecked(protocol == Protocol.MQTT);
-            final String vendor = getPreference(SettingsFragment.VENDOR, null);
-            final String mo_id = getPreference(SettingsFragment.MO_ID, null);
+            final String vendor = getPreference(protocol.prefName(SettingsFragment.VENDOR), null);
+            final String mo_id = getPreference(protocol.prefName(SettingsFragment.MO_ID), null);
             final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
+            final String tenant_id = getPreference(protocol.prefName(SettingsFragment.TENANT_ID), "public");
             final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
             final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
+            final String userAgent = getPreference(protocol.prefName(SettingsFragment.USER_AGENT), null);
             if(endpoint != null && !endpoint.isEmpty() && vendor != null && !vendor.isEmpty() && mo_id != null && !mo_id.isEmpty()){
-                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, tenant_id, vendor, mo_id, username, password);
+                if(userAgent != null){
+                    accessInfo.put(AccessInfo.ParamName.USER_AGENT, userAgent);
+                }
                 try{
                     vehicleDevice = protocol.createDevice(accessInfo);
                     initialized = true;
@@ -334,20 +347,6 @@ public class Home extends AppCompatActivity implements LocationListener {
         }
     }
 
-    void restartApp(final String endpoint, final String vendor, final String mo_id, final String username, final String password) {
-        // this may be called from a non UI thread
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (vehicleDevice != null && vehicleDevice.hasValidAccessInfo()) {
-                    AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
-                    vehicleDevice.setAccessInfo(accessInfo);
-                    startApp2();
-                }
-            }
-        });
-    }
-
     private void startApp2() {
         // this has to be called in the UI thread
 
@@ -355,12 +354,6 @@ public class Home extends AppCompatActivity implements LocationListener {
             // GPS and/or Network is disabled
             return;
         }
-//        if (!iotpDevice.hasValidAccessInfo()) {
-//            //TODO should check application api
-//            // IoT Platform setting is missing
-//            startSettingsActivity();
-//            return;
-//        }
         if (!obdBridgeBluetooth.setupBluetooth()) {
             // when bluetooth is not available (e.g. Android Studio simulator)
             final boolean doNotRunSimulationWithoutBluetooth = false; // testing purpose
@@ -469,11 +462,11 @@ public class Home extends AppCompatActivity implements LocationListener {
     }
 
     private void checkSettingsOnResume() {
-        final String endpoint = getPreference(SettingsFragment.ENDPOINT, null);
-        final String vendor = getPreference(SettingsFragment.VENDOR, null);
-        final String mo_id = getPreference(SettingsFragment.MO_ID, null);
-        final String username = getPreference(SettingsFragment.USERNAME, null);
-        final String password = getPreference(SettingsFragment.PASSWORD, null);
+        final String endpoint = getPreference(protocol.prefName(SettingsFragment.ENDPOINT), null);
+        final String vendor = getPreference(protocol.prefName(SettingsFragment.VENDOR), null);
+        final String mo_id = getPreference(protocol.prefName(SettingsFragment.MO_ID), null);
+        final String username = getPreference(protocol.prefName(SettingsFragment.USERNAME), null);
+        final String password = getPreference(protocol.prefName(SettingsFragment.PASSWORD), null);
         AccessInfo accessInfo = vehicleDevice != null ? vehicleDevice.getAccessInfo() : null;
         String currentEndpoint = accessInfo != null ? accessInfo.get(AccessInfo.ParamName.ENDPOINT) : null;
         if (currentEndpoint == null || !currentEndpoint.equals(endpoint)) {
@@ -807,7 +800,9 @@ public class Home extends AppCompatActivity implements LocationListener {
                 showStatus("Device Already Registered", View.GONE);
 
                 JsonElement obj = deviceDefinition.get("endpoint");
-                final String endpoint = obj.getAsString();
+                final String endpoint = obj != null ? obj.getAsString() : null;
+                obj = deviceDefinition.get("tenant_id");
+                final String tenant_id = obj != null ? obj.getAsString() : null;
                 obj = deviceDefinition.get("vendor");
                 final String vendor = obj != null ? obj.getAsString() : null;
                 obj = deviceDefinition.get("mo_id");
@@ -816,15 +811,21 @@ public class Home extends AppCompatActivity implements LocationListener {
                 final String username = obj != null ? obj.getAsString() : null;
                 obj = deviceDefinition.get("password");
                 final String password = obj != null ? obj.getAsString() : null;
-                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password); // FIXME
+                obj = deviceDefinition.get("userAgent");
+                final String userAgent = obj != null ? obj.getAsString() : null;
+
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, tenant_id, vendor, mo_id, username, password);
+                if(userAgent != null){
+                    accessInfo.put(AccessInfo.ParamName.USER_AGENT, userAgent);
+                }
                 if(vehicleDevice == null){
                     vehicleDevice = protocol.createDevice(accessInfo);
                 }else {
                     vehicleDevice.setAccessInfo(accessInfo);
                 }
                 setPreference(protocol.prefName(SettingsFragment.ENDPOINT), endpoint);
-                setPreference(SettingsFragment.VENDOR, vendor);
-                setPreference(SettingsFragment.MO_ID, mo_id);
+                setPreference(protocol.prefName(SettingsFragment.VENDOR), vendor);
+                setPreference(protocol.prefName(SettingsFragment.MO_ID), mo_id);
                 setPreference(protocol.prefName(SettingsFragment.USERNAME), username);
                 setPreference(protocol.prefName(SettingsFragment.PASSWORD), password);
 
@@ -910,11 +911,18 @@ public class Home extends AppCompatActivity implements LocationListener {
             case 201:
             case 202:
                 final String endpoint = deviceDefinition.get(SettingsFragment.ENDPOINT).getAsString();
+                JsonElement obj = deviceDefinition.get(SettingsFragment.TENANT_ID);
+                final String tenant_id = obj != null ? obj.getAsString() : null;
                 final String vendor = deviceDefinition.get(SettingsFragment.VENDOR).getAsString();
                 final String mo_id = deviceDefinition.get(SettingsFragment.MO_ID).getAsString();
                 final String username = deviceDefinition.get(SettingsFragment.USERNAME).getAsString();
                 final String password = deviceDefinition.get(SettingsFragment.PASSWORD).getAsString();
-                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, vendor, mo_id, username, password);
+                obj = deviceDefinition.get(SettingsFragment.USER_AGENT);
+                final String userAgent = obj != null ? obj.getAsString() : null;
+                AccessInfo accessInfo = AbstractVehicleDevice.createAccessInfo(endpoint, tenant_id, vendor, mo_id, username, password);
+                if(userAgent != null){
+                    accessInfo.put(AccessInfo.ParamName.USER_AGENT, userAgent);
+                }
                 if(vehicleDevice == null) {
                     vehicleDevice = protocol.createDevice(accessInfo);
                 }else{
@@ -922,8 +930,10 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
 
                 setPreference(protocol.prefName(SettingsFragment.ENDPOINT), endpoint);
-                setPreference(SettingsFragment.VENDOR, vendor);
-                setPreference(SettingsFragment.MO_ID, mo_id);
+                setPreference(protocol.prefName(SettingsFragment.TENANT_ID), tenant_id);
+                setPreference(protocol.prefName(SettingsFragment.VENDOR), vendor);
+                setPreference(protocol.prefName(SettingsFragment.MO_ID), mo_id);
+                setPreference(protocol.prefName(SettingsFragment.USER_AGENT), userAgent);
                 setPreference(protocol.prefName(SettingsFragment.USERNAME), username);
                 setPreference(protocol.prefName(SettingsFragment.PASSWORD), password);
 
@@ -995,7 +1005,9 @@ public class Home extends AppCompatActivity implements LocationListener {
 
     private void startPublishingProbeData() {
         final int uploadIntervalMS = getUploadFrequencySec() * 1000;
+        final String tenant_id = vehicleDevice.getAccessInfo().get(AccessInfo.ParamName.TENANT_ID);
         final String mo_id = vehicleDevice.getAccessInfo().get(AccessInfo.ParamName.MO_ID);
+        moIdText.setText(String.format("Vehicle ID: %s", mo_id));
         vehicleDevice.startPublishing(new EventDataGenerator() {
             @Override
             public String generateData() {
@@ -1003,6 +1015,7 @@ public class Home extends AppCompatActivity implements LocationListener {
                     JsonObject data = obdBridge.generateEvent(location, trip_id);
                     data.addProperty("mo_id", mo_id);
                     data.addProperty("trip_id", trip_id);
+                    data.addProperty("tenant_id", tenant_id);
                     String payload = protocol.defaultFormat().format(data);
                     return payload;
                 } else {
