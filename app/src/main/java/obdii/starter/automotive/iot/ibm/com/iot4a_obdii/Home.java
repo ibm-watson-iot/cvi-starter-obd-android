@@ -1036,7 +1036,7 @@ public class Home extends AppCompatActivity implements LocationListener {
         pauseButton.setEnabled(false);
         sendButton.setEnabled(true);
         sendButton.setChecked(false);
-        showStatus("Trip is finished", View.GONE);
+        showStatus("Your trip is finished", View.GONE);
     }
     public void send(View view){
         startPublishingProbeData();

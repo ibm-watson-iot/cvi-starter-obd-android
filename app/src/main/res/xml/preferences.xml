@@ -31,7 +31,7 @@
         android:key="obd2_settings"
         android:title="OBD2 Device">
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="AUTO"
             android:title="OBD2 Protocol"
             android:entries="@array/obd_protocols"
             android:entryValues="@array/obd_protocols"
