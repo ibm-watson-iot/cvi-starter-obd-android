@@ -10,15 +10,6 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
-import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +33,15 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
@@ -283,33 +283,6 @@ public class API {
             if (this.taskListener != null) {
                 this.taskListener.postExecute(response);
             }
-        }
-    }
-    static {
-        try {
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-            TrustManager[] tm = { new X509TrustManager() {
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-            } };
-            SSLContext sslcontext = SSLContext.getInstance("TLS");
-            sslcontext.init(null, tm, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
         }
     }
 
