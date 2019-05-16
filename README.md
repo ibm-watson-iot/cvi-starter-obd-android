@@ -2,7 +2,7 @@
 
 
 ## Overview
-The IBM IoT Connected Vehicle Insights - Mobility Starter Application uses the **IBM IoT Platform** that is available on **IBM Cloud** to help you to quickly build a smart fleet management solution. The solution consists of a mobile app and a server component which is the **IBM IoT Connected Vehicle Insights - Fleet Management Starter Web Application**.
+The IBM IoT Connected Vehicle Insights - Mobility Starter Application uses the **IBM IoT Platform** that is available on **IBM Cloud** to help you to quickly build a smart fleet management solution. The solution consists of a mobile app and a server component which is the **IBM IoT Connected Vehicle Insights - Fleet Management Starter Application**.
 
 ### Mobile app
 The starter app provides a mobile app to connect to an OBDII dongle plugged in to your car. If you are a user of the application, you can use the mobile app to do the following tasks:
@@ -24,6 +24,7 @@ The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App" interacts 
 
 Before you deploy the Android application, ensure that the following prerequisites are met:
 
+- Deploy the Fleet Management Starter Application, see [ibm-watson-iot/iota-starter-server-fm-saas](https://github.com/ibm-watson-iot/iota-starter-server-fm-saas).
 - Install the Android Studio integrated development environment (IDE) V3.3.1 or later.
 - Install an Android emulator device that is running on at least API Level 21.
 - The sample source code for the mobile app is supported only for use with an Android device and is intended to be used in conjunction with officially licensed Android development tools and further customized tools that are distributed under the terms and conditions of your licensed Android Developer Program.
@@ -65,7 +66,7 @@ To try the Android application by using Android Emulator, complete the following
     1. Check that your device appears in the Fleet Management App.
     
 4. Run the OBDII app with your mobile phone in Android Studio
-    1. In a browser, open your Fleet Management Application Server component that is deployed on IBM Cloud. For example, https://iota-starter-server-fleetmgmt.mybluemix.net/webclient/map.
+    1. In a browser, open your Fleet Management Starter Application, the server component, that is deployed on IBM Cloud. For example, https://iota-starter-server-fleetmgmt.mybluemix.net/webclient/map.
     1. In the left pane, select 'Settings'. A QR code displays, the QR code is used in a latter step.
     1. In Android Studio, within the toolbar, click the run icon. 
     1. Select deployment target. For your mobile phone, see [Android Studio Developers](https://developer.android.com/studio/run/device).
