@@ -31,17 +31,17 @@ Before you deploy the Android application, ensure that the following prerequisit
 
 ## Deploying the mobile app
 
-To try the Android application using Android Emulator, complete the following steps.
+To try the Android application by using Android Emulator, complete the following steps.
 
 1. Clone the source code repository of the OBDII application for Android.
    1. Create a project folder on a local PC.
-   1. Clone the following source code repository to the new project folder, git clone https://github.com/ibm-watson-iot/iota-starter-obd-android. 
-   1. Install Android Studio on the local PC, see https://developer.android.com/studio/install.  If there is the following type of  'Gradle sync' error message, click OK to use the Gradle wrapper.  To read about this Gradle issue and other issues see https://github.com/flutter/flutter/issues/26832.
+   1. Clone the following source code repository to the new project folder, Git clone https://github.com/ibm-watson-iot/iota-starter-obd-android. 
+   1. Install Android Studio on the local PC, see https://developer.android.com/studio/install.  If you see the following type of  'Gradle sync' error message, click OK to use the Gradle wrapper.  To read about this Gradle issue and other issues see https://github.com/flutter/flutter/issues/26832.
     ![Gradle Sync Dialog](GradleSync.jpg) 
    1. Open the project folder in Android Studio.
    
 2. With Android Studio, open a root folder of the cloned repository.
-    1. In Android Studio select 'Open an existing Android Studio project'. 
+    1. In Android Studio, select 'Open an existing Android Studio project'. 
     1. Select the directory where you cloned the source code. 
     1. If a message about 'Android Gradle Plugin Update Recommended' displays, select 'Update'. 
     1. Select the directory where you cloned the source code. 
@@ -55,7 +55,7 @@ To try the Android application using Android Emulator, complete the following st
     1. Click the QR code image.
     1. Click the MANUAL SETUP button.
     1. In the left pane, select 'Settings'. 
-    1. Enter details for the following items. Fleet Management application URL, Username and Password to Fleet Management Application settings. For example, https://iota-fleet.mybluemix.net.
+    1. Enter details for the following items. Fleet Management application URL, Username and Password to Fleet Management Application settings. For example, https://iota-starter-server-fleetmgmt.mybluemix.net/webclient/map.
     1. Click left arrow to go back to the main page.
     1. Click OK to register your device.
     1. On 'Your Device is Now Registered!', select CLOSE.
@@ -65,7 +65,7 @@ To try the Android application using Android Emulator, complete the following st
     1. Check that your device appears in the Fleet Management App.
     
 4. Run the OBDII app with your mobile phone in Android Studio
-    1. In a browser, open your Fleet Management application server component deployed on IBM Cloud. For example, 
+    1. In a browser, open your Fleet Management Application Server component that is deployed on IBM Cloud. For example, https://iota-starter-server-fleetmgmt.mybluemix.net/webclient/map.
     1. In the left pane, select 'Settings'. A QR code displays, the QR code is used in a latter step.
     1. In Android Studio, within the toolbar, click the run icon. 
     1. Select deployment target. For your mobile phone, see [Android Studio Developers](https://developer.android.com/studio/run/device).
