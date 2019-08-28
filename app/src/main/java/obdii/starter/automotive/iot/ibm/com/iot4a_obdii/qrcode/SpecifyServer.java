@@ -41,6 +41,15 @@ public class SpecifyServer extends AppCompatActivity {
         integrator.initiateScan();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        if(!super.onSupportNavigateUp()) {
+            setResult(RESULT_OK);
+            finish();
+        }
+        return true;
+    }
+
     public void useDefaultServer(View view) {
         Log.i("Button Clicked", "Default Server");
         Intent intent = new Intent();

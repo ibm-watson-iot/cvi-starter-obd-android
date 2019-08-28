@@ -240,11 +240,8 @@ public class Home extends AppCompatActivity implements LocationListener {
 
         obdBridge.initializeObdParameterList(this);
 
-        try {
-            checkForDisclaimer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        startApp();
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -263,51 +260,6 @@ public class Home extends AppCompatActivity implements LocationListener {
                 }
             }
         });
-    }
-    public void checkForDisclaimer() throws IOException {
-        if (!wasDisclaimerShown(false)) {
-            final DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int choice) {
-                    switch (choice) {
-                        case DialogInterface.BUTTON_POSITIVE:
-                            wasDisclaimerShown(true);
-                            startApp();
-                            break;
-                        case DialogInterface.BUTTON_NEGATIVE:
-                            Toast toast = Toast.makeText(Home.this, "Cannot use this application without agreeing to the disclaimer", Toast.LENGTH_SHORT);
-                            toast.show();
-                            Home.this.finishAffinity();
-                            break;
-                    }
-                }
-            };
-            final InputStream is = getResources().getAssets().open("LICENSE");
-            String line;
-            final StringBuffer message = new StringBuffer();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            try {
-                br = new BufferedReader(new InputStreamReader(is));
-                while ((line = br.readLine()) != null) {
-                    message.append(line + "\n");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (br != null) br.close();
-            }
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
-            builder
-                    .setTitle("Disclaimer")
-                    .setMessage(message)
-                    .setNegativeButton("Disagree", dialogClickListener)
-                    .setPositiveButton("Agree", dialogClickListener)
-                    .show();
-
-        } else {
-            startApp();
-        }
     }
 
     private void startApp() {
@@ -1152,16 +1104,6 @@ public class Home extends AppCompatActivity implements LocationListener {
     public ObdProtocols getObdProtocol() {
         final String value = getPreference(SettingsFragment.OBD_PROTOCOL, "" + ObdBridge.DEFAULT_OBD_PROTOCOL);
         return ObdProtocols.valueOf(value);
-    }
-
-    private boolean wasDisclaimerShown(boolean agreed) {
-        final boolean disclaimerShownAndAgreed = getPreferenceBoolean("iota-starter-obdii-disclaimer", false);
-        if (disclaimerShownAndAgreed) {
-            return disclaimerShownAndAgreed;
-        } else if (!disclaimerShownAndAgreed && agreed) {
-            setPreferenceBoolean("iota-starter-obdii-disclaimer", true);
-        }
-        return false;
     }
 
     private boolean wasWarningShown() {
