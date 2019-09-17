@@ -128,7 +128,6 @@ public class IoTPlatformDevice extends AbstractVehicleDevice {
                 return deviceClient.publishEvent("carprobe", probe, "csv", 0);
             }catch(Exception e){
                 Log.e("publish event", e.getMessage());
-                notificationHandler.notifyPostResult(false, new Notification(Notification.Type.Error, "Failed to publish to IoT Platform", null));
             }
         } else {
             return false;
