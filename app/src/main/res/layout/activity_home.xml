@@ -396,7 +396,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:text="Version: 1.0.5 Build: 20190912"
+                android:text="@string/versionLabel"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
         </LinearLayout>
