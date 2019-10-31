@@ -7,3 +7,4 @@ local.properties
 .DS_Store
 *.iml
 /app/release/
+/bin/
