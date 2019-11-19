@@ -32,14 +32,14 @@ Once you want to stop the application from recording your data, simply press "En
 You can currently download and install the mobile app on your Android mobile device.
 
 ### Server component
-The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Cloud and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [ibm-watson-iot/iota-starter-server-fm-saas](https://github.com/ibm-watson-iot/iota-starter-server-fm-saas).
+The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App" interacts with a server component. The server component provides the back-end fleet management and system monitoring service that provides more features for fleet management companies. By default, the mobile app connects to a test server that is provided by IBM. You can also choose to deploy your own server instance to IBM Cloud and connect your mobile app to that instance instead of the test system. For more information about deploying the fleet management server component, see [ibm-watson-iot/cvi-starter-server-fm](https://github.com/ibm-watson-iot/cvi-starter-server-fm).
 
 
 ## Prerequisites
 
 Before you deploy the Android application, ensure that the following prerequisites are met:
 
-- Deploy the Fleet Management Starter Application, see [ibm-watson-iot/iota-starter-server-fm-saas](https://github.com/ibm-watson-iot/iota-starter-server-fm-saas).
+- Deploy the Fleet Management Starter Application, see [ibm-watson-iot/cvi-starter-server-fm](https://github.com/ibm-watson-iot/cvi-starter-server-fm).
 - Install the Android Studio integrated development environment (IDE) V3.3.1 or later.
 - Install an Android emulator device that is running on at least API Level 21.
 - The sample source code for the mobile app is supported only for use with an Android device and is intended to be used in conjunction with officially licensed Android development tools and further customized tools that are distributed under the terms and conditions of your licensed Android Developer Program.
@@ -51,7 +51,7 @@ To try the Android application by using Android Emulator, complete the following
 
 1. Clone the source code repository of the OBDII application for Android.
    1. Create a project folder on a local PC.
-   1. Clone the following source code repository to the new project folder, Git clone https://github.com/ibm-watson-iot/iota-starter-obd-android.
+   1. Clone the following source code repository to the new project folder, Git clone https://github.com/ibm-watson-iot/cvi-starter-obd-android.
    1. Install Android Studio on the local PC, see https://developer.android.com/studio/install.  If you see the following type of  'Gradle sync' error message, click OK to use the Gradle wrapper.  To read about this Gradle issue and other issues see https://github.com/flutter/flutter/issues/26832.
     ![Gradle Sync Dialog](GradleSync.jpg)
    1. Open the project folder in Android Studio.
@@ -95,7 +95,7 @@ To try the Android application by using Android Emulator, complete the following
 
 
 ## Reporting defects
-To report a defect with the IBM IoT Connected Vehicle Insights - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-obd-android/issues) section.
+To report a defect with the IBM IoT Connected Vehicle Insights - Mobility Starter Application mobile app, go to the [Issues](https://github.com/ibm-watson-iot/cvi-starter-obd-android/issues) section.
 
 ## Privacy notice
 The "IBM IoT Connected Vehicle Insights - OBDII Fleet Management App for Android" on IBM Cloud stores all of the driving data that is obtained while you use the mobile app.
