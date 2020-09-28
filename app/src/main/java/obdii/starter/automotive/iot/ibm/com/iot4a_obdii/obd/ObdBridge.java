@@ -17,7 +17,7 @@
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii.obd;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.github.pires.obd.commands.ObdCommand;
