@@ -84,7 +84,7 @@ To try the Android application by using Android Emulator, complete the following
     1. In a browser, open your Fleet Management Starter Application, the server component, that is deployed on IBM Cloud. For example, https://iota-starter-server-fleetmgmt.mybluemix.net/webclient/map.
     1. In the left pane, select 'Settings'. A QR code displays, the QR code is used in a latter step.
     1. In Android Studio, within the toolbar, click the run icon.
-    1. Select deployment target. For your mobile phone, see [Android Studio Developers](https://developer.android.com/studio/run/device).
+    1. Select deployment target. For your mobile phone, see [Android Studio Developers](https://developer.android.com/studio/run/device) of the Android Developer Guide.
     1. On the Disclaimer, click AGREE.
     1. For location access, click ALLOW.
     1. Tap the QR code image.
@@ -92,6 +92,49 @@ To try the Android application by using Android Emulator, complete the following
     1. Tap OK to register your device.
     1, On 'Your Device is Now Registered!', select CLOSE.
     1. Check that your device appears in the Fleet Management App.
+
+
+## Certificate Pinning
+You can pin the server certificates as following if you are required according to the security requirement.
+See [Network security configuration](https://developer.android.com/training/articles/security-config).
+1. Get `SubjectPublicKeyInfo` of the X.509 certificates of the application server and Connected Vehicle Insights server. You can get them from running servers, for example,
+```bash
+$ openssl s_client -connect example.mybluemix.net:443 | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+```
+
+2. Create `res/xml/network_security_config.xml`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <!-- fleet management application server -->
+        <domain includeSubdomains="true">example.mybluemix.net</domain>
+        <pin-set expiration="2018-01-01">
+            <pin digest="SHA-256">xxxxxx_HASH_OF_THE_SERVER_PUBLIC_KEY_xxxxxxx</pin>
+            <!-- backup pin -->
+            <pin digest="SHA-256">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pin>
+        </pin-set>
+    </domain-config>
+    <domain-config>
+        <!-- Connected Vehicle Insights endpoint -->
+        <domain includeSubdomains="true">xxxx.automotive.internetofthings.ibmcloud.com</domain>
+        <pin-set expiration="2018-01-01">
+            <pin digest="SHA-256">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pin>
+            <!-- backup pin -->
+            <pin digest="SHA-256">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
+```
+
+3. Add `android:networkSecurityConfig` property to the application element of the `AndroidManifest.xml`.
+```xml
+<application
+....
+    android:networkSecurityConfig="@xml/network_security_config"
+....>
+
+```
 
 
 ## Reporting defects

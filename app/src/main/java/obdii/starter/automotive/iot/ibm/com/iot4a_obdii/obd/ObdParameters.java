@@ -28,6 +28,7 @@ import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.google.gson.JsonObject;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.R;
  */
 
 public class ObdParameters {
+    private static SecureRandom random = new SecureRandom();
 
     static String formatTemperature(double temperature) {
         double imperialUnit = temperature * 1.8f + 32;
@@ -57,13 +59,13 @@ public class ObdParameters {
         final List<ObdParameter> obdParameters = new ArrayList<ObdParameter>();
 
         final ObdParameter engineRPM = new ObdParameter((TextView) activity.findViewById(R.id.engineRPMValue), activity, "Engine RPM", new RPMCommand()) {
-            private long engineRPM = Math.round(Math.random() * 3000) + 600;
+            private long engineRPM = Math.round(random.nextFloat() * 3000) + 600;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineRPM = Math.round(Math.random() * 3000) + 600;
+                    engineRPM = Math.round(random.nextFloat() * 3000) + 600;
                 } else {
                     final RPMCommand rpmCommand = (RPMCommand) obdCommand;
                     engineRPM = rpmCommand.getRPM();
@@ -84,7 +86,7 @@ public class ObdParameters {
         obdParameters.add(engineRPM);
 
         final ObdParameter speed = new ObdParameter((TextView) activity.findViewById(R.id.speedValue), activity, "Speed", new SpeedCommand()) {
-            private final double max_speed = Math.random() > 0.5 ? 130.0 : 90.0;
+            private final double max_speed = random.nextFloat() > 0.5 ? 130.0 : 90.0;
             private final double speed_increment = 6.3;
             private double speed = 30.0;
             private double delta = 0;
@@ -101,10 +103,10 @@ public class ObdParameters {
                             speed = 0.0;
                             delta = speed_increment;
                         } else {
-                            final double random = Math.random();
-                            if (random < 0.4) {
+                            final float randomFloat = random.nextFloat();
+                            if (randomFloat < 0.4) {
                                 delta = -1.0 * speed_increment;
-                            } else if (random > 0.6) {
+                            } else if (randomFloat > 0.6) {
                                 delta = speed_increment;
                             } else {
                                 delta = 0;
@@ -142,13 +144,13 @@ public class ObdParameters {
         obdParameters.add(speed);
 
         final ObdParameter engineOil = new ObdParameter((TextView) activity.findViewById(R.id.engineOilValue), activity, "Engine Oil", new OilTempCommand()) {
-            private double engineOil = Math.random() * 120 + 20;
+            private float engineOil = random.nextFloat() * 120 + 20;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineOil = Math.random() * (140 - engineOil - 10) + engineOil - 10;
+                    engineOil = random.nextFloat() * (140 - engineOil - 10) + engineOil - 10;
 
                 } else {
                     final OilTempCommand oilTempCommand = (OilTempCommand) obdCommand;
@@ -171,13 +173,13 @@ public class ObdParameters {
         obdParameters.add(engineOil);
 
         final ObdParameter engineCoolant = new ObdParameter((TextView) activity.findViewById(R.id.engineCoolantValue), activity, "Engine Coolant", new EngineCoolantTemperatureCommand()) {
-            private double engineCoolant = Math.random() * 120 + 20;
+            private float engineCoolant = random.nextFloat() * 120 + 20;
             private String valueText;
 
             @Override
             protected void fetchValue(ObdCommand obdCommand, boolean simulation) {
                 if (simulation) {
-                    engineCoolant = Math.random() * (140 - engineCoolant - 10) + engineCoolant - 10;
+                    engineCoolant = random.nextFloat() * (140 - engineCoolant - 10) + engineCoolant - 10;
                 } else {
                     final EngineCoolantTemperatureCommand engineCoolantTemperatureCommand = (EngineCoolantTemperatureCommand) obdCommand;
                     engineCoolant = engineCoolantTemperatureCommand.getTemperature();
@@ -198,7 +200,7 @@ public class ObdParameters {
         obdParameters.add(engineCoolant);
 
         final ObdParameter fuelLevel = new ObdParameter((TextView) activity.findViewById(R.id.fuelLevelValue), activity, "Fuel Level", new FuelLevelCommand()) {
-            private double fuelLevel = Math.floor(Math.random() * 95) + 5;
+            private float fuelLevel = (float)Math.floor(random.nextFloat() * 95) + 5;
             private String valueText;
 
             @Override

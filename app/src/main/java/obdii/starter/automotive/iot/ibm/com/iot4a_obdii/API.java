@@ -16,26 +16,34 @@
 
 package obdii.starter.automotive.iot.ibm.com.iot4a_obdii;
 
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
-import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import obdii.starter.automotive.iot.ibm.com.iot4a_obdii.device.Protocol;
 
@@ -219,7 +227,50 @@ public class API {
                             wr.flush();
                         }
                     }
+                    ((HttpsURLConnection)urlConnection).setSSLSocketFactory(new SSLSocketFactory() {
+                        private SSLSocketFactory def = SSLContext.getDefault().getSocketFactory();
+                        @Override
+                        public String[] getDefaultCipherSuites() {
+                            return def.getDefaultCipherSuites();
+                        }
 
+                        @Override
+                        public String[] getSupportedCipherSuites() {
+                            return def.getSupportedCipherSuites();
+                        }
+
+                        @Override
+                        public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+                            return setTLSv12(def.createSocket(s, host, port, autoClose));
+                        }
+
+                        @Override
+                        public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+                            return setTLSv12(def.createSocket(host, port));
+                        }
+
+                        @Override
+                        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
+                            return setTLSv12(def.createSocket(host, port, localHost, localPort));
+                        }
+
+                        @Override
+                        public Socket createSocket(InetAddress host, int port) throws IOException {
+                            return setTLSv12(def.createSocket(host, port));
+                        }
+
+                        @Override
+                        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+                            return setTLSv12(def.createSocket(address, port, localAddress, localPort));
+                        }
+
+                        private Socket setTLSv12(Socket socket){
+                            if(socket != null && socket instanceof SSLSocket){
+                                ((SSLSocket)socket).setEnabledProtocols(new String[]{"TLSv1.2"});
+                            }
+                            return socket;
+                        }
+                    });
                     urlConnection.connect();
                 }
 
